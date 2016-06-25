@@ -66,6 +66,9 @@ def login(
         rsa_keys,
         output_format,
 ):
+    """
+    Authenticates an user with active directory credentials
+    """
     config = prepare.get_prepared_config(profile, region, ssl_verification, adfs_host, rsa_keys, output_format)
 
     _verification_checks(config)

@@ -13,7 +13,7 @@ from .prepare import adfs_config
 )
 def reset(profile):
     """
-    resets stored adfs credentials inside given profile
+    removes stored profile
     """
     _clear_credentials(adfs_config, profile)
     click.echo('Profile: \'{}\' has been wiped out'.format(profile))

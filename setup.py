@@ -11,7 +11,7 @@ setup(
     url='https://github.com/venth/aws-adfs',
     author='Venth',
     maintainer='Venth',
-    keywords='aws adfs console terminal',
+    keywords='aws adfs console tool',
     packages=['aws_adfs'],
 
     classifiers=[
