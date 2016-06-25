@@ -5,10 +5,11 @@ from os import path
 
 from setuptools import setup
 
+version = '0.0.2'
 
 setup(
     name='aws-adfs',
-    version='0.0.1',
+    version=version,
     description='AWS Cli authenticator via ADFS - small command-line tool '
                 'to authenticate via ADFS and assume chosen role',
     long_description=codecs.open(
@@ -17,7 +18,7 @@ setup(
         encoding='utf-8'
     ).read(),
     url='https://github.com/venth/aws-adfs',
-    download_url='https://github.com/venth/aws-adfs/tarball/0.0.1',
+    download_url='https://github.com/venth/aws-adfs/tarball/{}'.format(version),
     author='Venth',
     author_email='artur.krysiak.warszawa@gmail.com',
     maintainer='Venth',
