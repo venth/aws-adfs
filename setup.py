@@ -1,15 +1,25 @@
 #!/usr/bin/env python
 
+import codecs
+from os import path
+
 from setuptools import setup
 
 
 setup(
     name='aws-adfs',
     version='0.0.1',
-    description='AWS Cli authenticator via ADFS',
-    long_description='Small command-line program to authenticate via ADFS and assume chosen role',
+    description='AWS Cli authenticator via ADFS - small command-line tool '
+                'to authenticate via ADFS and assume chosen role',
+    long_description=codecs.open(
+        path.join(path.abspath(path.dirname(__file__)), 'README.md'),
+        mode='r',
+        encoding='utf-8'
+    ).read(),
     url='https://github.com/venth/aws-adfs',
+    download_url='https://github.com/venth/aws-adfs/tarball/0.0.1',
     author='Venth',
+    author_email='artur.krysiak.warszawa@gmail.com',
     maintainer='Venth',
     keywords='aws adfs console tool',
     packages=['aws_adfs'],
@@ -38,5 +48,6 @@ setup(
     ],
     entry_points={
         'console_scripts': ['aws-adfs=aws_adfs.commands:cli']
-    }
+    },
+    include_package_data=True,
 )
