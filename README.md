@@ -1,7 +1,13 @@
 # aws-adfs
 Command line tool to easier aws cli authentication against ADFS (multi factor authentication with active directory)
 
-## Examples of usage
+# Installation
+
+```
+pip install aws-adfs
+```
+
+# Examples of usage
 
 * login to your adfs host with disabled ssl verification on aws cli profile: adfs
 
