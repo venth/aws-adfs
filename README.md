@@ -3,9 +3,30 @@ Command line tool to easier aws cli authentication against ADFS (multi factor au
 
 # Installation
 
-```
-pip install aws-adfs
-```
+* user local installation
+
+    ```
+    pip install aws-adfs
+    ```
+
+    Please note, that you need to add $HOME/.local/bin to your PATH
+
+* system wide installation
+
+    ```
+    sudo pip install aws-adfs
+    ```
+
+* virtualenvs
+
+    ```
+    virtualenv -p /usr/bin/python2.7 aws-adfs
+    source aws-adfs/bin/activate
+    pip install aws-adfs
+    ...
+    ...
+    deactivate
+    ```
 
 # Examples of usage
 
@@ -97,3 +118,6 @@ pip install aws-adfs
       --profile TEXT  AWS cli profile that will be removed
       --help          Show this message and exit.
     ```
+
+# Known issues
+* id_rsa key cannot be password protected (not now). It's used to decrypt stored user's password
