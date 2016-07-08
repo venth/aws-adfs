@@ -99,6 +99,12 @@ def _load_adfs_config_from_stored_profile(adfs_config, profile):
     def load_credentials(config, profile):
         adfs_config.adfs_user = config.get_or(profile, 'adfs_config.adfs_user', None)
         adfs_config.adfs_password = config.get_or(profile, 'adfs_config.adfs_password', None)
+        adfs_config.id_rsa_location = config.get_or(profile, 'adfs_config.id_rsa_location', adfs_config.id_rsa_location)
+        if type(adfs_config.id_rsa_location) is not file:
+            adfs_config.id_rsa_location = file(adfs_config.id_rsa_location)
+        adfs_config.id_rsa_pub_location = config.get_or(profile, 'adfs_config.id_rsa_pub_location', adfs_config.id_rsa_pub_location)
+        if type(adfs_config.id_rsa_pub_location) is not file:
+            adfs_config.id_rsa_pub_location = file(adfs_config.id_rsa_pub_location)
 
         adfs_config.adfs_credentials_loaded = adfs_config.adfs_user and adfs_config.adfs_password
 
@@ -112,7 +118,10 @@ def _load_adfs_config_from_stored_profile(adfs_config, profile):
         adfs_config.adfs_host = config.get_or(profile, 'adfs_config.adfs_host', adfs_config.adfs_host)
 
     load_from_config(adfs_config.aws_credentials_location, profile, load_credentials)
-    load_from_config(adfs_config.aws_config_location, 'profile ' + profile, load_config)
+    if profile == 'default':
+        load_from_config(adfs_config.aws_config_location, profile, load_config)
+    else:
+        load_from_config(adfs_config.aws_config_location, 'profile ' + profile, load_config)
 
 
 def _create_base_aws_cli_config_files_if_needed(adfs_config):

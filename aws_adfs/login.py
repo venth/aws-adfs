@@ -2,6 +2,7 @@ import ConfigParser
 import base64
 import getpass
 import itertools
+import os
 import xml.etree.ElementTree as ET
 
 import boto3
@@ -226,6 +227,8 @@ def _store(config, aws_session_token):
         config_file.set(profile, 'aws_session_token', aws_session_token['Credentials']['SessionToken'])
         config_file.set(profile, 'adfs_config.adfs_user', config.adfs_user)
         config_file.set(profile, 'adfs_config.adfs_password', config.adfs_password)
+        config_file.set(profile, 'adfs_config.id_rsa_location', os.path.abspath(adfs_config.id_rsa_location.name))
+        config_file.set(profile, 'adfs_config.id_rsa_pub_location', os.path.abspath(adfs_config.id_rsa_pub_location.name))
 
     def config_storer(config_file, profile):
         config_file.set(profile, 'region', config.region)
@@ -236,7 +239,10 @@ def _store(config, aws_session_token):
         config_file.set(profile, 'source_profile', config.profile)
 
     store_config(config.profile, config.aws_credentials_location, credentials_storer)
-    store_config('profile {}'.format(config.profile), config.aws_config_location, config_storer)
+    if property == 'default':
+        store_config(config.profile, config.aws_config_location, config_storer)
+    else:
+        store_config('profile {}'.format(config.profile), config.aws_config_location, config_storer)
 
 
 def _verification_checks(config):
