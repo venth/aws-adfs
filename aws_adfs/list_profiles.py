@@ -1,4 +1,4 @@
-import ConfigParser
+import configparser
 
 import click
 
@@ -11,7 +11,7 @@ def list_profiles():
     lists available profiles
     """
 
-    config = ConfigParser.RawConfigParser()
+    config = configparser.RawConfigParser()
     config.read(adfs_config.aws_credentials_location)
 
     profiles = config.sections()

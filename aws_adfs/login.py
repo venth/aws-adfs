@@ -1,19 +1,17 @@
-import ConfigParser
+import configparser
 import base64
 import getpass
 import itertools
 import os
-import xml.etree.ElementTree as ET
+import lxml.etree as ET
 
 import boto3
 import botocore
-import bs4
 import click
 import requests
-import requests_ntlm
 from botocore import client
+from cookielib import LWPCookieJar
 
-from . import crypt
 from . import prepare
 from .prepare import adfs_config
 
@@ -48,12 +46,6 @@ _IDP_ENTRY_URL = 'https://{}/adfs/ls/IdpInitiatedSignOn.aspx?loginToRp=urn:amazo
          'it will be loaded from the stored configuration',
 )
 @click.option(
-    '--rsa-keys',
-    default=lambda: (adfs_config.id_rsa_location, adfs_config.id_rsa_pub_location),
-    type=(file, file),
-    help='Private and public key locations used to decrypt and encrypt credentials into storage'
-)
-@click.option(
     '--output-format',
     default=lambda: adfs_config.output_format,
     type=click.Choice(['json', 'text', 'table']),
@@ -64,27 +56,27 @@ def login(
         region,
         ssl_verification,
         adfs_host,
-        rsa_keys,
         output_format,
 ):
     """
     Authenticates an user with active directory credentials
     """
-    config = prepare.get_prepared_config(profile, region, ssl_verification, adfs_host, rsa_keys, output_format)
+    config = prepare.get_prepared_config(profile, region, ssl_verification, adfs_host, output_format)
 
     _verification_checks(config)
 
-    username, password = _get_user_credentials(config)
-    principal_roles, assertion = _authenticate(config, username, password)
+    # Try reauthenticating using an existing ADFS session
+    principal_roles, assertion = _authenticate(config)
 
-    pub_key = crypt.load_key(config.id_rsa_pub_location)
-    config.adfs_user = crypt.encrypt(text=username, pub_key=pub_key)
-    config.adfs_password = crypt.encrypt(text=password, pub_key=pub_key)
+    # If we fail to get an assertion, prompt for credentials and try again
+    if assertion is None:
+        username, password = _get_user_credentials(config)
+        principal_roles, assertion = _authenticate(config, username, password)
 
-    username = '########################################'
-    del username
-    password = '########################################'
-    del password
+        username = '########################################'
+        del username
+        password = '########################################'
+        del password
 
     principal_arn, config.role_arn = _chosen_role_to_assume(config, principal_roles)
 
@@ -123,31 +115,27 @@ def _emit_summary(config):
 
 
 def _get_user_credentials(config):
-    if config.adfs_credentials_loaded:
-        priv_key = crypt.load_key(config.id_rsa_location)
-        username = crypt.decrypt(config.adfs_user, priv_key)
-        password = crypt.decrypt(config.adfs_password, priv_key)
-
-        del priv_key
-    else:
-        username = raw_input('Username: ')
-        password = getpass.getpass()
+    username = raw_input('Username: ')
+    password = getpass.getpass()
 
     return username, password
 
 
-def _authenticate(config, username, password):
+def _authenticate(config, username=None, password=None):
     # Initiate session handler
     session = requests.Session()
+    session.cookies = LWPCookieJar(filename=config.adfs_cookie_location)
 
-    # Programmatically get the SAML assertion
-    # Set up the NTLM authentication handler by using the provided credential
-    session.auth = requests_ntlm.HttpNtlmAuth(username, password)
+    try:
+        session.cookies.load(ignore_discard=True)
+    except IOError:
+        pass
 
     # Opens the initial AD FS URL and follows all of the HTTP302 redirects
     response = session.post(
         _IDP_ENTRY_URL.format(config.adfs_host),
         verify=config.ssl_verification,
+        headers={'Accept-Language': os.environ['LANG'][:2]},
         data={
             'UserName': username,
             'Password': password,
@@ -155,26 +143,35 @@ def _authenticate(config, username, password):
         }
     )
 
+    mask = os.umask(0o177)
+    session.cookies.save(ignore_discard=True)
+    os.umask(mask)
+
     del username
     password = '###################################################'
     del password
 
-    # Decode the response and extract the SAML assertion
-    soup = bs4.BeautifulSoup(response.text.decode('utf8'), 'html.parser')
+    # Decode the response
+    html = ET.fromstring(response.text.decode('utf8'), ET.HTMLParser())
     assertion = None
 
-    # Look for the SAMLResponse attribute of the input tag (determined by
-    # analyzing the debug print lines above)
-    for inputtag in soup.find_all('input'):
-        if inputtag.get('name') == 'SAMLResponse':
-            assertion = inputtag.get('value')
+    # Check to see if login returned an error
+    # Since we're screen-scraping the login form, we need to pull it out of a label
+    for element in html.findall('.//form[@id="loginForm"]//label[@id="errorText"]'):
+        if element.text is not None:
+            click.echo(element.text)
+            exit(-1)
 
+    # Retrieve Base64-encoded SAML assertion from form SAMLResponse input field
+    for element in html.findall('.//form[@name="hiddenform"]/input[@name="SAMLResponse"]'):
+        assertion = element.get('value')
+
+    # If we did not get an error, but also do not have an assertion, then the user needs to authenticate
     if not assertion:
-        click.echo('Wrong authentication. Username or password doesn\'t match')
-        exit(-1)
+        return None, None
 
     # Parse the returned assertion and extract the authorized roles
-    root = ET.fromstring(base64.b64decode(assertion))
+    saml = ET.fromstring(base64.b64decode(assertion))
 
     aws_roles = map(
         lambda saml2attributevalue: saml2attributevalue.text,
@@ -184,7 +181,7 @@ def _authenticate(config, username, password):
                     saml2attribute.iter('{urn:oasis:names:tc:SAML:2.0:assertion}AttributeValue')),
                 filter(
                     lambda saml2attribute: saml2attribute.get('Name') == 'https://aws.amazon.com/SAML/Attributes/Role',
-                    root.iter('{urn:oasis:names:tc:SAML:2.0:assertion}Attribute')
+                    saml.iter('{urn:oasis:names:tc:SAML:2.0:assertion}Attribute')
                 ),
             )
         )
@@ -207,7 +204,7 @@ def _authenticate(config, username, password):
 
 def _store(config, aws_session_token):
     def store_config(profile, config_location, storer):
-        config_file = ConfigParser.RawConfigParser()
+        config_file = configparser.RawConfigParser()
         config_file.read(config_location)
 
         if not config_file.has_section(profile):
@@ -225,10 +222,6 @@ def _store(config, aws_session_token):
         config_file.set(profile, 'aws_access_key_id', aws_session_token['Credentials']['AccessKeyId'])
         config_file.set(profile, 'aws_secret_access_key', aws_session_token['Credentials']['SecretAccessKey'])
         config_file.set(profile, 'aws_session_token', aws_session_token['Credentials']['SessionToken'])
-        config_file.set(profile, 'adfs_config.adfs_user', config.adfs_user)
-        config_file.set(profile, 'adfs_config.adfs_password', config.adfs_password)
-        config_file.set(profile, 'adfs_config.id_rsa_location', os.path.abspath(adfs_config.id_rsa_location.name))
-        config_file.set(profile, 'adfs_config.id_rsa_pub_location', os.path.abspath(adfs_config.id_rsa_pub_location.name))
 
     def config_storer(config_file, profile):
         config_file.set(profile, 'region', config.region)
@@ -239,7 +232,7 @@ def _store(config, aws_session_token):
         config_file.set(profile, 'source_profile', config.profile)
 
     store_config(config.profile, config.aws_credentials_location, credentials_storer)
-    if property == 'default':
+    if config.profile == 'default':
         store_config(config.profile, config.aws_config_location, config_storer)
     else:
         store_config('profile {}'.format(config.profile), config.aws_config_location, config_storer)
