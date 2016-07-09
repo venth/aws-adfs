@@ -1,11 +1,21 @@
 #!/usr/bin/env python
 
 import codecs
+import re
 from os import path
 
 from setuptools import setup
 
-version = '0.0.4'
+
+VERSIONFILE = "aws_adfs/_version.py"
+verstrline = open(VERSIONFILE, "rt").read()
+VSRE = r"^__version__ = ['\"]([^'\"]*)['\"]"
+mo = re.search(VSRE, verstrline, re.M)
+if mo:
+    version = mo.group(1)
+else:
+    raise RuntimeError("Unable to find version string in %s." % (VERSIONFILE,))
+
 
 setup(
     name='aws-adfs',
