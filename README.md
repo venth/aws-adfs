@@ -1,5 +1,13 @@
 # aws-adfs
-Command line tool to easier aws cli authentication against ADFS (multi factor authentication with active directory)
+Command line tool to easier aws cli authentication against ADFS (multi factor authentication with active directory).
+
+Thanks to [Brandond](https://github.com/brandond) contribution - "Remove storage of credentials, in favor of storing ADFS session cookies"
+aws-adfs:
+
+> allows you to re-login to STS without
+> entering credentials for an extended period of time, without having to store the user's actual credentials.
+> It also lets an organization control the period in which a user can re-login to STS without entering credentials,
+> by altering the ADFS session lifetime.
 
 # Installation
 
@@ -60,6 +68,7 @@ Command line tool to easier aws cli authentication against ADFS (multi factor au
     Usage: aws-adfs [OPTIONS] COMMAND [ARGS]...
 
     Options:
+      --version  Show current tool version
       --help  Show this message and exit.
 
     Commands:
@@ -75,6 +84,7 @@ Command line tool to easier aws cli authentication against ADFS (multi factor au
       lists available profiles
 
     Options:
+      --version  Show current tool version
       --help  Show this message and exit.
     ```
 
@@ -117,5 +127,5 @@ Command line tool to easier aws cli authentication against ADFS (multi factor au
       --help          Show this message and exit.
     ```
 
-# Known issues
-* id_rsa key cannot be password protected (not now). It's used to decrypt stored user's password
+# Credits
+* [Brandond](https://github.com/brandond) for: Remove storage of credentials, in favor of storing ADFS session cookies
