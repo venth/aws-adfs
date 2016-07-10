@@ -222,6 +222,7 @@ def _store(config, aws_session_token):
         config_file.set(profile, 'aws_access_key_id', aws_session_token['Credentials']['AccessKeyId'])
         config_file.set(profile, 'aws_secret_access_key', aws_session_token['Credentials']['SecretAccessKey'])
         config_file.set(profile, 'aws_session_token', aws_session_token['Credentials']['SessionToken'])
+        config_file.set(profile, 'aws_security_token', aws_session_token['Credentials']['SessionToken'])
 
     def config_storer(config_file, profile):
         config_file.set(profile, 'region', config.region)
