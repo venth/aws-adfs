@@ -101,8 +101,6 @@ Command line tool to easier aws cli authentication against ADFS (multi factor au
                                       be provided, next time for the same profile
                                       it will be loaded from the stored
                                       configuration
-      --rsa-keys <FILE FILE>...       Private and public key locations used to
-                                      decrypt and encrypt credentials into storage
       --output-format [json|text|table]
                                       Output format used by aws cli
       --help                          Show this message and exit.

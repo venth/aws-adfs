@@ -49,13 +49,11 @@ setup(
     ],
 
     install_requires=[
-        'click==6.6',
-        'beautifulsoup4==4.4.1',
-        'boto3==1.3.1',
-        'requests_ntlm==0.3.0',
-        'requests==2.10.0',
-        'pycrypto==2.6.1',
-        'Crypto==1.4.1',
+        'lxml',
+        'click',
+        'boto3',
+        'requests',
+        'configparser'
     ],
     entry_points={
         'console_scripts': ['aws-adfs=aws_adfs.commands:cli']

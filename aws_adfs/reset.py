@@ -1,4 +1,4 @@
-import ConfigParser
+import configparser
 
 import click
 
@@ -21,7 +21,7 @@ def reset(profile):
 
 def _clear_credentials(config, profile):
     def store_config(config_location, storer):
-        config_file = ConfigParser.RawConfigParser()
+        config_file = configparser.RawConfigParser()
         config_file.read(config_location)
 
         if not config_file.has_section(profile):
