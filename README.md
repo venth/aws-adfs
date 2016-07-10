@@ -9,6 +9,12 @@ aws-adfs:
 > It also lets an organization control the period in which a user can re-login to STS without entering credentials,
 > by altering the ADFS session lifetime.
 
+Thanks to [Brandond](https://github.com/brandond) contribution - "Add support for legacy aws_security_token key in credentials file"
+aws-adfs supports ansible by providing two keys with security token:
+* AWS_SESSION_TOKEN and
+* AWS_SECURITY_TOKEN
+
+
 # Installation
 
 * user local installation
@@ -129,3 +135,4 @@ aws-adfs:
 
 # Credits
 * [Brandond](https://github.com/brandond) for: Remove storage of credentials, in favor of storing ADFS session cookies
+* [Brandond](https://github.com/brandond) for: Add support for legacy aws_security_token key in credentials file
