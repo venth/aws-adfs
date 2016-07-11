@@ -133,6 +133,13 @@ aws-adfs supports ansible by providing two keys with security token:
       --help          Show this message and exit.
     ```
 
+# Known issues
+* in cases of trouble with lxml please install
+
+  ```
+  sudo apt-get install python-dev libxml2-dev libxslt1-dev zlib1g-dev
+  ```
+
 # Credits
 * [Brandond](https://github.com/brandond) for: Remove storage of credentials, in favor of storing ADFS session cookies
 * [Brandond](https://github.com/brandond) for: Add support for legacy aws_security_token key in credentials file
