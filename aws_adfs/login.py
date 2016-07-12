@@ -1,6 +1,5 @@
 import configparser
 import base64
-import getpass
 import itertools
 import os
 import lxml.etree as ET
@@ -97,12 +96,12 @@ def _emit_summary(config):
     click.echo(
         """
         Prepared ADFS configuration as follows:
-            * AWS Cli profile                           : '{}'
-            * AWS region                                : '{}'
-            * output format                             : '{}'
-            * ssl verification during authentication was: '{}'
-            * selected role_arn                         : '{}'
-            * ADFS host used for authentication         : '{}'
+            * AWS CLI profile                 : '{}'
+            * AWS region                      : '{}'
+            * Output format                   : '{}'
+            * SSL verification of ADFS Server : '{}'
+            * Selected role_arn               : '{}'
+            * ADFS Server                     : '{}'
         """.format(
             config.profile,
             config.region,
@@ -115,10 +114,10 @@ def _emit_summary(config):
 
 
 def _get_user_credentials(config):
-    username = raw_input('Username: ')
-    password = getpass.getpass()
+    config.adfs_user = click.prompt(text='Username', type=str, default=config.adfs_user)
+    password = click.prompt('Password', type=str, hide_input=True)
 
-    return username, password
+    return config.adfs_user, password
 
 
 def _authenticate(config, username=None, password=None):
@@ -228,9 +227,9 @@ def _store(config, aws_session_token):
         config_file.set(profile, 'region', config.region)
         config_file.set(profile, 'output', config.output_format)
         config_file.set(profile, 'adfs_config.ssl_verification', config.ssl_verification)
-        config_file.set(profile, 'adfs_config.adfs_host', config.adfs_host)
         config_file.set(profile, 'adfs_config.role_arn', config.role_arn)
-        config_file.set(profile, 'source_profile', config.profile)
+        config_file.set(profile, 'adfs_config.adfs_host', config.adfs_host)
+        config_file.set(profile, 'adfs_config.adfs_user', config.adfs_user)
 
     store_config(config.profile, config.aws_credentials_location, credentials_storer)
     if config.profile == 'default':
@@ -264,7 +263,7 @@ def _chosen_role_to_assume(config, principal_roles):
             click.echo('    [ {} -> {} ]: {}'.format(role_name.ljust(30, ' ' if i % 2 == 0 else '.'), i, role_arn))
             i += 1
 
-        selected_index = int(raw_input('Selection: '))
+        selected_index = click.prompt(text='Selection', type=int)
 
         chosen_principal_arn = principal_roles[selected_index][0]
         chosen_role_arn = principal_roles[selected_index][1]

@@ -72,6 +72,8 @@ def _create_adfs_default_config():
 
     config.adfs_host = None
 
+    config.adfs_user = None
+
     return config
 
 
@@ -98,6 +100,7 @@ def _load_adfs_config_from_stored_profile(adfs_config, profile):
             adfs_config.ssl_verification))
         adfs_config.role_arn = config.get_or(profile, 'adfs_config.role_arn', adfs_config.role_arn)
         adfs_config.adfs_host = config.get_or(profile, 'adfs_config.adfs_host', adfs_config.adfs_host)
+        adfs_config.adfs_user = config.get_or(profile, 'adfs_config.adfs_user', adfs_config.adfs_user)
 
     if profile == 'default':
         load_from_config(adfs_config.aws_config_location, profile, load_config)
