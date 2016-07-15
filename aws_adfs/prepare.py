@@ -87,7 +87,7 @@ def _load_adfs_config_from_stored_profile(adfs_config, profile):
                     return self.get(profile, option)
                 return default_value
 
-            setattr(config, get_or.__name__, MethodType(get_or, config, type(config)))
+            setattr(config, get_or.__name__, MethodType(get_or, config))
             loader(config, profile)
 
         del config

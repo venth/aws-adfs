@@ -9,7 +9,11 @@ import botocore
 import click
 import requests
 from botocore import client
-from cookielib import LWPCookieJar
+
+try:
+    from http.cookiejar import LWPCookieJar
+except ImportError:
+    from cookielib import LWPCookieJar
 
 from . import prepare
 from .prepare import adfs_config
@@ -151,7 +155,7 @@ def _authenticate(config, username=None, password=None):
     del password
 
     # Decode the response
-    html = ET.fromstring(response.text.decode('utf8'), ET.HTMLParser())
+    html = ET.fromstring(response.text, ET.HTMLParser())
     assertion = None
 
     # Check to see if login returned an error
@@ -245,10 +249,10 @@ def _verification_checks(config):
 
 
 def _chosen_role_to_assume(config, principal_roles):
-    chosen_principal_role = filter(
-        lambda (_, role_arn): config.role_arn == role_arn,
+    chosen_principal_role = list(filter(
+        lambda role: config.role_arn == role[1],
         principal_roles
-    )
+    ))
 
     if chosen_principal_role:
         chosen_role_arn = chosen_principal_role[0][0]
