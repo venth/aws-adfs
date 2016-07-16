@@ -1,3 +1,6 @@
+import logging
+import sys
+
 import click
 
 from . import list_profiles
@@ -22,10 +25,18 @@ def _print_version(ctx, param, value):
     is_eager=True,
     help='Show current tool version'
 )
-def cli():
-    pass
+@click.option(
+    '--debug/--no-debug',
+    default=False,
+    help='Enables debug information on stdout. By default log level is set on ERROR'
+)
+def cli(debug):
+    log_format = '%(asctime)s [%(module)s %(filename)s:%(funcName)s] ' \
+                 '[%(process)d-%(processName)s] [%(thread)d-%(threadName)s] - %(levelname)s: %(message)s'
+    logging.basicConfig(format=log_format, stream=sys.stdout, level=logging.DEBUG if debug else logging.ERROR)
 
 
 cli.add_command(list_profiles.list_profiles)
 cli.add_command(login.login)
 cli.add_command(reset.reset)
+
