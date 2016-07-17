@@ -19,7 +19,7 @@ else:
 
 tests_require = [
     'pytest',
-    'mockito',
+    'mock',
 ]
 
 

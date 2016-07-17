@@ -29,7 +29,6 @@ def fetch_html_encoded_roles(adfs_host, adfs_cookie_location, ssl_verification_e
     response = session.post(
         authentication_url,
         verify=ssl_verification_enabled,
-        # headers={'Accept-Language': os.environ['LANG'][:2]},
         headers={'Accept-Language': 'en'},
         data={
             'UserName': username,
