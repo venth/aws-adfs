@@ -55,6 +55,12 @@ setup(
         'requests',
         'configparser'
     ],
+
+    tests_require=[
+        'pytest',
+        'mockito',
+    ],
+
     entry_points={
         'console_scripts': ['aws-adfs=aws_adfs.commands:cli']
     },

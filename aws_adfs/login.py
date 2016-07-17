@@ -1,21 +1,13 @@
 import configparser
-import base64
-import itertools
-import os
-import lxml.etree as ET
 
 import boto3
 import botocore
 import click
-import requests
 from botocore import client
-from cookielib import LWPCookieJar
 
+from . import authenticator
 from . import prepare
 from .prepare import adfs_config
-
-# The initial URL that starts the authentication process.
-_IDP_ENTRY_URL = 'https://{}/adfs/ls/IdpInitiatedSignOn.aspx?loginToRp=urn:amazon:webservices'
 
 
 @click.command()
@@ -65,12 +57,12 @@ def login(
     _verification_checks(config)
 
     # Try reauthenticating using an existing ADFS session
-    principal_roles, assertion = _authenticate(config)
+    principal_roles, assertion = authenticator.authenticate(config)
 
     # If we fail to get an assertion, prompt for credentials and try again
     if assertion is None:
         username, password = _get_user_credentials(config)
-        principal_roles, assertion = _authenticate(config, username, password)
+        principal_roles, assertion = authenticator.authenticate(config, username, password)
 
         username = '########################################'
         del username
@@ -118,87 +110,6 @@ def _get_user_credentials(config):
     password = click.prompt('Password', type=str, hide_input=True)
 
     return config.adfs_user, password
-
-
-def _authenticate(config, username=None, password=None):
-    # Initiate session handler
-    session = requests.Session()
-    session.cookies = LWPCookieJar(filename=config.adfs_cookie_location)
-
-    try:
-        session.cookies.load(ignore_discard=True)
-    except IOError:
-        pass
-
-    # Opens the initial AD FS URL and follows all of the HTTP302 redirects
-    response = session.post(
-        _IDP_ENTRY_URL.format(config.adfs_host),
-        verify=config.ssl_verification,
-        headers={'Accept-Language': os.environ['LANG'][:2]},
-        data={
-            'UserName': username,
-            'Password': password,
-            'AuthMethod': 'urn:amazon:webservices'
-        }
-    )
-
-    mask = os.umask(0o177)
-    session.cookies.save(ignore_discard=True)
-    os.umask(mask)
-
-    del username
-    password = '###################################################'
-    del password
-
-    # Decode the response
-    html = ET.fromstring(response.text.decode('utf8'), ET.HTMLParser())
-    assertion = None
-
-    # Check to see if login returned an error
-    # Since we're screen-scraping the login form, we need to pull it out of a label
-    for element in html.findall('.//form[@id="loginForm"]//label[@id="errorText"]'):
-        if element.text is not None:
-            click.echo(element.text)
-            exit(-1)
-
-    # Retrieve Base64-encoded SAML assertion from form SAMLResponse input field
-    for element in html.findall('.//form[@name="hiddenform"]/input[@name="SAMLResponse"]'):
-        assertion = element.get('value')
-
-    # If we did not get an error, but also do not have an assertion, then the user needs to authenticate
-    if not assertion:
-        return None, None
-
-    # Parse the returned assertion and extract the authorized roles
-    saml = ET.fromstring(base64.b64decode(assertion))
-
-    aws_roles = map(
-        lambda saml2attributevalue: saml2attributevalue.text,
-        itertools.chain.from_iterable(
-            map(
-                lambda saml2attribute: list(
-                    saml2attribute.iter('{urn:oasis:names:tc:SAML:2.0:assertion}AttributeValue')),
-                filter(
-                    lambda saml2attribute: saml2attribute.get('Name') == 'https://aws.amazon.com/SAML/Attributes/Role',
-                    saml.iter('{urn:oasis:names:tc:SAML:2.0:assertion}Attribute')
-                ),
-            )
-        )
-    )
-
-    # Note the format of the attribute value is principal_arn, role_arn
-    principal_roles = map(
-        lambda chunks: (chunks[0], chunks[1]),
-        filter(
-            lambda chunks: 'saml-provider' in chunks[0],
-            map(
-                lambda role: role.split(','),
-                aws_roles,
-            )
-        )
-    )
-
-    return principal_roles, assertion
 
 
 def _store(config, aws_session_token):
