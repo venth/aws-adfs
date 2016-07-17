@@ -61,4 +61,17 @@ def fetch_html_encoded_roles(adfs_host, adfs_cookie_location, ssl_verification_e
     del password
 
     # Decode the response
-    return ET.fromstring(response.text.decode('utf8'), ET.HTMLParser())
+    response_text = response.text
+    if _is_capable_of_string_decode():
+        response_text = response_text.decode('utf8')
+    return ET.fromstring(response_text, ET.HTMLParser())
+
+
+def _is_capable_of_string_decode():
+    capable = True
+    try:
+        eval("'text_to_decode'.decode('utf8')")
+    except SyntaxError:
+        capable = False
+
+    return capable
