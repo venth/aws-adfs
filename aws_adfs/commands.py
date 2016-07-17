@@ -26,14 +26,15 @@ def _print_version(ctx, param, value):
     help='Show current tool version'
 )
 @click.option(
-    '--debug/--no-debug',
+    '-v', '--verbose',
     default=False,
+    is_flag=True,
     help='Enables debug information on stdout. By default log level is set on ERROR'
 )
-def cli(debug):
+def cli(verbose):
     log_format = '%(asctime)s [%(module)s %(filename)s:%(funcName)s] ' \
                  '[%(process)d-%(processName)s] [%(thread)d-%(threadName)s] - %(levelname)s: %(message)s'
-    logging.basicConfig(format=log_format, stream=sys.stdout, level=logging.DEBUG if debug else logging.ERROR)
+    logging.basicConfig(format=log_format, stream=sys.stdout, level=logging.DEBUG if verbose else logging.ERROR)
 
 
 cli.add_command(list_profiles.list_profiles)
