@@ -1,7 +1,12 @@
 import os
 import logging
 
-import cookielib
+try:
+    import cookielib
+except:
+    # python 3
+    import http.cookiejar as cookielib
+
 import lxml.etree as ET
 import requests
 
