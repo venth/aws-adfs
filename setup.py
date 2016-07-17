@@ -9,19 +9,18 @@ from setuptools import setup
 
 VERSIONFILE = "aws_adfs/_version.py"
 verstrline = open(VERSIONFILE, "rt").read()
-VSRE = r"^__version__ = ['\"]([^'\"]*)['\"]"
-mo = re.search(VSRE, verstrline, re.M)
+VSRE = r"^__version__ = '([^']+)'"
+mo = re.search(VSRE, verstrline, re.MULTILINE)
 if mo:
     version = mo.group(1)
 else:
     raise RuntimeError("Unable to find version string in %s." % (VERSIONFILE,))
 
-
 tests_require = [
     'pytest',
     'mock',
+    'coverage < 4',
 ]
-
 
 setup(
     name='aws-adfs',
