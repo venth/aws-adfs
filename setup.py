@@ -17,6 +17,12 @@ else:
     raise RuntimeError("Unable to find version string in %s." % (VERSIONFILE,))
 
 
+tests_require = [
+    'pytest',
+    'mockito',
+]
+
+
 setup(
     name='aws-adfs',
     version=version,
@@ -48,6 +54,10 @@ setup(
         'Programming Language :: Python',
     ],
 
+    setup_requires=[
+        'pytest-runner',
+        'setuptools',
+    ],
     install_requires=[
         'lxml',
         'click',
@@ -56,10 +66,8 @@ setup(
         'configparser'
     ],
 
-    tests_require=[
-        'pytest',
-        'mockito',
-    ],
+    tests_require=tests_require,
+    extras_require={'test': tests_require},
 
     entry_points={
         'console_scripts': ['aws-adfs=aws_adfs.commands:cli']
