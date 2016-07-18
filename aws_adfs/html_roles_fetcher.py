@@ -1,5 +1,5 @@
-import os
 import logging
+import os
 
 try:
     import cookielib
@@ -9,7 +9,6 @@ except:
 
 import lxml.etree as ET
 import requests
-
 
 # The initial URL that starts the authentication process.
 _IDP_ENTRY_URL = 'https://{}/adfs/ls/IdpInitiatedSignOn.aspx?loginToRp=urn:amazon:webservices'
@@ -62,20 +61,7 @@ def fetch_html_encoded_roles(adfs_host, adfs_cookie_location, ssl_verification_e
     del password
 
     # Decode the response
-    response_text = response.text
-    if _is_capable_of_string_decode():
-        response_text = response_text.decode('utf8')
-    return ET.fromstring(response_text, ET.HTMLParser())
-
-
-def _is_capable_of_string_decode():
-    capable = True
-    try:
-        eval("'text_to_decode'.decode('utf8')")
-    except AttributeError:
-        capable = False
-
-    return capable
+    return ET.fromstring(response.text, ET.HTMLParser())
 
 
 def _is_capable_of_providing_error_message():
