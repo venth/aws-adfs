@@ -23,10 +23,11 @@ def fetch_html_encoded_roles(adfs_host, adfs_cookie_location, ssl_verification_e
     try:
         session.cookies.load(ignore_discard=True)
     except IOError as e:
+        error_message = e.message if _is_capable_of_providing_error_message() else e
         logging.debug(
             'A try to loaded authenticated cookie into a session failed. '
             'Re-authentication will be performed. '
-            'The error: {}'.format(e.message)
+            'The error: {}'.format(error_message)
         )
 
     # Opens the initial AD FS URL and follows all of the HTTP302 redirects
@@ -71,6 +72,21 @@ def _is_capable_of_string_decode():
     capable = True
     try:
         eval("'text_to_decode'.decode('utf8')")
+    except AttributeError:
+        capable = False
+
+    return capable
+
+
+def _is_capable_of_providing_error_message():
+    capable = True
+    try:
+        eval("""
+            try:
+                raise IOError('bumps')
+            except IOError as e:
+                print(e.message)
+        """)
     except SyntaxError:
         capable = False
 
