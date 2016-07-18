@@ -1,7 +1,6 @@
 import base64
 import itertools
 
-import click
 import lxml.etree as ET
 
 
@@ -12,8 +11,7 @@ def extract(html):
     # Since we're screen-scraping the login form, we need to pull it out of a label
     for element in html.findall('.//form[@id="loginForm"]//label[@id="errorText"]'):
         if element.text is not None:
-            click.echo(element.text)
-            exit(-1)
+            raise RuntimeError('Login error. The error: {}'.format(element.text))
 
     # Retrieve Base64-encoded SAML assertion from form SAMLResponse input field
     for element in html.findall('.//form[@name="hiddenform"]/input[@name="SAMLResponse"]'):
@@ -41,7 +39,7 @@ def extract(html):
     )
 
     # Note the format of the attribute value is principal_arn, role_arn
-    principal_roles = map(
+    principal_roles = list(map(
         lambda chunks: (chunks[0], chunks[1]),
         filter(
             lambda chunks: 'saml-provider' in chunks[0],
@@ -50,6 +48,6 @@ def extract(html):
                 aws_roles,
             )
         )
-    )
+    ))
 
     return principal_roles, assertion
