@@ -142,6 +142,9 @@ aws-adfs supports ansible by providing two keys with security token:
   ```
   sudo apt-get install python-dev libxml2-dev libxslt1-dev zlib1g-dev
   ```
+* python 2.6 is not supported
+* python 3.2 is not supported
+
 
 # Credits
 * [Brandond](https://github.com/brandond) for: Remove storage of credentials, in favor of storing ADFS session cookies
