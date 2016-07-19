@@ -147,3 +147,4 @@ aws-adfs supports ansible by providing two keys with security token:
 * [Brandond](https://github.com/brandond) for: Remove storage of credentials, in favor of storing ADFS session cookies
 * [Brandond](https://github.com/brandond) for: Add support for legacy aws_security_token key in credentials file
 * [Brandond](https://github.com/brandond) for: Store last username in profile config; use it as default for prompt
+* [Brandond](https://github.com/brandond) for: python 3 compatibility
