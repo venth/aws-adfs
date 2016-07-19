@@ -35,18 +35,18 @@ class TestAssertionExtractor:
 
     @staticmethod
     def a_page_of_allowed_beer_roles():
-        assertion = '''<samlp:Response Consent="urn:oasis:names:tc:SAML:2.0:consent:unspecified" Destination="https://signin.aws.amazon.com/saml" xmlns:samlp="urn:oasis:names:tc:SAML:2.0:protocol">
-  <Assertion Version="2.0" xmlns="urn:oasis:names:tc:SAML:2.0:assertion">
-    <AttributeStatement>
-      <Attribute Name="https://aws.amazon.com/SAML/Attributes/RoleSessionName">
-        <AttributeValue>beer.lover@awesome.company.com</AttributeValue>
-      </Attribute>
-      <Attribute Name="https://aws.amazon.com/SAML/Attributes/Role">
-        <AttributeValue>arn:aws:iam::000000000000:saml-provider/ADFS,arn:aws:iam::000000000000:role/beer-lover</AttributeValue>
-        <AttributeValue>arn:aws:iam::000000000000:saml-provider/ADFS,arn:aws:iam::000000000000:role/beer-crafter</AttributeValue>
-      </Attribute>
-    </AttributeStatement>
-  </Assertion>
+        assertion = u'''<samlp:Response Consent="urn:oasis:names:tc:SAML:2.0:consent:unspecified" Destination="https://signin.aws.amazon.com/saml" xmlns:samlp="urn:oasis:names:tc:SAML:2.0:protocol">
+<Assertion Version="2.0" xmlns="urn:oasis:names:tc:SAML:2.0:assertion">
+<AttributeStatement>
+  <Attribute Name="https://aws.amazon.com/SAML/Attributes/RoleSessionName">
+    <AttributeValue>beer.lover@awesome.company.com</AttributeValue>
+  </Attribute>
+  <Attribute Name="https://aws.amazon.com/SAML/Attributes/Role">
+    <AttributeValue>arn:aws:iam::000000000000:saml-provider/ADFS,arn:aws:iam::000000000000:role/beer-lover</AttributeValue>
+    <AttributeValue>arn:aws:iam::000000000000:saml-provider/ADFS,arn:aws:iam::000000000000:role/beer-crafter</AttributeValue>
+  </Attribute>
+</AttributeStatement>
+</Assertion>
 </samlp:Response>'''
 
         encoded_assertion = base64.encodestring(assertion.encode('utf-8')).decode('utf-8')
@@ -188,16 +188,3 @@ class TestAssertionExtractor:
             ''',
             ET.HTMLParser(),
         )
-
-    @staticmethod
-    def _decode_base64(data):
-        """Decode base64, padding being optional.
-
-        :param data: Base64 data as an ASCII byte string
-        :returns: The decoded byte string.
-
-        """
-        missing_padding = 4 - len(data) % 4
-        if missing_padding:
-            data += b'='* missing_padding
-        return base64.decodebytes(data)
