@@ -156,10 +156,7 @@ def _verification_checks(config):
 
 
 def _chosen_role_to_assume(config, principal_roles):
-    chosen_principal_role = filter(
-        lambda (_, role_arn): config.role_arn == role_arn,
-        principal_roles
-    )
+    chosen_principal_role = [role for role in principal_roles if config.role_arn == role[1]]
 
     if chosen_principal_role:
         chosen_role_arn = chosen_principal_role[0][0]

@@ -1,5 +1,4 @@
 import base64
-import itertools
 
 import lxml.etree as ET
 
@@ -24,30 +23,11 @@ def extract(html):
     # Parse the returned assertion and extract the authorized roles
     saml = ET.fromstring(base64.b64decode(assertion))
 
-    aws_roles = map(
-        lambda saml2attributevalue: saml2attributevalue.text,
-        itertools.chain.from_iterable(
-            map(
-                lambda saml2attribute: list(
-                    saml2attribute.iter('{urn:oasis:names:tc:SAML:2.0:assertion}AttributeValue')),
-                filter(
-                    lambda saml2attribute: saml2attribute.get('Name') == 'https://aws.amazon.com/SAML/Attributes/Role',
-                    saml.iter('{urn:oasis:names:tc:SAML:2.0:assertion}Attribute')
-                ),
-            )
-        )
-    )
+    # Find all roles offered by the assertion
+    raw_roles = saml.findall('.//{*}Attribute[@Name="https://aws.amazon.com/SAML/Attributes/Role"]/{*}AttributeValue')
+    aws_roles = [element.text.split(',') for element in raw_roles]
 
-    # Note the format of the attribute value is principal_arn, role_arn
-    principal_roles = list(map(
-        lambda chunks: (chunks[0], chunks[1]),
-        filter(
-            lambda chunks: 'saml-provider' in chunks[0],
-            map(
-                lambda role: role.split(','),
-                aws_roles,
-            )
-        )
-    ))
+    # Note the format of the attribute value is provider_arn, role_arn
+    principal_roles = [role for role in aws_roles if ':saml-provider/' in role[0]]
 
     return principal_roles, assertion
