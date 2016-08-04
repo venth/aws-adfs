@@ -1,9 +1,9 @@
 #!/usr/bin/env python
 
-import codecs
 import re
+import codecs
 from os import path
-
+from platform import system
 from setuptools import setup
 
 
@@ -19,8 +19,19 @@ else:
 tests_require = [
     'pytest',
     'mock',
-    'coverage < 4',
+    'coverage < 4'
 ]
+
+install_requires = [
+    'lxml',
+    'click',
+    'boto3',
+    'requests',
+    'configparser'
+]
+
+if system() == 'Windows':
+    install_requires.append('requests-negotiate-sspi')
 
 setup(
     name='aws-adfs',
@@ -39,7 +50,6 @@ setup(
     maintainer='Venth',
     keywords='aws adfs console tool',
     packages=['aws_adfs'],
-
     classifiers=[
         'Development Status :: 4 - Beta',
         'Environment :: Console',
@@ -52,22 +62,15 @@ setup(
         'Operating System :: POSIX',
         'Programming Language :: Python',
     ],
-
     setup_requires=[
         'pytest-runner',
         'setuptools',
     ],
-    install_requires=[
-        'lxml',
-        'click',
-        'boto3',
-        'requests',
-        'configparser'
-    ],
-
+    install_requires=install_requires,
     tests_require=tests_require,
-    extras_require={'test': tests_require},
-
+    extras_require={
+        'test': tests_require
+    },
     entry_points={
         'console_scripts': ['aws-adfs=aws_adfs.commands:cli']
     },

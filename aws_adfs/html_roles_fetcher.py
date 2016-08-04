@@ -1,14 +1,26 @@
+import requests
 import logging
 import os
+import lxml.etree as ET
 
 try:
     import cookielib
-except:
+except ImportError:
     # python 3
     import http.cookiejar as cookielib
 
-import lxml.etree as ET
-import requests
+_auth_provider = None
+_headers={'Accept-Language': 'en'}
+
+# Support for Kerberos SSO on Windows via requests_negotiate_sspi
+# also requires tricking the server into thinking we're using IE
+# so that it servers up a redirect to the IWA page.
+try:
+    from requests_negotiate_sspi import HttpNegotiateAuth
+    _auth_provider = HttpNegotiateAuth()
+    _headers['User-Agent'] = 'Mozilla/5.0 (Windows NT 6.1; WOW64; Trident/7.0; rv:11.0) like Gecko'
+except ImportError:
+    pass
 
 # The initial URL that starts the authentication process.
 _IDP_ENTRY_URL = 'https://{}/adfs/ls/IdpInitiatedSignOn.aspx?loginToRp=urn:amazon:webservices'
@@ -22,9 +34,9 @@ def fetch_html_encoded_roles(adfs_host, adfs_cookie_location, ssl_verification_e
     try:
         session.cookies.load(ignore_discard=True)
     except IOError as e:
-        error_message = e.message if _is_capable_of_providing_error_message() else e
+        error_message = getattr(e, 'message', e)
         logging.debug(
-            'A try to loaded authenticated cookie into a session failed. '
+            'Attempt to load authentication cookies into session failed. '
             'Re-authentication will be performed. '
             'The error: {}'.format(error_message)
         )
@@ -34,7 +46,8 @@ def fetch_html_encoded_roles(adfs_host, adfs_cookie_location, ssl_verification_e
     response = session.post(
         authentication_url,
         verify=ssl_verification_enabled,
-        headers={'Accept-Language': 'en'},
+        headers=_headers,
+        auth=_auth_provider,
         data={
             'UserName': username,
             'Password': password,
@@ -62,18 +75,3 @@ def fetch_html_encoded_roles(adfs_host, adfs_cookie_location, ssl_verification_e
 
     # Decode the response
     return ET.fromstring(response.text, ET.HTMLParser())
-
-
-def _is_capable_of_providing_error_message():
-    capable = True
-    try:
-        eval("""
-            try:
-                raise IOError('bumps')
-            except IOError as e:
-                print(e.message)
-        """)
-    except SyntaxError:
-        capable = False
-
-    return capable
