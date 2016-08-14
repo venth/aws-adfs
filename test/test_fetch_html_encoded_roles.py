@@ -63,6 +63,9 @@ class TestFetchHtmlEncodedRoles:
         # and credentials are not provided
         no_credentials_provided = None
 
+        # and authentication provider is irrelevant (adfs or windws sspi)
+        authenticator_is_irrelevant = None
+
         # when a call against adfs host is performed
         html = html_roles_fetcher.fetch_html_encoded_roles(
             adfs_host=adfs_host,
@@ -76,6 +79,7 @@ class TestFetchHtmlEncodedRoles:
         new_session.post.assert_called_with(
             html_roles_fetcher._IDP_ENTRY_URL.format(adfs_host),
             verify=ssl_verification_is_irrelevant,
+            auth=authenticator_is_irrelevant,
             headers={'Accept-Language': 'en'},
             data={
                 'UserName': no_credentials_provided,

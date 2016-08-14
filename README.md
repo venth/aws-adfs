@@ -17,6 +17,8 @@ aws-adfs supports ansible by providing two keys with security token:
 * AWS_SESSION_TOKEN and
 * AWS_SECURITY_TOKEN
 
+Thanks to [Brandond](https://github.com/brandond) contribution - "Add support for Kerberos SSO on Windows via requests_negotiate_sspi"
+* on windows os will be used Security Support Provider Interface
 
 # Installation
 
@@ -151,3 +153,4 @@ aws-adfs supports ansible by providing two keys with security token:
 * [Brandond](https://github.com/brandond) for: Add support for legacy aws_security_token key in credentials file
 * [Brandond](https://github.com/brandond) for: Store last username in profile config; use it as default for prompt
 * [Brandond](https://github.com/brandond) for: python 3 compatibility
+* [Brandond](https://github.com/brandond) for: Add support for Kerberos SSO on Windows via requests_negotiate_sspi
