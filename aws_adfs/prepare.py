@@ -28,7 +28,7 @@ def get_prepared_config(
     :param profile: aws cli profile
     """
     adfs_config.profile = profile
-    adfs_config.ssl_verification = ssl_verification
+    adfs_config.ssl_verification = str(ssl_verification)
     adfs_config.region = region
     adfs_config.adfs_host = adfs_host
     adfs_config.output_format = output_format
