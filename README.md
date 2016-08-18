@@ -154,3 +154,4 @@ Thanks to [Brandond](https://github.com/brandond) contribution - "Add support fo
 * [Brandond](https://github.com/brandond) for: Store last username in profile config; use it as default for prompt
 * [Brandond](https://github.com/brandond) for: python 3 compatibility
 * [Brandond](https://github.com/brandond) for: Add support for Kerberos SSO on Windows via requests_negotiate_sspi
+* [Brandond](https://github.com/brandond) for: ssl_verification must be a str
