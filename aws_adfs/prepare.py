@@ -28,7 +28,7 @@ def get_prepared_config(
     :param profile: aws cli profile
     """
     adfs_config.profile = profile
-    adfs_config.ssl_verification = str(ssl_verification)
+    adfs_config.ssl_verification = ssl_verification
     adfs_config.region = region
     adfs_config.adfs_host = adfs_host
     adfs_config.output_format = output_format
@@ -65,7 +65,7 @@ def _create_adfs_default_config():
 
     # SSL certificate verification: Whether or not strict certificate
     # verification is done, False should only be used for dev/test
-    config.ssl_verification = 'True'
+    config.ssl_verification = True
 
     # AWS role arn
     config.role_arn = None
@@ -97,7 +97,7 @@ def _load_adfs_config_from_stored_profile(adfs_config, profile):
         adfs_config.output_format = config.get_or(profile, 'output', adfs_config.output_format)
         adfs_config.ssl_verification = ast.literal_eval(config.get_or(
             profile, 'adfs_config.ssl_verification',
-            adfs_config.ssl_verification))
+            str(adfs_config.ssl_verification)))
         adfs_config.role_arn = config.get_or(profile, 'adfs_config.role_arn', adfs_config.role_arn)
         adfs_config.adfs_host = config.get_or(profile, 'adfs_config.adfs_host', adfs_config.adfs_host)
         adfs_config.adfs_user = config.get_or(profile, 'adfs_config.adfs_user', adfs_config.adfs_user)
