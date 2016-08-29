@@ -17,6 +17,7 @@ else:
     raise RuntimeError("Unable to find version string in %s." % (VERSIONFILE,))
 
 tests_require = [
+    'pytest-runner',
     'pytest',
     'mock',
     'coverage < 4'
@@ -63,7 +64,6 @@ setup(
         'Programming Language :: Python',
     ],
     setup_requires=[
-        'pytest-runner',
         'setuptools',
     ],
     install_requires=install_requires,
