@@ -151,7 +151,7 @@ def _store(config, aws_session_token):
 
 def _verification_checks(config):
     if not config.adfs_host:
-        click.echo('\'--adfs-host\' parameter need to be supplied')
+        click.echo('\'--adfs-host\' parameter must be supplied', err=True)
         exit(-1)
 
 
@@ -162,8 +162,10 @@ def _chosen_role_to_assume(config, principal_roles):
         chosen_role_arn = chosen_principal_role[0][0]
         chosen_principal_arn = chosen_principal_role[0][1]
         return chosen_role_arn, chosen_principal_arn
-
-    if len(principal_roles) > 1:
+    if len(principal_roles) == 1:
+        chosen_principal_arn = principal_roles[0][0]
+        chosen_role_arn = principal_roles[0][1]
+    elif len(principal_roles) > 1:
         click.echo('Please choose the role you would like to assume:')
         i = 0
         for (principal_arn, role_arn) in principal_roles:
@@ -171,12 +173,12 @@ def _chosen_role_to_assume(config, principal_roles):
             click.echo('    [ {} -> {} ]: {}'.format(role_name.ljust(30, ' ' if i % 2 == 0 else '.'), i, role_arn))
             i += 1
 
-        selected_index = click.prompt(text='Selection', type=int)
+        selected_index = click.prompt(text='Selection', type=click.IntRange(0, len(principal_roles)))
 
         chosen_principal_arn = principal_roles[selected_index][0]
         chosen_role_arn = principal_roles[selected_index][1]
     else:
-        chosen_principal_arn = principal_roles[0][0]
-        chosen_role_arn = principal_roles[0][1]
+        click.echo('This account does not have access to any roles', err=True)
+        exit(-1)
 
     return chosen_principal_arn, chosen_role_arn

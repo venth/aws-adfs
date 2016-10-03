@@ -1,5 +1,5 @@
 import base64
-
+import click
 import lxml.etree as ET
 
 
@@ -10,7 +10,8 @@ def extract(html):
     # Since we're screen-scraping the login form, we need to pull it out of a label
     for element in html.findall('.//form[@id="loginForm"]//label[@id="errorText"]'):
         if element.text is not None:
-            raise RuntimeError('Login error. The error: {}'.format(element.text))
+            click.echo('Login error: {}'.format(element.text), err=True)
+            exit(-1)
 
     # Retrieve Base64-encoded SAML assertion from form SAMLResponse input field
     for element in html.findall('.//form[@name="hiddenform"]/input[@name="SAMLResponse"]'):

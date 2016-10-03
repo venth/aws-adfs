@@ -8,14 +8,17 @@ from aws_adfs import roles_assertion_extractor
 
 class TestAssertionExtractor:
 
-    def test_login_error_cases_runtime_exception(self):
+    def test_login_error_causes_error_and_exit(self, capsys):
         # given login page after authentication failure
         login_error_page_result = self._a_page_of_authentication_failure()
 
-        # then runtime exception is raised
-        with pytest.raises(RuntimeError):
+        # Error is printed and exit is called
+        with pytest.raises(SystemExit):
             # when a login page after failed authentication is extracted
             roles_assertion_extractor.extract(login_error_page_result)
+
+        out, err = capsys.readouterr()
+        assert err.startswith("Login error: Incorrect user ID or password")
 
     def test_missing_saml_assertion_causes_to_return_nothing(self):
         # when a returned result page doesn't contain saml (perhaps session expired)
