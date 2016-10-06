@@ -49,7 +49,7 @@ def _create_adfs_default_config():
     config.region = session.get_config_variable('region') or 'eu-central-1'
 
     # aws cli profile to store config and access keys into
-    config.profile = 'adfs'
+    config.profile = session.profile or 'default'
 
     # output format: The AWS CLI output format that will be configured in the
     # adf profile (affects subsequent CLI calls)

@@ -20,6 +20,10 @@ aws-adfs supports ansible by providing two keys with security token:
 Thanks to [Brandond](https://github.com/brandond) contribution - "Add support for Kerberos SSO on Windows via requests_negotiate_sspi"
 * on windows os will be used Security Support Provider Interface
 
+# Compatibility
+
+As of version 0.2.0, this tool acts on the 'default' profile unless an alternate profile name has been specified on the command line or in your environment. Previous versions acted on the 'adfs' profile by default.
+
 # Installation
 
 * user local installation
