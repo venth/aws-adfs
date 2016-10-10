@@ -32,7 +32,8 @@ def fetch_html_encoded_roles(adfs_host, adfs_cookie_location, ssl_verification_e
     session.cookies = cookielib.LWPCookieJar(filename=adfs_cookie_location)
 
     try:
-        session.cookies.load(ignore_discard=True)
+        have_creds = (username and password) or _auth_provider
+        session.cookies.load(ignore_discard=not(have_creds))
     except IOError as e:
         error_message = getattr(e, 'message', e)
         logging.debug(
@@ -59,9 +60,13 @@ def fetch_html_encoded_roles(adfs_host, adfs_cookie_location, ssl_verification_e
         * url: {}
         * headers: {}
     Response:
-        * headers: '{}'
-        * body: '{}'
-    '''.format(authentication_url, response.request.headers, response.headers, response.text))
+        * status: {}
+        * headers: {}
+        * body: {}
+    '''.format(authentication_url, response.request.headers, response.status_code, response.headers, response.text))
+
+    if response.status_code >= 400:
+        session.cookies.clear()
 
     mask = os.umask(0o177)
     try:

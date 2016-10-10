@@ -16,15 +16,17 @@ class TestFetchHtmlEncodedRoles:
         requests.Session = mock.Mock(return_value=new_session)
         empty_response = mock.Mock()
         empty_response.text = '<html></html>'
+        empty_response.status_code = 400
         new_session.post = mock.Mock(return_value=empty_response)
 
         # and there isn't authentication cookie stored
         there_is_no_cookie_on_the_location = 'no/authenticated/cookie/stored'
 
-        html_roles_fetcher.cookielib = mock.Mock()
         cookie_jar = mock.Mock()
-        html_roles_fetcher.cookielib.LWPCookieJar = mock.Mock(return_value=cookie_jar)
         cookie_jar.load = mock.Mock(side_effect=IOError('No cookie. Still hungry'))
+        cookie_jar.clear = mock.Mock()
+        html_roles_fetcher.cookielib = mock.Mock()
+        html_roles_fetcher.cookielib.LWPCookieJar = mock.Mock(return_value=cookie_jar)
 
         # and credentials are not provided
         no_credentials_provided = None
@@ -40,6 +42,7 @@ class TestFetchHtmlEncodedRoles:
 
         # then returned html is empty
         assert html.text is None
+        cookie_jar.clear.assert_called()
 
     def test_always_use_en_on_accept_language(self):
         # given adfs host which doesn't care that ssl is enabled or not
@@ -51,14 +54,18 @@ class TestFetchHtmlEncodedRoles:
         new_session = mock.Mock()
         requests.Session = mock.Mock(return_value=new_session)
         empty_response = mock.Mock()
+        empty_response.status_code = 200
         empty_response.text = '<html></html>'
         new_session.post = mock.Mock(return_value=empty_response)
 
         # and authentication cookie isn't relevant
         there_is_no_cookie_on_the_location = 'no/authenticated/cookie/stored'
 
+        cookie_jar = mock.Mock()
+        cookie_jar.load = mock.Mock(side_effect=IOError('No cookie. Still hungry'))
+        cookie_jar.clear = mock.Mock()
         html_roles_fetcher.cookielib = mock.Mock()
-        html_roles_fetcher.cookielib.LWPCookieJar = mock.Mock(return_value=mock.Mock())
+        html_roles_fetcher.cookielib.LWPCookieJar = mock.Mock(return_value=cookie_jar)
 
         # and credentials are not provided
         no_credentials_provided = None
@@ -87,3 +94,5 @@ class TestFetchHtmlEncodedRoles:
                 'AuthMethod': 'urn:amazon:webservices'
             }
         )
+
+        cookie_jar.clear.assert_not_called()

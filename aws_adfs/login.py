@@ -156,12 +156,17 @@ def _verification_checks(config):
 
 
 def _chosen_role_to_assume(config, principal_roles):
+    if not principal_roles or len(principal_roles) == 0:
+        click.echo('This account does not have access to any roles', err=True)
+        exit(-1)
+
     chosen_principal_role = [role for role in principal_roles if config.role_arn == role[1]]
 
     if chosen_principal_role:
         chosen_role_arn = chosen_principal_role[0][0]
         chosen_principal_arn = chosen_principal_role[0][1]
         return chosen_role_arn, chosen_principal_arn
+
     if len(principal_roles) == 1:
         chosen_principal_arn = principal_roles[0][0]
         chosen_role_arn = principal_roles[0][1]
@@ -177,8 +182,5 @@ def _chosen_role_to_assume(config, principal_roles):
 
         chosen_principal_arn = principal_roles[selected_index][0]
         chosen_role_arn = principal_roles[selected_index][1]
-    else:
-        click.echo('This account does not have access to any roles', err=True)
-        exit(-1)
 
     return chosen_principal_arn, chosen_role_arn
