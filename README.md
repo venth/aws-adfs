@@ -157,3 +157,4 @@ Thanks to [Brandond](https://github.com/brandond) contribution - "Add support fo
 * [Brandond](https://github.com/brandond) for: ssl_verification must be a str
 * [Brandond](https://github.com/brandond) for: Move pytest-runner out of setup-requires
 * [Brandond](https://github.com/brandond) for: Improve handling of role selection
+* [Brandond](https://github.com/brandond) for: Improve handling of errors caused by excessive cookie growth
