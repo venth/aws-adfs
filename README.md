@@ -162,3 +162,4 @@ As of version 0.2.0, this tool acts on the 'default' profile unless an alternate
 * [Brandond](https://github.com/brandond) for: Move pytest-runner out of setup-requires
 * [Brandond](https://github.com/brandond) for: Improve handling of role selection
 * [Brandond](https://github.com/brandond) for: Improve handling of errors caused by excessive cookie growth
+* [Brandond](https://github.com/brandond) for: Default to 'default' profile, in line with other AWS tools
