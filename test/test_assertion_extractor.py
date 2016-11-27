@@ -22,7 +22,7 @@ class TestAssertionExtractor:
 
     def test_missing_saml_assertion_causes_to_return_nothing(self):
         # when a returned result page doesn't contain saml (perhaps session expired)
-        roles, assertion = roles_assertion_extractor.extract(self._a_page_of_expired_login())
+        roles, assertion, _ = roles_assertion_extractor.extract(self._a_page_of_expired_login())
 
         # the return nothing - perhaps re-authentication is needed
         assert roles is None
@@ -30,11 +30,34 @@ class TestAssertionExtractor:
 
     def test_beer_roles_are_extracted(self):
         # when after successful authentication adfs responded with page containing available roles
-        roles, assertion = roles_assertion_extractor.extract(self.a_page_of_allowed_beer_roles())
+        roles, assertion, _ = roles_assertion_extractor.extract(self.a_page_of_allowed_beer_roles())
 
         # then two beer roles are extracted
         assert len(roles) == 2
         assert assertion is not None
+
+    def test_provides_existing_in_response_session_duration(self):
+        # adfs has configured aws session duration
+        session_duration_configured_in_adfs = 7200
+
+        # when after successful authentican adfs responds with saml response
+        # containing session duration
+        roles, assertion, extracted_session_duration = roles_assertion_extractor.extract(
+            self.a_page_with_saml_containing_session_duration(session_duration_configured_in_adfs)
+        )
+
+        # then responded session duration is extracted
+        assert extracted_session_duration == session_duration_configured_in_adfs
+
+    def test_provides_default_session_duration_when_it_is_missing_in_response(self):
+        # when after successful authentican adfs responds with saml response
+        # without session duration setup
+        roles, assertion, extracted_session_duration = roles_assertion_extractor.extract(
+            self.a_page_with_saml_without_session_duration()
+        )
+
+        # then extracted session duration has default value for boto
+        assert extracted_session_duration == roles_assertion_extractor.default_session_duration
 
     @staticmethod
     def a_page_of_allowed_beer_roles():
@@ -51,6 +74,77 @@ class TestAssertionExtractor:
 </AttributeStatement>
 </Assertion>
 </samlp:Response>'''
+
+        encoded_assertion = base64.encodestring(assertion.encode('utf-8')).decode('utf-8')
+
+        return ET.fromstring(
+            '''
+<html>
+  <head>
+    <title>Working...</title>
+  </head>
+  <body>
+    <form method="POST" name="hiddenform" action="https://signin.aws.amazon.com:443/saml">
+      <input type="hidden" name="SAMLResponse" value="{}" />
+    </form>
+  </body>
+</html>
+            '''.format(encoded_assertion),
+            ET.HTMLParser(),
+        )
+
+    @staticmethod
+    def a_page_with_saml_without_session_duration():
+        assertion = u'''<samlp:Response Consent="urn:oasis:names:tc:SAML:2.0:consent:unspecified" Destination="https://signin.aws.amazon.com/saml" xmlns:samlp="urn:oasis:names:tc:SAML:2.0:protocol">
+<Assertion Version="2.0" xmlns="urn:oasis:names:tc:SAML:2.0:assertion">
+<AttributeStatement>
+  <Attribute Name="https://aws.amazon.com/SAML/Attributes/RoleSessionName">
+    <AttributeValue>beer.lover@awesome.company.com</AttributeValue>
+  </Attribute>
+  <Attribute Name="https://aws.amazon.com/SAML/Attributes/Role">
+    <AttributeValue>arn:aws:iam::000000000000:saml-provider/ADFS,arn:aws:iam::000000000000:role/beer-lover</AttributeValue>
+    <AttributeValue>arn:aws:iam::000000000000:saml-provider/ADFS,arn:aws:iam::000000000000:role/beer-crafter</AttributeValue>
+  </Attribute>
+</AttributeStatement>
+</Assertion>
+</samlp:Response>'''
+
+        encoded_assertion = base64.encodestring(assertion.encode('utf-8')).decode('utf-8')
+
+        return ET.fromstring(
+            '''
+<html>
+  <head>
+    <title>Working...</title>
+  </head>
+  <body>
+    <form method="POST" name="hiddenform" action="https://signin.aws.amazon.com:443/saml">
+      <input type="hidden" name="SAMLResponse" value="{}" />
+    </form>
+  </body>
+</html>
+            '''.format(encoded_assertion),
+            ET.HTMLParser(),
+        )
+
+    @staticmethod
+    def a_page_with_saml_containing_session_duration(session_duration):
+        assertion = u'''<samlp:Response Consent="urn:oasis:names:tc:SAML:2.0:consent:unspecified" Destination="https://signin.aws.amazon.com/saml" xmlns:samlp="urn:oasis:names:tc:SAML:2.0:protocol">
+<Assertion Version="2.0" xmlns="urn:oasis:names:tc:SAML:2.0:assertion">
+<AttributeStatement>
+  <Attribute Name="https://aws.amazon.com/SAML/Attributes/RoleSessionName">
+    <AttributeValue>beer.lover@awesome.company.com</AttributeValue>
+  </Attribute>
+  <Attribute Name="https://aws.amazon.com/SAML/Attributes/Role">
+    <AttributeValue>arn:aws:iam::000000000000:saml-provider/ADFS,arn:aws:iam::000000000000:role/beer-lover</AttributeValue>
+    <AttributeValue>arn:aws:iam::000000000000:saml-provider/ADFS,arn:aws:iam::000000000000:role/beer-crafter</AttributeValue>
+  </Attribute>
+  <Attribute Name="https://aws.amazon.com/SAML/Attributes/SessionDuration">
+        <AttributeValue>{}</AttributeValue>
+      </Attribute>
+</AttributeStatement>
+</Assertion>
+</samlp:Response>'''.format(session_duration)
 
         encoded_assertion = base64.encodestring(assertion.encode('utf-8')).decode('utf-8')
 

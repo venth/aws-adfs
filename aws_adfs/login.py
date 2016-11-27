@@ -57,12 +57,12 @@ def login(
     _verification_checks(config)
 
     # Try reauthenticating using an existing ADFS session
-    principal_roles, assertion = authenticator.authenticate(config)
+    principal_roles, assertion, aws_session_duration = authenticator.authenticate(config)
 
     # If we fail to get an assertion, prompt for credentials and try again
     if assertion is None:
         username, password = _get_user_credentials(config)
-        principal_roles, assertion = authenticator.authenticate(config, username, password)
+        principal_roles, assertion, aws_session_duration = authenticator.authenticate(config, username, password)
 
         username = '########################################'
         del username
@@ -72,19 +72,39 @@ def login(
     principal_arn, config.role_arn = _chosen_role_to_assume(config, principal_roles)
 
     # Use the assertion to get an AWS STS token using Assume Role with SAML
+    # according to the documentation:
+    #   http://docs.aws.amazon.com/IAM/latest/UserGuide/id_roles_providers_create_saml_assertions.html
+    # This element contains one AttributeValue element that specifies the maximum time that the user
+    # can access the AWS Management Console before having to request new temporary credentials.
+    # The value is an integer representing the number of seconds, and can be
+    # a maximum of 43200 seconds (12 hours). If this attribute is not present,
+    # then the maximum session duration defaults to one hour
+    # (the default value of the DurationSeconds parameter of the AssumeRoleWithSAML API).
+    # To use this attribute, you must configure the SAML provider to provide single sign-on access
+    # to the AWS Management Console through the console sign-in web endpoint at
+    # https://signin.aws.amazon.com/saml.
+    # Note that this attribute extends sessions only to the AWS Management Console.
+    # It cannot extend the lifetime of other credentials.
+    # However, if it is present in an AssumeRoleWithSAML API call,
+    # it can be used to shorten the lifetime of the credentials returned by the call to less than
+    # the default of 60 minutes.
+    #
+    # Note, too, that if a SessionNotOnOrAfter attribute is also defined,
+    # then the lesser value of the two attributes, SessionDuration or SessionNotOnOrAfter,
+    # establishes the maximum duration of the console session.
     conn = boto3.client('sts', config=client.Config(signature_version=botocore.UNSIGNED))
     aws_session_token = conn.assume_role_with_saml(
         RoleArn=config.role_arn,
         PrincipalArn=principal_arn,
         SAMLAssertion=assertion,
-        DurationSeconds=3600,
+        # DurationSeconds=aws_session_duration,
     )
 
     _store(config, aws_session_token)
-    _emit_summary(config)
+    _emit_summary(config, aws_session_duration)
 
 
-def _emit_summary(config):
+def _emit_summary(config, session_duration):
     click.echo(
         """
         Prepared ADFS configuration as follows:
@@ -94,6 +114,7 @@ def _emit_summary(config):
             * SSL verification of ADFS Server : '{}'
             * Selected role_arn               : '{}'
             * ADFS Server                     : '{}'
+            * Session Duration in seconds     : {}
         """.format(
             config.profile,
             config.region,
@@ -101,6 +122,7 @@ def _emit_summary(config):
             'ENABLED' if config.ssl_verification else 'DISABLED',
             config.role_arn,
             config.adfs_host,
+            session_duration,
         )
     )
 
