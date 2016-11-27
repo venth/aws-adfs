@@ -3,6 +3,9 @@ import click
 import lxml.etree as ET
 
 
+default_session_duration = 3600
+
+
 def extract(html):
     assertion = None
 
@@ -17,18 +20,28 @@ def extract(html):
     for element in html.findall('.//form[@name="hiddenform"]/input[@name="SAMLResponse"]'):
         assertion = element.get('value')
 
-    # If we did not get an error, but also do not have an assertion, then the user needs to authenticate
+    # If we did not get an error, but also do not have an assertion,
+    # then the user needs to authenticate
     if not assertion:
-        return None, None
+        return None, None, None
 
     # Parse the returned assertion and extract the authorized roles
     saml = ET.fromstring(base64.b64decode(assertion))
 
     # Find all roles offered by the assertion
-    raw_roles = saml.findall('.//{*}Attribute[@Name="https://aws.amazon.com/SAML/Attributes/Role"]/{*}AttributeValue')
+    raw_roles = saml.findall(
+        './/{*}Attribute[@Name="https://aws.amazon.com/SAML/Attributes/Role"]/{*}AttributeValue'
+    )
     aws_roles = [element.text.split(',') for element in raw_roles]
 
     # Note the format of the attribute value is provider_arn, role_arn
     principal_roles = [role for role in aws_roles if ':saml-provider/' in role[0]]
 
-    return principal_roles, assertion
+    aws_session_duration = default_session_duration
+    # Retrieve session duration
+    for element in saml.findall(
+            './/{*}Attribute[@Name="https://aws.amazon.com/SAML/Attributes/SessionDuration"]/{*}AttributeValue'
+    ):
+        aws_session_duration = int(element.text)
+
+    return principal_roles, assertion, aws_session_duration
