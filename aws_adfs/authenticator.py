@@ -8,6 +8,7 @@ def authenticate(config, username=None, password=None):
         adfs_host=config.adfs_host,
         adfs_cookie_location=config.adfs_cookie_location,
         ssl_verification_enabled=config.ssl_verification,
+        provider_id=config.provider_id,
         username=username,
         password=password,
     )

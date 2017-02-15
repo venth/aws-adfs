@@ -23,10 +23,10 @@ except ImportError:
     pass
 
 # The initial URL that starts the authentication process.
-_IDP_ENTRY_URL = 'https://{}/adfs/ls/IdpInitiatedSignOn.aspx?loginToRp=urn:amazon:webservices'
+_IDP_ENTRY_URL = 'https://{}/adfs/ls/IdpInitiatedSignOn.aspx?loginToRp={}'
 
 
-def fetch_html_encoded_roles(adfs_host, adfs_cookie_location, ssl_verification_enabled, username=None, password=None):
+def fetch_html_encoded_roles(adfs_host, adfs_cookie_location, ssl_verification_enabled, provider_id, username=None, password=None):
     # Initiate session handler
     session = requests.Session()
     session.cookies = cookielib.LWPCookieJar(filename=adfs_cookie_location)
@@ -43,7 +43,7 @@ def fetch_html_encoded_roles(adfs_host, adfs_cookie_location, ssl_verification_e
         )
 
     # Opens the initial AD FS URL and follows all of the HTTP302 redirects
-    authentication_url = _IDP_ENTRY_URL.format(adfs_host)
+    authentication_url = _IDP_ENTRY_URL.format(adfs_host, provider_id)
     response = session.post(
         authentication_url,
         verify=ssl_verification_enabled,
@@ -52,7 +52,7 @@ def fetch_html_encoded_roles(adfs_host, adfs_cookie_location, ssl_verification_e
         data={
             'UserName': username,
             'Password': password,
-            'AuthMethod': 'urn:amazon:webservices'
+            'AuthMethod': provider_id
         }
     )
 

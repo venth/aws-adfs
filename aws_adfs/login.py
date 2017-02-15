@@ -42,17 +42,23 @@ from .prepare import adfs_config
     type=click.Choice(['json', 'text', 'table']),
     help='Output format used by aws cli',
 )
+@click.option(
+    '--provider-id',
+    default=lambda: adfs_config.provider_id,
+    help='Provider ID, e.g urn:amazon:webservices (optional)',
+)
 def login(
         profile,
         region,
         ssl_verification,
         adfs_host,
         output_format,
+        provider_id,
 ):
     """
     Authenticates an user with active directory credentials
     """
-    config = prepare.get_prepared_config(profile, region, ssl_verification, adfs_host, output_format)
+    config = prepare.get_prepared_config(profile, region, ssl_verification, adfs_host, output_format, provider_id)
 
     _verification_checks(config)
 

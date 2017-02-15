@@ -11,6 +11,7 @@ def get_prepared_config(
         ssl_verification,
         adfs_host,
         output_format,
+        provider_id,
 ):
     """
     Prepares ADF configuration for login task.
@@ -32,6 +33,7 @@ def get_prepared_config(
     adfs_config.region = region
     adfs_config.adfs_host = adfs_host
     adfs_config.output_format = output_format
+    adfs_config.provider_id = provider_id
     _create_base_aws_cli_config_files_if_needed(adfs_config)
     _load_adfs_config_from_stored_profile(adfs_config, profile)
 
@@ -73,6 +75,9 @@ def _create_adfs_default_config():
     config.adfs_host = None
 
     config.adfs_user = None
+
+    # aws provider id. (Optional - 9/10 times it will always be urn:amazon:websevices)
+    config.provider_id = session.profile or 'urn:amazon:webservices'
 
     return config
 
