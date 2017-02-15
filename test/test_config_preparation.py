@@ -18,6 +18,7 @@ class TestConfigPreparation:
         default_region = 'default_region'
         default_adfs_host = 'default_adfs_host'
         default_output_format = 'default_output_format'
+        default_provider_id = 'default_provider_id'
 
         # when configuration is prepared for not existing profile
         adfs_config = prepare.get_prepared_config(
@@ -26,6 +27,7 @@ class TestConfigPreparation:
             default_ssl_config,
             default_adfs_host,
             default_output_format,
+            default_provider_id,
         )
 
         # then resolved config contains defaults values
@@ -50,6 +52,7 @@ class TestConfigPreparation:
         irrelevant_region = 'irrelevant_region'
         irrelevant_adfs_host = 'irrelevant_adfs_host'
         irrelevant_output_format = 'irrelevant_output_format'
+        irrelevant_provider_id = 'irrelevant_provider_id'
 
         # when configuration is prepared for existing profile
         adfs_config = prepare.get_prepared_config(
@@ -58,6 +61,7 @@ class TestConfigPreparation:
             default_ssl_config,
             irrelevant_adfs_host,
             irrelevant_output_format,
+            irrelevant_provider_id,
         )
 
         # then resolved ssl verification holds the default value

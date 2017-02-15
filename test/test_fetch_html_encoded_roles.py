@@ -31,11 +31,15 @@ class TestFetchHtmlEncodedRoles:
         # and credentials are not provided
         no_credentials_provided = None
 
+        # and provider_id are not provided
+        no_provider_id_provided = None
+
         # when a call against adfs host is performed
         html = html_roles_fetcher.fetch_html_encoded_roles(
             adfs_host=adfs_host,
             adfs_cookie_location=there_is_no_cookie_on_the_location,
             ssl_verification_enabled=ssl_verification_is_irrelevant,
+            provider_id=no_provider_id_provided,
             username=no_credentials_provided,
             password=no_credentials_provided,
         )
@@ -47,6 +51,7 @@ class TestFetchHtmlEncodedRoles:
     def test_always_use_en_on_accept_language(self):
         # given adfs host which doesn't care that ssl is enabled or not
         adfs_host = 'adfs.awsome.com'
+        provider_id = None
         ssl_verification_is_irrelevant = False
 
         requests = html_roles_fetcher.requests = mock.Mock()
@@ -73,25 +78,29 @@ class TestFetchHtmlEncodedRoles:
         # and authentication provider is irrelevant (adfs or windws sspi)
         authenticator_is_irrelevant = None
 
+        # and provider_id are not provided
+        no_provider_id_provided = None
+
         # when a call against adfs host is performed
         html = html_roles_fetcher.fetch_html_encoded_roles(
             adfs_host=adfs_host,
             adfs_cookie_location=there_is_no_cookie_on_the_location,
             ssl_verification_enabled=ssl_verification_is_irrelevant,
+            provider_id=no_provider_id_provided,
             username=no_credentials_provided,
             password=no_credentials_provided,
         )
 
         # then en was requested as preferred language
         new_session.post.assert_called_with(
-            html_roles_fetcher._IDP_ENTRY_URL.format(adfs_host),
+            html_roles_fetcher._IDP_ENTRY_URL.format(adfs_host, provider_id),
             verify=ssl_verification_is_irrelevant,
             auth=authenticator_is_irrelevant,
             headers={'Accept-Language': 'en'},
             data={
                 'UserName': no_credentials_provided,
                 'Password': no_credentials_provided,
-                'AuthMethod': 'urn:amazon:webservices'
+                'AuthMethod': provider_id
             }
         )
 
