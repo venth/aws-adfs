@@ -106,9 +106,9 @@ As of version 0.2.0, this tool acts on the 'default' profile unless an alternate
     ```
     $ aws-adfs login --help                                                                                                                                              13:38
     Usage: aws-adfs login [OPTIONS]
-
+    
       Authenticates an user with active directory credentials
-
+    
     Options:
       --profile TEXT                  AWS cli profile that will be authenticated.
                                       After successful authentication just use:
@@ -128,6 +128,8 @@ As of version 0.2.0, this tool acts on the 'default' profile unless an alternate
                                       configuration
       --output-format [json|text|table]
                                       Output format used by aws cli
+      --provider-id TEXT              Provider ID, e.g urn:amazon:webservices
+                                      (optional)
       --help                          Show this message and exit.
     ```
 
@@ -163,3 +165,4 @@ As of version 0.2.0, this tool acts on the 'default' profile unless an alternate
 * [Brandond](https://github.com/brandond) for: Improve handling of role selection
 * [Brandond](https://github.com/brandond) for: Improve handling of errors caused by excessive cookie growth
 * [Brandond](https://github.com/brandond) for: Default to 'default' profile, in line with other AWS tools
+* [kwhitlock](https://github.com/kwhitlock) for: Added extra option "--provider-id"
