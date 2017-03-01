@@ -166,3 +166,4 @@ As of version 0.2.0, this tool acts on the 'default' profile unless an alternate
 * [Brandond](https://github.com/brandond) for: Improve handling of errors caused by excessive cookie growth
 * [Brandond](https://github.com/brandond) for: Default to 'default' profile, in line with other AWS tools
 * [kwhitlock](https://github.com/kwhitlock) for: Added extra option "--provider-id"
+* [SydOps](https://github.com/SydOps) for: add additional information in list command's output"
