@@ -15,9 +15,13 @@ def list_profiles():
     config.read(adfs_config.aws_credentials_location)
 
     profiles = config.sections()
+
+    config.read(adfs_config.aws_config_location)
+
     if len(profiles) < 1:
         click.echo('No defined profiles')
     else:
         click.echo('Available profiles:')
         for profile in profiles:
-            click.echo('    * {}'.format(profile))
+            role_arn = config.get(profile,'adfs_config.role_arn')
+            click.echo(' * {} | {}'.format(profile, role_arn))
