@@ -79,7 +79,7 @@ As of version 0.2.0, this tool acts on the 'default' profile unless an alternate
 
 * help, help, help?
     ```
-    $ aws-adfs --help                                                                                                                                                    13:37
+    $ aws-adfs --help
     Usage: aws-adfs [OPTIONS] COMMAND [ARGS]...
 
     Options:
@@ -93,7 +93,7 @@ As of version 0.2.0, this tool acts on the 'default' profile unless an alternate
     ```
 
     ```
-    $ aws-adfs list --help                                                                                                                                               13:38
+    $ aws-adfs list --help
     Usage: aws-adfs list [OPTIONS]
 
       lists available profiles
@@ -104,7 +104,7 @@ As of version 0.2.0, this tool acts on the 'default' profile unless an alternate
     ```
 
     ```
-    $ aws-adfs login --help                                                                                                                                              13:38
+    $ aws-adfs login --help
     Usage: aws-adfs login [OPTIONS]
     
       Authenticates an user with active directory credentials
@@ -130,8 +130,10 @@ As of version 0.2.0, this tool acts on the 'default' profile unless an alternate
                                       Output format used by aws cli
       --provider-id TEXT              Provider ID, e.g urn:amazon:webservices
                                       (optional)
-      --help                          Show this message and exit.
-    ```
+      --s3-signature-version [s3v4]   s3 signature version: Identifies the version
+                                      of AWS Signature to support for
+                                      authenticated requests. Valid values: s3v4
+      --help                          Show this message and exit.    ```
 
     ```
     $ aws-adfs reset --help                                                                                                                                              13:39
@@ -166,4 +168,4 @@ As of version 0.2.0, this tool acts on the 'default' profile unless an alternate
 * [Brandond](https://github.com/brandond) for: Improve handling of errors caused by excessive cookie growth
 * [Brandond](https://github.com/brandond) for: Default to 'default' profile, in line with other AWS tools
 * [kwhitlock](https://github.com/kwhitlock) for: Added extra option "--provider-id"
-* [SydOps](https://github.com/SydOps) for: add additional information in list command's output"
+* [SydOps](https://github.com/SydOps) for: add additional information in list command's output
