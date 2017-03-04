@@ -12,6 +12,7 @@ def get_prepared_config(
         adfs_host,
         output_format,
         provider_id,
+        s3_signature_version,
 ):
     """
     Prepares ADF configuration for login task.
@@ -27,6 +28,8 @@ def get_prepared_config(
     :param region: The default AWS region that this script will connect
                    to for all API calls
     :param profile: aws cli profile
+    :param provider_id: Provider ID, e.g urn:amazon:webservices (optional)
+    :param s3_signature_version: s3 signature version
     """
     adfs_config.profile = profile
     adfs_config.ssl_verification = ssl_verification
@@ -34,6 +37,7 @@ def get_prepared_config(
     adfs_config.adfs_host = adfs_host
     adfs_config.output_format = output_format
     adfs_config.provider_id = provider_id
+    adfs_config.s3_signature_version = s3_signature_version
     _create_base_aws_cli_config_files_if_needed(adfs_config)
     _load_adfs_config_from_stored_profile(adfs_config, profile)
 
@@ -79,19 +83,24 @@ def _create_adfs_default_config():
     # aws provider id. (Optional - 9/10 times it will always be urn:amazon:websevices)
     config.provider_id = session.profile or 'urn:amazon:webservices'
 
+    # Note: if your bucket require CORS, it is advised that you use path style addressing
+    # (which is set by default in signature version 4).
+    config.s3_signature_version = None
+
     return config
 
 
 def _load_adfs_config_from_stored_profile(adfs_config, profile):
+
+    def get_or(self, profile, option, default_value):
+        if self.has_option(profile, option):
+            return self.get(profile, option)
+        return default_value
+
     def load_from_config(config_location, profile, loader):
         config = configparser.RawConfigParser()
         config.read(config_location)
         if config.has_section(profile):
-            def get_or(self, profile, option, default_value):
-                if self.has_option(profile, option):
-                    return self.get(profile, option)
-                return default_value
-
             setattr(config, get_or.__name__, MethodType(get_or, config))
             loader(config, profile)
 
@@ -106,6 +115,19 @@ def _load_adfs_config_from_stored_profile(adfs_config, profile):
         adfs_config.role_arn = config.get_or(profile, 'adfs_config.role_arn', adfs_config.role_arn)
         adfs_config.adfs_host = config.get_or(profile, 'adfs_config.adfs_host', adfs_config.adfs_host)
         adfs_config.adfs_user = config.get_or(profile, 'adfs_config.adfs_user', adfs_config.adfs_user)
+        adfs_config.provider_id = config.get_or(profile, 'adfs_config.provider_id', adfs_config.provider_id)
+
+        adfs_config.s3_signature_version = None
+        rawS3SubSection = config.get_or(profile, 's3', None)
+        if rawS3SubSection:
+            s3SubSection = configparser.RawConfigParser()
+            setattr(s3SubSection, get_or.__name__, MethodType(get_or, s3SubSection))
+            s3SubSection.read_string('[s3_section]\n' + rawS3SubSection)
+            adfs_config.s3_signature_version = s3SubSection.get_or(
+                's3_section',
+                'signature_version',
+                adfs_config.s3_signature_version
+            )
 
     if profile == 'default':
         load_from_config(adfs_config.aws_config_location, profile, load_config)

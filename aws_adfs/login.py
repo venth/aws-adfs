@@ -47,6 +47,13 @@ from .prepare import adfs_config
     default=lambda: adfs_config.provider_id,
     help='Provider ID, e.g urn:amazon:webservices (optional)',
 )
+@click.option(
+    '--s3-signature-version',
+    type=click.Choice(['s3v4']),
+    default=lambda: adfs_config.s3_signature_version,
+    help='s3 signature version: Identifies the version of AWS Signature to support for '
+         'authenticated requests. Valid values: s3v4',
+)
 def login(
         profile,
         region,
@@ -54,11 +61,20 @@ def login(
         adfs_host,
         output_format,
         provider_id,
+        s3_signature_version,
 ):
     """
     Authenticates an user with active directory credentials
     """
-    config = prepare.get_prepared_config(profile, region, ssl_verification, adfs_host, output_format, provider_id)
+    config = prepare.get_prepared_config(
+        profile,
+        region,
+        ssl_verification,
+        adfs_host,
+        output_format,
+        provider_id,
+        s3_signature_version,
+    )
 
     _verification_checks(config)
 
@@ -121,6 +137,8 @@ def _emit_summary(config, session_duration):
             * Selected role_arn                 : '{}'
             * ADFS Server                       : '{}'
             * ADFS Session Duration in seconds  : '{}'
+            * Provider ID                       : '{}'
+            * S3 Signature Version              : '{}'
         """.format(
             config.profile,
             config.region,
@@ -129,6 +147,8 @@ def _emit_summary(config, session_duration):
             config.role_arn,
             config.adfs_host,
             session_duration,
+            config.provider_id,
+            config.s3_signature_version,
         )
     )
 
@@ -169,6 +189,8 @@ def _store(config, aws_session_token):
         config_file.set(profile, 'adfs_config.role_arn', config.role_arn)
         config_file.set(profile, 'adfs_config.adfs_host', config.adfs_host)
         config_file.set(profile, 'adfs_config.adfs_user', config.adfs_user)
+        if config.s3_signature_version:
+            config_file.set(profile, 's3', '\nsignature_version = {}'.format(config.s3_signature_version))
 
     store_config(config.profile, config.aws_credentials_location, credentials_storer)
     if config.profile == 'default':
