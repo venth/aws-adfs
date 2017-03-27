@@ -27,7 +27,7 @@ install_requires = [
     'lxml',
     'click',
     'boto3',
-    'requests',
+    'requests[security]',
     'configparser'
 ]
 
