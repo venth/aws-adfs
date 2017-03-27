@@ -1,7 +1,7 @@
-import requests
 import logging
 import os
-import lxml.etree as ET
+import requests
+
 
 try:
     import cookielib
@@ -79,4 +79,4 @@ def fetch_html_encoded_roles(adfs_host, adfs_cookie_location, ssl_verification_e
     del password
 
     # Decode the response
-    return ET.fromstring(response.text, ET.HTMLParser())
+    return response, session

@@ -35,7 +35,7 @@ class TestFetchHtmlEncodedRoles:
         no_provider_id_provided = None
 
         # when a call against adfs host is performed
-        html = html_roles_fetcher.fetch_html_encoded_roles(
+        fetched_response, session = html_roles_fetcher.fetch_html_encoded_roles(
             adfs_host=adfs_host,
             adfs_cookie_location=there_is_no_cookie_on_the_location,
             ssl_verification_enabled=ssl_verification_is_irrelevant,
@@ -45,7 +45,7 @@ class TestFetchHtmlEncodedRoles:
         )
 
         # then returned html is empty
-        assert html.text is None
+        assert fetched_response == empty_response
         cookie_jar.clear.assert_called()
 
     def test_always_use_en_on_accept_language(self):
@@ -82,7 +82,7 @@ class TestFetchHtmlEncodedRoles:
         no_provider_id_provided = None
 
         # when a call against adfs host is performed
-        html = html_roles_fetcher.fetch_html_encoded_roles(
+        html_roles_fetcher.fetch_html_encoded_roles(
             adfs_host=adfs_host,
             adfs_cookie_location=there_is_no_cookie_on_the_location,
             ssl_verification_enabled=ssl_verification_is_irrelevant,
