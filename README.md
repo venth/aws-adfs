@@ -24,6 +24,11 @@ Thanks to [Brandond](https://github.com/brandond) contribution - "Add support fo
 
 As of version 0.2.0, this tool acts on the 'default' profile unless an alternate profile name has been specified on the command line or in your environment. Previous versions acted on the 'adfs' profile by default.
 
+# MFA integration
+
+aws-adfs integrates with:
+* [duo security](https://duo.com) MFA provider
+
 # Installation
 
 * user local installation
@@ -169,3 +174,4 @@ As of version 0.2.0, this tool acts on the 'default' profile unless an alternate
 * [Brandond](https://github.com/brandond) for: Default to 'default' profile, in line with other AWS tools
 * [kwhitlock](https://github.com/kwhitlock) for: Added extra option "--provider-id"
 * [SydOps](https://github.com/SydOps) for: add additional information in list command's output
+* [eric-nord](https://github.com/eric-nord) for: bringing topic of [duo security](https://duo.com) MFA integration
