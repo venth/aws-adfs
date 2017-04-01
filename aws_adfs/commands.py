@@ -1,3 +1,4 @@
+import codecs
 import logging
 import sys
 
@@ -33,8 +34,13 @@ def _print_version(ctx, param, value):
 )
 def cli(verbose):
     log_format = '%(asctime)s [%(module)s %(filename)s:%(funcName)s] ' \
-                 '[%(process)d-%(processName)s] [%(thread)d-%(threadName)s] - %(levelname)s: %(message)s'
-    logging.basicConfig(format=log_format, stream=sys.stdout, level=logging.DEBUG if verbose else logging.ERROR)
+                 '[%(process)d-%(processName)s] [%(thread)d-%(threadName)s] ' \
+                 '- %(levelname)s: %(message)s'
+    logging.basicConfig(
+        format=log_format,
+        stream=codecs.getwriter("utf-8")(sys.stdout),
+        level=logging.DEBUG if verbose else logging.ERROR,
+    )
 
 
 cli.add_command(list_profiles.list_profiles)
