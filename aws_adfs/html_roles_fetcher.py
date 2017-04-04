@@ -2,7 +2,6 @@ import logging
 import os
 import requests
 
-
 try:
     import cookielib
 except ImportError:
@@ -37,9 +36,9 @@ def fetch_html_encoded_roles(adfs_host, adfs_cookie_location, ssl_verification_e
     except IOError as e:
         error_message = getattr(e, 'message', e)
         logging.debug(
-            'Attempt to load authentication cookies into session failed. '
-            'Re-authentication will be performed. '
-            'The error: {}'.format(error_message)
+            u'Attempt to load authentication cookies into session failed. '
+            u'Re-authentication will be performed. '
+            u'The error: {}'.format(error_message)
         )
 
     # Opens the initial AD FS URL and follows all of the HTTP302 redirects
@@ -56,7 +55,7 @@ def fetch_html_encoded_roles(adfs_host, adfs_cookie_location, ssl_verification_e
         }
     )
 
-    logging.debug('''Request:
+    logging.debug(u'''Request:
         * url: {}
         * headers: {}
     Response:

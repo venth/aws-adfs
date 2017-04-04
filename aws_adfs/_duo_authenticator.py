@@ -13,7 +13,6 @@ except ImportError:
 
 from . import roles_assertion_extractor
 
-
 _headers = {
     'Accept-Language': 'en',
     'User-Agent': 'Mozilla/5.0 (Windows NT 6.1; WOW64; Trident/7.0; rv:11.0) like Gecko',
@@ -86,7 +85,8 @@ def _context(html_response):
     return element.get('value')
 
 
-def _retrieve_roles_page(roles_page_url, context, session, ssl_verification_enabled, signed_response):
+def _retrieve_roles_page(roles_page_url, context, session, ssl_verification_enabled,
+                         signed_response):
     response = session.post(
         roles_page_url,
         verify=ssl_verification_enabled,
@@ -98,7 +98,7 @@ def _retrieve_roles_page(roles_page_url, context, session, ssl_verification_enab
             'sig_response': signed_response,
         }
     )
-    logging.debug('''Request:
+    logging.debug(u'''Request:
             * url: {}
             * headers: {}
         Response:
@@ -110,7 +110,7 @@ def _retrieve_roles_page(roles_page_url, context, session, ssl_verification_enab
 
     if response.status_code != 200:
         raise click.ClickException(
-            'Issues during redirection to aws roles page. The error response {}'.format(
+            u'Issues during redirection to aws roles page. The error response {}'.format(
                 response
             )
         )
@@ -136,7 +136,7 @@ def _authentication_result(
             'txid': duo_transaction_id
         }
     )
-    logging.debug('''Request:
+    logging.debug(u'''Request:
         * url: {}
         * headers: {}
     Response:
@@ -148,7 +148,8 @@ def _authentication_result(
 
     if response.status_code != 200:
         raise click.ClickException(
-            'Issues during retrieval of a code entered into the device. The error response {}'.format(
+            u'Issues during retrieval of a code entered into '
+            u'the device. The error response {}'.format(
                 response
             )
         )
@@ -156,16 +157,16 @@ def _authentication_result(
     json_response = response.json()
     if json_response['stat'] != 'OK':
         raise click.ClickException(
-            'There was an issue during retrieval of a code entered into the device.'
-            ' The error response: {}'.format(
+            u'There was an issue during retrieval of a code entered into the device.'
+            u' The error response: {}'.format(
                 response.text
             )
         )
 
     if json_response['response']['status_code'] != 'allow':
         raise click.ClickException(
-            'There was an issue during retrieval of a code entered into the device.'
-            ' The error response: {}'.format(
+            u'There was an issue during retrieval of a code entered into the device.'
+            u' The error response: {}'.format(
                 response.text
             )
         )
@@ -174,7 +175,8 @@ def _authentication_result(
     return auth_signature
 
 
-def _verify_that_code_was_sent(duo_host, sid, duo_transaction_id, session, ssl_verification_enabled):
+def _verify_that_code_was_sent(duo_host, sid, duo_transaction_id, session,
+                               ssl_verification_enabled):
     status_for_url = "https://{}/frame/status".format(duo_host)
     response = session.post(
         status_for_url,
@@ -185,7 +187,7 @@ def _verify_that_code_was_sent(duo_host, sid, duo_transaction_id, session, ssl_v
             'txid': duo_transaction_id
         }
     )
-    logging.debug('''Request:
+    logging.debug(u'''Request:
         * url: {}
         * headers: {}
     Response:
@@ -197,7 +199,7 @@ def _verify_that_code_was_sent(duo_host, sid, duo_transaction_id, session, ssl_v
 
     if response.status_code != 200:
         raise click.ClickException(
-            'Issues during sending code to the devide. The error response {}'.format(
+            u'Issues during sending code to the devide. The error response {}'.format(
                 response
             )
         )
@@ -205,14 +207,14 @@ def _verify_that_code_was_sent(duo_host, sid, duo_transaction_id, session, ssl_v
     json_response = response.json()
     if json_response['stat'] != 'OK':
         raise click.ClickException(
-            'There was an issue during sending code to the device. The error response: {}'.format(
+            u'There was an issue during sending code to the device. The error response: {}'.format(
                 response.text
             )
         )
 
     if json_response['response']['status_code'] != 'pushed':
         raise click.ClickException(
-            'There was an issue during sending code to the device. The error response: {}'.format(
+            u'There was an issue during sending code to the device. The error response: {}'.format(
                 response.text
             )
         )
@@ -234,7 +236,8 @@ def _app(request_signature):
     return m.group(1)
 
 
-def _initiate_authentication(duo_host, duo_request_signature, roles_page_url, session, ssl_verification_enabled):
+def _initiate_authentication(duo_host, duo_request_signature, roles_page_url, session,
+                             ssl_verification_enabled):
     prompt_for_url = 'https://{}/frame/web/v1/auth'.format(duo_host)
     parent = "{}{}".format(
         roles_page_url,
@@ -272,7 +275,7 @@ def _initiate_authentication(duo_host, duo_request_signature, roles_page_url, se
             'color_depth': '24',
         }
     )
-    logging.debug('''Request:
+    logging.debug(u'''Request:
         * url: {}
         * headers: {}
     Response:
@@ -292,8 +295,6 @@ def _initiate_authentication(duo_host, duo_request_signature, roles_page_url, se
         return None, False
 
     sid = query['sid']
-    # <input type="hidden" name="preferred_factor" value="Duo&#x20;Push">
-    # <input type="hidden" name="preferred_device" value="phone1">
     html_response = ET.fromstring(response.text, ET.HTMLParser())
     preferred_factor = _preferred_factor(html_response)
     preferred_device = _preferred_device(html_response)
@@ -312,7 +313,8 @@ def _preferred_device(html_response):
     return element.get('value')
 
 
-def _begin_authentication_transaction(duo_host, sid, preferred_factor, preferred_device, session, ssl_verification_enabled):
+def _begin_authentication_transaction(duo_host, sid, preferred_factor, preferred_device, session,
+                                      ssl_verification_enabled):
     prompt_for_url = "https://{}/frame/prompt".format(duo_host)
     response = session.post(
         prompt_for_url,
@@ -325,7 +327,7 @@ def _begin_authentication_transaction(duo_host, sid, preferred_factor, preferred
             'out_of_date': ''
         }
     )
-    logging.debug('''Request:
+    logging.debug(u'''Request:
         * url: {}
         * headers: {}
     Response:
@@ -337,7 +339,7 @@ def _begin_authentication_transaction(duo_host, sid, preferred_factor, preferred
 
     if response.status_code != 200:
         raise click.ClickException(
-            'Issues during beginning of the authentication process. The error response {}'.format(
+            u'Issues during beginning of the authentication process. The error response {}'.format(
                 response
             )
         )
@@ -345,7 +347,7 @@ def _begin_authentication_transaction(duo_host, sid, preferred_factor, preferred
     json_response = response.json()
     if json_response['stat'] != 'OK':
         raise click.ClickException(
-            'Cannot begin authentication process. The error response: {}'.format(response.text)
+            u'Cannot begin authentication process. The error response: {}'.format(response.text)
         )
 
     return json_response['response']['txid']

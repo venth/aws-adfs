@@ -12,6 +12,9 @@ from . import reset
 from . import _version
 
 
+sys.stdout = codecs.getwriter("utf-8")(sys.stdout)
+
+
 def _print_version(ctx, param, value):
     if not value or ctx.resilient_parsing:
         return
@@ -40,7 +43,7 @@ def cli(verbose):
                  '- %(levelname)s: %(message)s'
     logging.basicConfig(
         format=log_format,
-        stream=codecs.getwriter("utf-8")(sys.stdout),
+        stream=sys.stdout,
         level=logging.DEBUG if verbose else logging.ERROR,
     )
 

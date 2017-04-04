@@ -128,7 +128,7 @@ def login(
 
 def _emit_summary(config, session_duration):
     click.echo(
-        """
+        u"""
         Prepared ADFS configuration as follows:
             * AWS CLI profile                   : '{}'
             * AWS region                        : '{}'
