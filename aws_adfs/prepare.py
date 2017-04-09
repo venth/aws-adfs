@@ -31,15 +31,22 @@ def get_prepared_config(
     :param provider_id: Provider ID, e.g urn:amazon:webservices (optional)
     :param s3_signature_version: s3 signature version
     """
-    adfs_config.profile = profile
-    adfs_config.ssl_verification = ssl_verification
-    adfs_config.region = region
-    adfs_config.adfs_host = adfs_host
-    adfs_config.output_format = output_format
-    adfs_config.provider_id = provider_id
-    adfs_config.s3_signature_version = s3_signature_version
+    def default_if_none(value, default):
+        return value if value is not None else default
+
     _create_base_aws_cli_config_files_if_needed(adfs_config)
     _load_adfs_config_from_stored_profile(adfs_config, profile)
+
+    adfs_config.profile = default_if_none(profile, adfs_config.profile)
+    adfs_config.ssl_verification = default_if_none(ssl_verification, adfs_config.ssl_verification)
+    adfs_config.region = default_if_none(region, adfs_config.region)
+    adfs_config.adfs_host = default_if_none(adfs_host, adfs_config.adfs_host)
+    adfs_config.output_format = default_if_none(output_format, adfs_config.output_format)
+    adfs_config.provider_id = default_if_none(provider_id, adfs_config.provider_id)
+    adfs_config.s3_signature_version = default_if_none(
+        s3_signature_version,
+        adfs_config.s3_signature_version
+    )
 
     return adfs_config
 

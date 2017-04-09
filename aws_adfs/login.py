@@ -13,44 +13,38 @@ from .prepare import adfs_config
 @click.command()
 @click.option(
     '--profile',
-    default=lambda: adfs_config.profile,
     help='AWS cli profile that will be authenticated.\n'
          'After successful authentication just use:\n'
          'aws --profile <authenticated profile> <service> ...',
 )
 @click.option(
     '--region',
-    default=lambda: adfs_config.region,
     help='The default AWS region that this script will connect\n'
          'to for all API calls',
 )
 @click.option(
     '--ssl-verification/--no-ssl-verification',
-    default=lambda: adfs_config.ssl_verification,
+    default=None,
     help='SSL certificate verification: Whether or not strict certificate\n'
          'verification is done, False should only be used for dev/test',
 )
 @click.option(
     '--adfs-host',
-    default=lambda: adfs_config.adfs_host,
     help='For the first time for a profile it has to be provided, next time for the same profile\n'
          'it will be loaded from the stored configuration',
 )
 @click.option(
     '--output-format',
-    default=lambda: adfs_config.output_format,
     type=click.Choice(['json', 'text', 'table']),
     help='Output format used by aws cli',
 )
 @click.option(
     '--provider-id',
-    default=lambda: adfs_config.provider_id,
     help='Provider ID, e.g urn:amazon:webservices (optional)',
 )
 @click.option(
     '--s3-signature-version',
     type=click.Choice(['s3v4']),
-    default=lambda: adfs_config.s3_signature_version,
     help='s3 signature version: Identifies the version of AWS Signature to support for '
          'authenticated requests. Valid values: s3v4',
 )

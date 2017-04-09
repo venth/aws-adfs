@@ -9,7 +9,7 @@ except ImportError:
     import http.cookiejar as cookielib
 
 _auth_provider = None
-_headers={'Accept-Language': 'en'}
+_headers = {'Accept-Language': 'en'}
 
 # Support for Kerberos SSO on Windows via requests_negotiate_sspi
 # also requires tricking the server into thinking we're using IE
@@ -25,7 +25,14 @@ except ImportError:
 _IDP_ENTRY_URL = 'https://{}/adfs/ls/IdpInitiatedSignOn.aspx?loginToRp={}'
 
 
-def fetch_html_encoded_roles(adfs_host, adfs_cookie_location, ssl_verification_enabled, provider_id, username=None, password=None):
+def fetch_html_encoded_roles(
+        adfs_host,
+        adfs_cookie_location,
+        ssl_verification_enabled,
+        provider_id,
+        username=None,
+        password=None
+):
     # Initiate session handler
     session = requests.Session()
     session.cookies = cookielib.LWPCookieJar(filename=adfs_cookie_location)
