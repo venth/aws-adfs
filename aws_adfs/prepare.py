@@ -34,10 +34,11 @@ def get_prepared_config(
     def default_if_none(value, default):
         return value if value is not None else default
 
-    _create_base_aws_cli_config_files_if_needed(adfs_config)
-    _load_adfs_config_from_stored_profile(adfs_config, profile)
-
     adfs_config.profile = default_if_none(profile, adfs_config.profile)
+
+    _create_base_aws_cli_config_files_if_needed(adfs_config)
+    _load_adfs_config_from_stored_profile(adfs_config, adfs_config.profile)
+
     adfs_config.ssl_verification = default_if_none(ssl_verification, adfs_config.ssl_verification)
     adfs_config.region = default_if_none(region, adfs_config.region)
     adfs_config.adfs_host = default_if_none(adfs_host, adfs_config.adfs_host)
