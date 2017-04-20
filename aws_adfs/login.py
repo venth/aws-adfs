@@ -231,13 +231,10 @@ def _chosen_role_to_assume(config, principal_roles):
 
     elif len(principal_roles) > 1:
         click.echo('Please choose the role you would like to assume:')
-        # with open('./account_map.json') as map_file:
-        # map_file = requests.get('https://s3.amazonaws.com/eis-aws-accounts/account_map.json')
-        # account_map = map_file.json()
         i = 0
         for (principal_arn, role_arn, account_name) in principal_roles:
-            role_name = role_arn.split(':role/')[1]
-            click.echo('    [ {} -> {} ]: {}'.format(account_name.upper().ljust(30, ' ' if i % 2 == 0 else '.'), i, role_arn))
+            role_name = role_arn.split('-')[1]
+            click.echo('    [ {} -> {} ]: {}'.format(account_name.upper().ljust(30, ' ' if i % 2 == 0 else '.'), i, role_name))
             i += 1
 
         selected_index = click.prompt(text='Selection', type=click.IntRange(0, len(principal_roles)))
