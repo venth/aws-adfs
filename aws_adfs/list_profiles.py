@@ -28,4 +28,9 @@ def list_profiles():
                 'adfs_config.role_arn',
                 fallback=''
             )
-            click.echo(' * {0:<30} | {1}'.format(profile, role_arn))
+            account_name = config.get(
+                profile,
+                'adfs_config.account_name',
+                fallback=''
+            )
+            click.echo(' * {0:<30} | {1:<30} | {2}'.format(profile, role_arn, account_name))

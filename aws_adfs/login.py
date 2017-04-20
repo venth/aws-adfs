@@ -192,6 +192,7 @@ def _store(config, aws_session_token):
         config_file.set(profile, 'output', config.output_format)
         config_file.set(profile, 'adfs_config.ssl_verification', config.ssl_verification)
         config_file.set(profile, 'adfs_config.role_arn', config.role_arn)
+        config_file.set(profile, 'adfs_config.account_name', config.account_name)
         config_file.set(profile, 'adfs_config.adfs_host', config.adfs_host)
         config_file.set(profile, 'adfs_config.adfs_user', config.adfs_user)
         if config.s3_signature_version:
