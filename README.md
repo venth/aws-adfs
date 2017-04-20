@@ -138,8 +138,9 @@ aws-adfs integrates with:
       --s3-signature-version [s3v4]   s3 signature version: Identifies the version
                                       of AWS Signature to support for
                                       authenticated requests. Valid values: s3v4
-      --help                          Show this message and exit.    ```
+      --help                          Show this message and exit.
 
+    ```
     ```
     $ aws-adfs reset --help                                                                                                                                              13:39
     Usage: aws-adfs reset [OPTIONS]
