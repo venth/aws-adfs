@@ -47,10 +47,12 @@ def extract(html):
     for index, principal_arn in enumerate(principal_roles):
         account_id = principal_arn[0].split('::')[1].split(':')[0]
 
-        for id in account_map:
-            if id == account_id:
-                account_name = account_map[id]
-                principal_roles[index].append(account_name)
+        if account_id not in account_map:
+            # print "Account id %s is not in map" % account_id
+            principal_roles[index].append(account_id)
+        else:
+            account_name = account_map[account_id]
+            principal_roles[index].append(account_name)
 
     aws_session_duration = default_session_duration
     # Retrieve session duration

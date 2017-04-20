@@ -49,6 +49,12 @@ from .prepare import adfs_config
     help='s3 signature version: Identifies the version of AWS Signature to support for '
          'authenticated requests. Valid values: s3v4',
 )
+@click.option(
+    '--account_name',
+    help='The friendly AWS account name this script will connect\n'
+         'to for all API calls',
+)
+
 def login(
         profile,
         region,
@@ -57,6 +63,7 @@ def login(
         output_format,
         provider_id,
         s3_signature_version,
+        account_name,
 ):
     """
     Authenticates an user with active directory credentials
@@ -69,6 +76,7 @@ def login(
         output_format,
         provider_id,
         s3_signature_version,
+        account_name,
     )
 
     _verification_checks(config)
@@ -86,7 +94,7 @@ def login(
         password = '########################################'
         del password
 
-    principal_arn, config.role_arn = _chosen_role_to_assume(config, principal_roles)
+    principal_arn, config.role_arn, config.account_name = _chosen_role_to_assume(config, principal_roles)
 
     # Use the assertion to get an AWS STS token using Assume Role with SAML
     # according to the documentation:
@@ -127,6 +135,7 @@ def _emit_summary(config, session_duration):
         Prepared ADFS configuration as follows:
             * AWS CLI profile                   : '{}'
             * AWS region                        : '{}'
+            * AWS Account                       : '{}'
             * Output format                     : '{}'
             * SSL verification of ADFS Server   : '{}'
             * Selected role_arn                 : '{}'
@@ -137,6 +146,7 @@ def _emit_summary(config, session_duration):
         """.format(
             config.profile,
             config.region,
+            config.account_name,
             config.output_format,
             'ENABLED' if config.ssl_verification else 'DISABLED',
             config.role_arn,
@@ -210,11 +220,13 @@ def _chosen_role_to_assume(config, principal_roles):
     if chosen_principal_role:
         chosen_role_arn = chosen_principal_role[0][0]
         chosen_principal_arn = chosen_principal_role[0][1]
-        return chosen_role_arn, chosen_principal_arn
+        chosen_account_name = chosen_principal_role[0][2]
+        return chosen_role_arn, chosen_principal_arn, chosen_account_name
 
     if len(principal_roles) == 1:
         chosen_principal_arn = principal_roles[0][0]
         chosen_role_arn = principal_roles[0][1]
+        chosen_account_name = principal_roles[0][2]
 
     elif len(principal_roles) > 1:
         click.echo('Please choose the role you would like to assume:')
@@ -223,11 +235,6 @@ def _chosen_role_to_assume(config, principal_roles):
         # account_map = map_file.json()
         i = 0
         for (principal_arn, role_arn, account_name) in principal_roles:
-            # account_id = principal_arn.split('::')[1].split(':')[0]
-            # for id in account_map:
-            #     if id == account_id:
-            #         account_name = account_map[id]
-
             role_name = role_arn.split(':role/')[1]
             click.echo('    [ {} -> {} ]: {}'.format(account_name.upper().ljust(30, ' ' if i % 2 == 0 else '.'), i, role_arn))
             i += 1
@@ -237,5 +244,5 @@ def _chosen_role_to_assume(config, principal_roles):
         chosen_principal_arn = principal_roles[selected_index][0]
         chosen_role_arn = principal_roles[selected_index][1]
         chosen_account_name = principal_roles[selected_index][2]
-
-    return chosen_principal_arn, chosen_role_arn
+        # print "Chosen account name: %s " % chosen_account_name
+    return chosen_principal_arn, chosen_role_arn, chosen_account_name

@@ -13,6 +13,7 @@ def get_prepared_config(
         output_format,
         provider_id,
         s3_signature_version,
+        account_name,
 ):
     """
     Prepares ADF configuration for login task.
@@ -39,6 +40,7 @@ def get_prepared_config(
     _create_base_aws_cli_config_files_if_needed(adfs_config)
     _load_adfs_config_from_stored_profile(adfs_config, adfs_config.profile)
 
+    adfs_config.account_name = default_if_none(account_name, adfs_config.account_name)
     adfs_config.ssl_verification = default_if_none(ssl_verification, adfs_config.ssl_verification)
     adfs_config.region = default_if_none(region, adfs_config.region)
     adfs_config.adfs_host = default_if_none(adfs_host, adfs_config.adfs_host)
@@ -81,6 +83,9 @@ def _create_adfs_default_config():
     # verification is done, False should only be used for dev/test
     config.ssl_verification = True
 
+    # AWS account name
+    config.account_name = None
+
     # AWS role arn
     config.role_arn = None
 
@@ -120,6 +125,7 @@ def _load_adfs_config_from_stored_profile(adfs_config, profile):
         adfs_config.ssl_verification = ast.literal_eval(config.get_or(
             profile, 'adfs_config.ssl_verification',
             str(adfs_config.ssl_verification)))
+        adfs_config.account_name = config.get_or(profile, 'adfs_config.account_name', adfs_config.account_name)
         adfs_config.role_arn = config.get_or(profile, 'adfs_config.role_arn', adfs_config.role_arn)
         adfs_config.adfs_host = config.get_or(profile, 'adfs_config.adfs_host', adfs_config.adfs_host)
         adfs_config.adfs_user = config.get_or(profile, 'adfs_config.adfs_user', adfs_config.adfs_user)
