@@ -111,9 +111,9 @@ aws-adfs integrates with:
     ```
     $ aws-adfs login --help
     Usage: aws-adfs login [OPTIONS]
-    
+
       Authenticates an user with active directory credentials
-    
+
     Options:
       --profile TEXT                  AWS cli profile that will be authenticated.
                                       After successful authentication just use:
@@ -176,3 +176,4 @@ aws-adfs integrates with:
 * [kwhitlock](https://github.com/kwhitlock) for: Added extra option "--provider-id"
 * [SydOps](https://github.com/SydOps) for: add additional information in list command's output
 * [eric-nord](https://github.com/eric-nord) for: bringing topic of [duo security](https://duo.com) MFA integration
+* [roblugton](https://github.com/roblugton) for: Fix formatting in README.md
