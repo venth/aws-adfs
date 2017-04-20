@@ -37,10 +37,7 @@ def extract(html):
     # Note the format of the attribute value is provider_arn, role_arn
     principal_roles = [role for role in aws_roles if ':saml-provider/' in role[0]]
 
-    # for element in principal_roles:
-    #     account_id = element[0].split('::')[1].split(':')[0]
-    #     print account_id
-
+    # File contains a list of AWS account id's and names
     map_file = requests.get('https://s3.amazonaws.com/eis-aws-accounts/account_map.json')
     account_map = map_file.json()
 
@@ -48,7 +45,6 @@ def extract(html):
         account_id = principal_arn[0].split('::')[1].split(':')[0]
 
         if account_id not in account_map:
-            # print "Account id %s is not in map" % account_id
             principal_roles[index].append(account_id)
         else:
             account_name = account_map[account_id]
