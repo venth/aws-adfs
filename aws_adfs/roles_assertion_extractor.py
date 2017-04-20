@@ -1,7 +1,7 @@
 import base64
 import click
 import lxml.etree as ET
-
+import requests
 
 default_session_duration = 3600
 
@@ -37,6 +37,21 @@ def extract(html):
     # Note the format of the attribute value is provider_arn, role_arn
     principal_roles = [role for role in aws_roles if ':saml-provider/' in role[0]]
 
+    # for element in principal_roles:
+    #     account_id = element[0].split('::')[1].split(':')[0]
+    #     print account_id
+
+    map_file = requests.get('https://s3.amazonaws.com/eis-aws-accounts/account_map.json')
+    account_map = map_file.json()
+
+    for index, principal_arn in enumerate(principal_roles):
+        account_id = principal_arn[0].split('::')[1].split(':')[0]
+
+        for id in account_map:
+            if id == account_id:
+                account_name = account_map[id]
+                principal_roles[index].append(account_name)
+
     aws_session_duration = default_session_duration
     # Retrieve session duration
     for element in saml.findall(
@@ -45,3 +60,4 @@ def extract(html):
         aws_session_duration = int(element.text)
 
     return principal_roles, assertion, aws_session_duration
+

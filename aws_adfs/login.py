@@ -1,5 +1,6 @@
 import configparser
-
+import requests
+import json
 import boto3
 import botocore
 import click
@@ -214,17 +215,27 @@ def _chosen_role_to_assume(config, principal_roles):
     if len(principal_roles) == 1:
         chosen_principal_arn = principal_roles[0][0]
         chosen_role_arn = principal_roles[0][1]
+
     elif len(principal_roles) > 1:
         click.echo('Please choose the role you would like to assume:')
+        # with open('./account_map.json') as map_file:
+        # map_file = requests.get('https://s3.amazonaws.com/eis-aws-accounts/account_map.json')
+        # account_map = map_file.json()
         i = 0
-        for (principal_arn, role_arn) in principal_roles:
+        for (principal_arn, role_arn, account_name) in principal_roles:
+            # account_id = principal_arn.split('::')[1].split(':')[0]
+            # for id in account_map:
+            #     if id == account_id:
+            #         account_name = account_map[id]
+
             role_name = role_arn.split(':role/')[1]
-            click.echo('    [ {} -> {} ]: {}'.format(role_name.ljust(30, ' ' if i % 2 == 0 else '.'), i, role_arn))
+            click.echo('    [ {} -> {} ]: {}'.format(account_name.upper().ljust(30, ' ' if i % 2 == 0 else '.'), i, role_arn))
             i += 1
 
         selected_index = click.prompt(text='Selection', type=click.IntRange(0, len(principal_roles)))
 
         chosen_principal_arn = principal_roles[selected_index][0]
         chosen_role_arn = principal_roles[selected_index][1]
+        chosen_account_name = principal_roles[selected_index][2]
 
     return chosen_principal_arn, chosen_role_arn
