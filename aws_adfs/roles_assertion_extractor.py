@@ -38,7 +38,9 @@ def extract(html):
     principal_roles = [role for role in aws_roles if ':saml-provider/' in role[0]]
 
     # File contains a list of AWS account id's and names
-    map_file = requests.get('https://s3.amazonaws.com/eis-aws-accounts/account_map.json')
+    # map_file = requests.get('https://s3.amazonaws.com/eis-aws-accounts/account_map.json')
+    map_file = requests.get('https://roevbufzkl.execute-api.us-east-1.amazonaws.com/dev')
+
     account_map = map_file.json()
 
     for index, principal_arn in enumerate(principal_roles):

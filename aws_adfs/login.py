@@ -234,7 +234,7 @@ def _chosen_role_to_assume(config, principal_roles):
         i = 0
         for (principal_arn, role_arn, account_name) in principal_roles:
             role_name = role_arn.split('-')[1]
-            click.echo('    [ {} -> {} ]: {}'.format(account_name.upper().ljust(30, ' ' if i % 2 == 0 else '.'), i, role_name))
+            click.echo('    [ {} -> {} ]: {}'.format(account_name.upper().ljust(40, ' ' if i % 2 == 0 else '.'), i, role_name))
             i += 1
 
         selected_index = click.prompt(text='Selection', type=click.IntRange(0, len(principal_roles)))
