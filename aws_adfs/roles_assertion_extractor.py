@@ -39,7 +39,7 @@ def extract(html):
 
     # File contains a list of AWS account id's and names
     # map_file = requests.get('https://s3.amazonaws.com/eis-aws-accounts/account_map.json')
-    map_file = requests.get('https://roevbufzkl.execute-api.us-east-1.amazonaws.com/dev')
+    map_file = requests.get('https://44n8qsbiud.execute-api.us-east-1.amazonaws.com/live')
 
     account_map = map_file.json()
 
