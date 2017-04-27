@@ -13,14 +13,24 @@ node("docker") {
   // Checkout the repo from github
   stage ('checkout') {
     checkout scm
+
+    def pythonDir = "python"
+    def pythonCmd = ". $pythonDir/bin/activate; python"
+    def pylintCmd = ". $pythonDir/bin/activate; pylint"
+    def pipCmd    = ". $pythonDir/bin/activate; pip"
+
+    sh "virtualenv $pythonDir"
+    sh "$pipCmd install pylint"
+    sh "$pipCmd install wheel"
+
   }
 
   stage("Test") {
-    sh "python setup.py test"
+    sh "$pythonCmd setup.py test"
   }
 
   stage("Package") {
-    sh "python setup.py bdist_wheel --universal"
+    sh "$pythonCmd setup.py bdist_wheel --universal"
   }
 
  /*
