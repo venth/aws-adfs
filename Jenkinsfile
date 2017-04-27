@@ -10,6 +10,9 @@ node("docker") {
   // Ensure we start with an empty directory.
   deleteDir()
 
+    // Checkout the repo from github
+    checkout scm
+
     def pythonDir = "python"
     def pythonCmd = ". $pythonDir/bin/activate; python"
     def pylintCmd = ". $pythonDir/bin/activate; pylint"
@@ -19,11 +22,6 @@ node("docker") {
     sh "$pipCmd install pylint"
     sh "$pipCmd install wheel"
 
-  // Checkout the repo from github
-  stage ('checkout') {
-    checkout scm
-
-  }
 
   stage("Test") {
     sh "$pythonCmd setup.py test"
