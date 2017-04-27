@@ -20,6 +20,7 @@ class TestConfigPreparation:
         default_output_format = 'default_output_format'
         default_provider_id = 'default_provider_id'
         default_s3_signature_version = None
+        default_account_name = None
 
         # when configuration is prepared for not existing profile
         adfs_config = prepare.get_prepared_config(
@@ -30,6 +31,7 @@ class TestConfigPreparation:
             default_output_format,
             default_provider_id,
             default_s3_signature_version,
+            default_account_name,
         )
 
         # then resolved config contains defaults values
@@ -56,6 +58,7 @@ class TestConfigPreparation:
         irrelevant_output_format = 'irrelevant_output_format'
         irrelevant_provider_id = 'irrelevant_provider_id'
         irrelevant_s3_signature_version = 'irrelevant_s3_signature_version'
+        irrelevant_account_name = 'irrelevant_account_name'
 
         # when configuration is prepared for existing profile
         adfs_config = prepare.get_prepared_config(
@@ -66,6 +69,7 @@ class TestConfigPreparation:
             irrelevant_output_format,
             irrelevant_provider_id,
             irrelevant_s3_signature_version,
+            irrelevant_account_name,
         )
 
         # then resolved ssl verification holds the default value
