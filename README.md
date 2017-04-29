@@ -153,6 +153,10 @@ aws-adfs integrates with:
     ```
 
 # Known issues
+* duo-security
+    * Error: Cannot begin authentication process. The error response: {"message": "Unknown authentication method.", "stat": "FAIL"}
+    
+        Please setup preferred auth method in duo-sercurity settings (settings' -> 'My Settings & Devices').
 * in cases of trouble with lxml please install
 
   ```
@@ -177,3 +181,4 @@ aws-adfs integrates with:
 * [SydOps](https://github.com/SydOps) for: add additional information in list command's output
 * [eric-nord](https://github.com/eric-nord) for: bringing topic of [duo security](https://duo.com) MFA integration
 * [roblugton](https://github.com/roblugton) for: Fix formatting in README.md
+* [cliv](https://github.com/cliv) for: pointing out the issue with missing preferred device for duo-security and providing workaround
