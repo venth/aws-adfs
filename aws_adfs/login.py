@@ -50,7 +50,7 @@ from .prepare import adfs_config
 )
 @click.option(
     '--sts-ttl',
-    default=32400,
+    default=9,
     help='The time in hours for the STS token duration.',
 )
 def login(
