@@ -162,6 +162,15 @@ aws-adfs integrates with:
   ```
   sudo apt-get install python-dev libxml2-dev libxslt1-dev zlib1g-dev
   ```
+* in cases of trouble with OSX Sierra (obsolete OpenSSL), upgrade OpenSSL. Example:
+  ```
+  brew upgrade openssl
+  ```
+  AND add explicit directive to .bash_profile:
+  ```
+  export PATH=$(brew --prefix openssl)/bin:$PATH
+  ```
+
 * python 2.6 is not supported
 * python 3.2 is not supported
 
