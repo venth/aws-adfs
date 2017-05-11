@@ -48,6 +48,11 @@ from .prepare import adfs_config
     help='s3 signature version: Identifies the version of AWS Signature to support for '
          'authenticated requests. Valid values: s3v4',
 )
+@click.option(
+    '--sts-ttl',
+    default=9,
+    help='The time in hours for the STS token duration.',
+)
 def login(
         profile,
         region,
@@ -113,7 +118,7 @@ def login(
         RoleArn=config.role_arn,
         PrincipalArn=principal_arn,
         SAMLAssertion=assertion,
-        DurationSeconds=3600,
+        DurationSeconds=3600 * sts-ttl,
     )
 
     _store(config, aws_session_token)
