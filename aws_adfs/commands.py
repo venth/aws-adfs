@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 
-import codecs
 import logging
 import sys
 
@@ -10,9 +9,6 @@ from . import list_profiles
 from . import login
 from . import reset
 from . import _version
-
-
-sys.stdout = codecs.getwriter("utf-8")(sys.stdout)
 
 
 def _print_version(ctx, param, value):
