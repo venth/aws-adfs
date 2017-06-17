@@ -69,7 +69,13 @@ def fetch_html_encoded_roles(
         * status: {}
         * headers: {}
         * body: {}
-    '''.format(authentication_url, response.request.headers, response.status_code, response.headers, response.text))
+    '''.format(
+            authentication_url,
+            response.request.headers,
+            response.status_code,
+            response.headers,
+            response.text
+       ))
 
     if response.status_code >= 400:
         session.cookies.clear()
