@@ -191,3 +191,4 @@ aws-adfs integrates with:
 * [eric-nord](https://github.com/eric-nord) for: bringing topic of [duo security](https://duo.com) MFA integration
 * [roblugton](https://github.com/roblugton) for: Fix formatting in README.md
 * [cliv](https://github.com/cliv) for: pointing out the issue with missing preferred device for duo-security and providing workaround
+* [AndrewFarley](https://github.com/AndrewFarley) for: Bug in parsing Duo host and signature, backwards compatible
