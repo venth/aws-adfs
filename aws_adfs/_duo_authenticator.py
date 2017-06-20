@@ -1,5 +1,6 @@
 import click
 import lxml.etree as ET
+from pprint import pprint
 
 import logging
 import re
@@ -357,20 +358,27 @@ _duo_host_pattern = re.compile("'host': '([^']+)'")
 
 
 def _duo_host(html_response):
-    duo_host_query = './/form[@id="duo_form"]/following-sibling::script'
-    element = html_response.xpath(duo_host_query)[0]
-    m = _duo_host_pattern.search(element.text)
-    return m.group(1)
-
+    try:
+        duo_host_query = './/form[@id="duo_form"]/following-sibling::script'
+        element = html_response.xpath(duo_host_query)[0]
+        m = _duo_host_pattern.search(element.text)
+        return m.group(1)
+    except:
+        duo_host_query = './/input[@name="duo_host"]/@value'
+        return html_response.xpath(duo_host_query)[0]
 
 _duo_signature_pattern = re.compile("'sig_request': '([^']+)'")
 
 
 def _duo_request_signature(html_response):
-    duo_signature_query = './/form[@id="duo_form"]/following-sibling::script'
-    element = html_response.xpath(duo_signature_query)[0]
-    m = _duo_signature_pattern.search(element.text)
-    return m.group(1)
+    try:
+        duo_signature_query = './/form[@id="duo_form"]/following-sibling::script'
+        element = html_response.xpath(duo_signature_query)[0]
+        m = _duo_signature_pattern.search(element.text)
+        return m.group(1)
+    except:
+        duo_host_query = './/input[@name="duo_sig_request"]/@value'
+        return html_response.xpath(duo_host_query)[0]
 
 
 def _action_url_on_validation_success(html_response):
