@@ -1,0 +1,29 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description : "Create role and policy for the aws-adfs python script"
+Resources:
+
+  RoleAWSADFSListAcounts:
+    Type: "AWS::IAM::Role"
+    Properties:
+      RoleName: "RoleAWSADFSListAcounts"
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          -
+            Action: "sts:AssumeRole"
+            Effect: "Allow"
+            Principal:
+              Service:
+                - "lambda.amazonaws.com"
+                - "apigateway.amazonaws.com"
+      Policies:
+        -
+          PolicyName: "ListAccounts"
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              -
+                Effect: "Allow"
+                Action: "organizations:ListAccounts"
+                Resource: "*"
+
