@@ -192,3 +192,4 @@ aws-adfs integrates with:
 * [roblugton](https://github.com/roblugton) for: Fix formatting in README.md
 * [cliv](https://github.com/cliv) for: pointing out the issue with missing preferred device for duo-security and providing workaround
 * [AndrewFarley](https://github.com/AndrewFarley) for: Bug in parsing Duo host and signature, backwards compatible
+* [eikenb](https://github.com/eikenb) for: Version 0.3.4 returns no roles - thanks this [eikenb](https://github.com/eikenb) spoiled egg was identified
