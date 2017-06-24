@@ -48,6 +48,11 @@ from .prepare import adfs_config
     help='s3 signature version: Identifies the version of AWS Signature to support for '
          'authenticated requests. Valid values: s3v4',
 )
+@click.option(
+    '--stdin',
+    is_flag=True,
+    help='Read username, password from standard input separated by a newline.',
+)
 def login(
         profile,
         region,
@@ -56,6 +61,7 @@ def login(
         output_format,
         provider_id,
         s3_signature_version,
+        stdin,
 ):
     """
     Authenticates an user with active directory credentials
@@ -77,7 +83,11 @@ def login(
 
     # If we fail to get an assertion, prompt for credentials and try again
     if assertion is None:
-        username, password = _get_user_credentials(config)
+        if stdin:
+            username, password = _stdin_user_credentials()
+        else:
+            username, password = _get_user_credentials(config)
+
         principal_roles, assertion, aws_session_duration = authenticator.authenticate(config, username, password)
 
         username = '########################################'
@@ -153,6 +163,15 @@ def _get_user_credentials(config):
 
     return config.adfs_user, password
 
+def _stdin_user_credentials():
+    stdin = click.get_text_stream('stdin').read()
+    stdin_lines = stdin.strip().splitlines()
+    try:
+        username, password = stdin_lines[:2]
+    except ValueError:
+        raise click.ClickException("Failed to read newline separated "
+                "username and password from stdin.")
+    return username, password
 
 def _store(config, aws_session_token):
     def store_config(profile, config_location, storer):

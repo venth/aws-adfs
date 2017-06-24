@@ -111,9 +111,9 @@ aws-adfs integrates with:
     ```
     $ aws-adfs login --help
     Usage: aws-adfs login [OPTIONS]
-
+    
       Authenticates an user with active directory credentials
-
+    
     Options:
       --profile TEXT                  AWS cli profile that will be authenticated.
                                       After successful authentication just use:
@@ -138,8 +138,9 @@ aws-adfs integrates with:
       --s3-signature-version [s3v4]   s3 signature version: Identifies the version
                                       of AWS Signature to support for
                                       authenticated requests. Valid values: s3v4
+      --stdin                         Read username, password from standard input
+                                      separated by a newline.
       --help                          Show this message and exit.
-
     ```
     ```
     $ aws-adfs reset --help                                                                                                                                              13:39
