@@ -42,12 +42,7 @@ def authenticate(config, username=None, password=None):
     return aggregated_principal_roles, assertion, aws_session_duration
 
 
-def _aggregate_roles_by_account_alias(session,
-                                      config,
-                                      username,
-                                      password,
-                                      assertion,
-                                      principal_roles):
+def _account_aliases(session, username, password, auth_method, saml_response):
     alias_response = session.post(
         'https://signin.aws.amazon.com/saml',
         verify=config.ssl_verification,
@@ -61,11 +56,28 @@ def _aggregate_roles_by_account_alias(session,
         data={
             'UserName': username,
             'Password': password,
-            'AuthMethod': config.provider_id,
-            'SAMLResponse': assertion,
+            'AuthMethod': auth_method,
+            'SAMLResponse': saml_response,
         }
     )
     return {}
+
+
+def _aggregate_roles_by_account_alias(session,
+                                      config,
+                                      username,
+                                      password,
+                                      assertion,
+                                      principal_roles):
+    account_aliases = _account_aliases(session, username, password, config.provider_id, assertion)
+    aggregated_accounts = {}
+    for (principal_arn, role_arn) in principal_roles:
+        role_name = role_arn.split(':role/')[1]
+        account_no = role_arn.split(':')[4]
+        if account_aliases[account_no] not in aggregated_accounts:
+            aggregated_accounts[account_aliases[account_no]] = {}
+        aggregated_accounts[account_aliases[account_no]][role_arn] = { 'name': role_name, 'principal_arn': principal_arn }
+    return aggregated_accounts
 
 
 def _strategy(response, config, session):

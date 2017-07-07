@@ -7,7 +7,7 @@ from botocore import client
 
 from . import authenticator
 from . import prepare
-from .prepare import adfs_config
+from . import role_chooser
 
 
 @click.command()
@@ -78,7 +78,7 @@ def login(
 
     _verification_checks(config)
 
-    # Try reauthenticating using an existing ADFS session
+    # Try re-authenticating using an existing ADFS session
     principal_roles, assertion, aws_session_duration = authenticator.authenticate(config)
 
     # If we fail to get an assertion, prompt for credentials and try again
@@ -95,7 +95,10 @@ def login(
         password = '########################################'
         del password
 
-    principal_arn, config.role_arn = _chosen_role_to_assume(config, principal_roles)
+    principal_arn, config.role_arn = role_chooser.choose_role_to_assume(config, principal_roles)
+    if principal_arn is None or config.role_arn is None:
+        click.echo('This account does not have access to any roles', err=True)
+        exit(-1)
 
     # Use the assertion to get an AWS STS token using Assume Role with SAML
     # according to the documentation:
@@ -163,6 +166,7 @@ def _get_user_credentials(config):
 
     return config.adfs_user, password
 
+
 def _stdin_user_credentials():
     stdin = click.get_text_stream('stdin').read()
     stdin_lines = stdin.strip().splitlines()
@@ -170,8 +174,9 @@ def _stdin_user_credentials():
         username, password = stdin_lines[:2]
     except ValueError:
         raise click.ClickException("Failed to read newline separated "
-                "username and password from stdin.")
+                                   "username and password from stdin.")
     return username, password
+
 
 def _store(config, aws_session_token):
     def store_config(profile, config_location, storer):
@@ -216,34 +221,3 @@ def _verification_checks(config):
     if not config.adfs_host:
         click.echo('\'--adfs-host\' parameter must be supplied', err=True)
         exit(-1)
-
-
-def _chosen_role_to_assume(config, principal_roles):
-    if not principal_roles or len(principal_roles) == 0:
-        click.echo('This account does not have access to any roles', err=True)
-        exit(-1)
-
-    chosen_principal_role = [role for role in principal_roles if config.role_arn == role[1]]
-
-    if chosen_principal_role:
-        chosen_role_arn = chosen_principal_role[0][0]
-        chosen_principal_arn = chosen_principal_role[0][1]
-        return chosen_role_arn, chosen_principal_arn
-
-    if len(principal_roles) == 1:
-        chosen_principal_arn = principal_roles[0][0]
-        chosen_role_arn = principal_roles[0][1]
-    elif len(principal_roles) > 1:
-        click.echo('Please choose the role you would like to assume:')
-        i = 0
-        for (principal_arn, role_arn) in principal_roles:
-            role_name = role_arn.split(':role/')[1]
-            click.echo('    [ {} -> {} ]: {}'.format(role_name.ljust(30, ' ' if i % 2 == 0 else '.'), i, role_arn))
-            i += 1
-
-        selected_index = click.prompt(text='Selection', type=click.IntRange(0, len(principal_roles)))
-
-        chosen_principal_arn = principal_roles[selected_index][0]
-        chosen_role_arn = principal_roles[selected_index][1]
-
-    return chosen_principal_arn, chosen_role_arn

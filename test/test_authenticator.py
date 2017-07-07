@@ -1,5 +1,20 @@
+import logging
+
 from aws_adfs import authenticator
 from aws_adfs.authenticator import html_roles_fetcher
+
+
+class AwsAccount:
+    def __init__(self, account_no, account_name):
+        self.account_no = account_no
+        self.account_name = account_name
+
+
+class AwsRole:
+    def __init__(self, account, role_name):
+        self.role_name = role_name
+        self.principal_arn = 'arn:aws:iam::{}:saml-provider/ADFS'.format(account.account_no)
+        self.role_arn = 'arn:aws:iam::{}:role/{}'.format(account.account_no, role_name)
 
 
 class TestAuthenticator:
@@ -140,23 +155,100 @@ class TestAuthenticator:
             assert principal_roles == expected_roles
 
     def test_groups_iam_roles_by_account_alias(self):
-        # when aggregates iam roles by account
-        authenticator._aggregate_roles_by_account_alias(session=self.http_session,
-                                                        config=self.irrelevant_config,
-                                                        username=self.valid_user,
-                                                        password=self.valid_password,
-                                                        assertion=self.valid_assertion,
-                                                        principal_roles=extracted_iam_roles
-                                                        )
+        # given
+        account1 = AwsAccount('9999', 'account1')
+        aws_role1 = AwsRole(account=account1, role_name='role1')
+        aws_role2 = AwsRole(account=account1, role_name='role2')
 
-        # then iam_roles are grouped by account alias
-        for account_alias in expected_accounts.keys():
-            assert principal_roles[account_alias] is not None
-            for iam_role in expected_accounts[account_alias].keys():
-                assert principal_roles[account_alias] is not None
-                assert principal_roles[account_alias][iam_role] == expected_accounts[account_alias][iam_role]
+        account2 = AwsAccount('8888', 'account2')
+        aws_role3 = AwsRole(account=account2, role_name='role3')
 
-    def setup_method(self):
+        arn_principal_account1 = 'arn:aws:iam::9999:saml-provider/ADFS'
+        arn_role1 = 'arn:aws:iam::9999:role/role1'
+
+        arn_principal_account2 = 'arn:aws:iam::8888:saml-provider/ADFS'
+        arn_role3 = 'arn:aws:iam::8888:role/role3'
+        extracted_iam_roles_scenarios = {
+            'there are no iam roles': {
+                'extracted_iam_roles': [],
+                'expected_accounts': {},
+                'aliases': {},
+            },
+            'one account with one role': {
+                'extracted_iam_roles': [
+                    [aws_role1.principal_arn, aws_role1.role_arn],
+                ],
+                'expected_accounts': {
+                    account1.account_name: {
+                        aws_role1.role_arn: {'name': aws_role1.role_name, 'principal_arn': aws_role1.principal_arn},
+                    }
+                },
+                'aliases': {
+                    account1.account_no: account1.account_name
+                },
+            },
+            'one account with 2 roles': {
+                'extracted_iam_roles': [
+                    [aws_role1.principal_arn, aws_role1.role_arn],
+                    [aws_role2.principal_arn, aws_role2.role_arn],
+                ],
+                'expected_accounts': {
+                    account1.account_name: {
+                        aws_role1.role_arn: {'name': aws_role1.role_name, 'principal_arn': aws_role1.principal_arn},
+                        aws_role2.role_arn: {'name': aws_role2.role_name, 'principal_arn': aws_role2.principal_arn},
+                    }
+                },
+                'aliases': {
+                    '9999': 'account1'
+                },
+            },
+            '2 accounts with 1 role in each of them': {
+                'extracted_iam_roles': [
+                    [arn_principal_account1, arn_role1],
+                    [arn_principal_account2, arn_role3],
+                ],
+                'expected_accounts': {
+                    account1.account_name: {
+                        aws_role1.role_arn: {'name': aws_role1.role_name, 'principal_arn': aws_role1.principal_arn},
+                    },
+                    account2.account_name: {
+                        aws_role3.role_arn: {'name': aws_role3.role_name, 'principal_arn': aws_role3.principal_arn},
+                    }
+                },
+                'aliases': {
+                    account1.account_no: account1.account_name,
+                    account2.account_no: account2.account_name,
+                },
+            },
+        }
+
+        for scenario_name in extracted_iam_roles_scenarios.keys():
+            logging.info('=============> Scenario: %s'.format(scenario_name))
+            scenario_params = extracted_iam_roles_scenarios[scenario_name]
+            authenticator._account_aliases = lambda *args: scenario_params['aliases']
+            # when aggregates iam roles by account
+            extracted_iam_roles = scenario_params['extracted_iam_roles']
+            principal_roles = authenticator._aggregate_roles_by_account_alias(
+                session=self.http_session,
+                config=self.irrelevant_config,
+                username=self.valid_user,
+                password=self.valid_password,
+                assertion=self.valid_assertion,
+                principal_roles=extracted_iam_roles
+            )
+
+            # then iam_roles are grouped by account alias
+            expected_accounts = scenario_params['expected_accounts']
+            assert len(principal_roles.keys()) == len(expected_accounts.keys()), 'scenario name: {}'.format(scenario_name)
+
+            for account_alias in expected_accounts.keys():
+                assert account_alias in principal_roles, 'scenario name: {}'.format(scenario_name)
+                for iam_role in expected_accounts[account_alias].keys():
+                    assert principal_roles[account_alias][iam_role] == \
+                           expected_accounts[account_alias][iam_role], 'scenario name: {}'.format(scenario_name)
+
+    def setup_method(self, method):
+        self.orignal_account_aliases = authenticator._account_aliases
         self.orignal_aggregate_method = authenticator._aggregate_roles_by_account_alias
         self.irrelevant_config = type('', (), {})()
         self.irrelevant_config.adfs_host = 'irrelevant host'
@@ -176,5 +268,6 @@ class TestAuthenticator:
         self.valid_user = 'valid user'
         self.valid_password = 'valid password'
 
-    def teardown_method(self):
+    def teardown_method(self, method):
         authenticator._aggregate_roles_by_account_alias = self.orignal_aggregate_method
+        authenticator._account_aliases = self.orignal_account_aliases
