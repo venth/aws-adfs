@@ -248,6 +248,7 @@ class TestAuthenticator:
                            expected_accounts[account_alias][iam_role], 'scenario name: {}'.format(scenario_name)
 
     def setup_method(self, method):
+        self.original_fetch_html_encoded_roles = html_roles_fetcher.fetch_html_encoded_roles
         self.orignal_account_aliases = authenticator._account_aliases
         self.orignal_aggregate_method = authenticator._aggregate_roles_by_account_alias
         self.irrelevant_config = type('', (), {})()
@@ -271,3 +272,4 @@ class TestAuthenticator:
     def teardown_method(self, method):
         authenticator._aggregate_roles_by_account_alias = self.orignal_aggregate_method
         authenticator._account_aliases = self.orignal_account_aliases
+        html_roles_fetcher.fetch_html_encoded_roles = self.original_fetch_html_encoded_roles
