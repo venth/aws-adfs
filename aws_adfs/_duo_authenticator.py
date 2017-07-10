@@ -1,6 +1,5 @@
 import click
 import lxml.etree as ET
-from pprint import pprint
 
 import logging
 import re

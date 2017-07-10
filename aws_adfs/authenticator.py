@@ -1,6 +1,7 @@
 import logging
 import lxml.etree as ET
 
+from . import account_aliases_fetcher
 from . import _duo_authenticator as duo_auth
 from . import html_roles_fetcher
 from . import roles_assertion_extractor
@@ -42,34 +43,13 @@ def authenticate(config, username=None, password=None):
     return aggregated_principal_roles, assertion, aws_session_duration
 
 
-def _account_aliases(session, username, password, auth_method, saml_response):
-    alias_response = session.post(
-        'https://signin.aws.amazon.com/saml',
-        verify=config.ssl_verification,
-        headers={
-            'Accept-Language': 'en',
-            'User-Agent': 'Mozilla/5.0 (Windows NT 6.1; WOW64; Trident/7.0; rv:11.0) like Gecko',
-            'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
-            'Accept': 'text/plain, */*; q=0.01',
-        },
-        auth=None,
-        data={
-            'UserName': username,
-            'Password': password,
-            'AuthMethod': auth_method,
-            'SAMLResponse': saml_response,
-        }
-    )
-    return {}
-
-
 def _aggregate_roles_by_account_alias(session,
                                       config,
                                       username,
                                       password,
                                       assertion,
                                       principal_roles):
-    account_aliases = _account_aliases(session, username, password, config.provider_id, assertion)
+    account_aliases = account_aliases_fetcher.account_aliases(session, username, password, config.provider_id, assertion, config)
     aggregated_accounts = {}
     for (principal_arn, role_arn) in principal_roles:
         role_name = role_arn.split(':role/')[1]

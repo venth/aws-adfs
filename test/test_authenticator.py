@@ -2,6 +2,7 @@ import logging
 
 from aws_adfs import authenticator
 from aws_adfs.authenticator import html_roles_fetcher
+from aws_adfs.authenticator import account_aliases_fetcher
 
 
 class AwsAccount:
@@ -225,7 +226,7 @@ class TestAuthenticator:
         for scenario_name in extracted_iam_roles_scenarios.keys():
             logging.info('=============> Scenario: %s'.format(scenario_name))
             scenario_params = extracted_iam_roles_scenarios[scenario_name]
-            authenticator._account_aliases = lambda *args: scenario_params['aliases']
+            account_aliases_fetcher.account_aliases = lambda *args: scenario_params['aliases']
             # when aggregates iam roles by account
             extracted_iam_roles = scenario_params['extracted_iam_roles']
             principal_roles = authenticator._aggregate_roles_by_account_alias(
@@ -249,7 +250,7 @@ class TestAuthenticator:
 
     def setup_method(self, method):
         self.original_fetch_html_encoded_roles = html_roles_fetcher.fetch_html_encoded_roles
-        self.orignal_account_aliases = authenticator._account_aliases
+        self.orignal_account_aliases = account_aliases_fetcher.account_aliases
         self.orignal_aggregate_method = authenticator._aggregate_roles_by_account_alias
         self.irrelevant_config = type('', (), {})()
         self.irrelevant_config.adfs_host = 'irrelevant host'
@@ -271,5 +272,5 @@ class TestAuthenticator:
 
     def teardown_method(self, method):
         authenticator._aggregate_roles_by_account_alias = self.orignal_aggregate_method
-        authenticator._account_aliases = self.orignal_account_aliases
+        account_aliases_fetcher.account_aliases = self.orignal_account_aliases
         html_roles_fetcher.fetch_html_encoded_roles = self.original_fetch_html_encoded_roles
