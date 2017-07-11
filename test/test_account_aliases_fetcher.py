@@ -7,6 +7,10 @@ def _aws_account(account_alias, account_no):
 
 def _account_page_response(accounts):
     response = type('', (), {})()
+    response.request = type('', (), {})()
+    response.request.headers = {}
+    response.status_code = 'irrelevant'
+    response.headers = {}
     response.text = u'''
     <html>
         <body>

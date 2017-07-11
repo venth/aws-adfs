@@ -1,5 +1,7 @@
-import lxml.etree as ET
+import logging
 import re
+
+import lxml.etree as ET
 
 
 _account_alias_pattern = re.compile("Account: ([^(]+) \(([0-9]+)\)")
@@ -23,6 +25,19 @@ def account_aliases(session, username, password, auth_method, saml_response, con
             'SAMLResponse': saml_response,
         }
     )
+
+    logging.debug(u'''Request:
+        * url: {}
+        * headers: {}
+    Response:
+        * status: {}
+        * headers: {}
+        * body: {}
+    '''.format('https://signin.aws.amazon.com/saml',
+               alias_response.request.headers,
+               alias_response.status_code,
+               alias_response.headers,
+               alias_response.text))
 
     html_response = ET.fromstring(alias_response.text, ET.HTMLParser())
 
