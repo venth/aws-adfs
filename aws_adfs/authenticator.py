@@ -1,5 +1,7 @@
+import logging
 import lxml.etree as ET
 
+from . import account_aliases_fetcher
 from . import _duo_authenticator as duo_auth
 from . import html_roles_fetcher
 from . import roles_assertion_extractor
@@ -16,9 +18,46 @@ def authenticate(config, username=None, password=None):
         password=password,
     )
 
-    extract_strategy = _strategy(response, config, session)
+    assertion = None
+    aws_session_duration = None
 
-    return extract_strategy()
+    aggregated_principal_roles = None
+    if response.status_code == 200:
+        extract_strategy = _strategy(response, config, session)
+
+        principal_roles, assertion, aws_session_duration = extract_strategy()
+
+        if assertion is None:
+            logging.error(u'Cannot extract saml assertion. Second factor authentication failed?')
+        else:
+            aggregated_principal_roles = _aggregate_roles_by_account_alias(session,
+                                                                           config,
+                                                                           username,
+                                                                           password,
+                                                                           assertion,
+                                                                           principal_roles)
+
+    else:
+        logging.error(u'Cannot extract roles from response')
+
+    return aggregated_principal_roles, assertion, aws_session_duration
+
+
+def _aggregate_roles_by_account_alias(session,
+                                      config,
+                                      username,
+                                      password,
+                                      assertion,
+                                      principal_roles):
+    account_aliases = account_aliases_fetcher.account_aliases(session, username, password, config.provider_id, assertion, config)
+    aggregated_accounts = {}
+    for (principal_arn, role_arn) in principal_roles:
+        role_name = role_arn.split(':role/')[1]
+        account_no = role_arn.split(':')[4]
+        if account_aliases[account_no] not in aggregated_accounts:
+            aggregated_accounts[account_aliases[account_no]] = {}
+        aggregated_accounts[account_aliases[account_no]][role_arn] = { 'name': role_name, 'principal_arn': principal_arn }
+    return aggregated_accounts
 
 
 def _strategy(response, config, session):
