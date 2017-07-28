@@ -221,6 +221,23 @@ class TestAuthenticator:
                     account2.account_no: account2.account_name,
                 },
             },
+            '2 accounts with 1 role in each of them and only first one of the account has alias name ': {
+                'extracted_iam_roles': [
+                    [arn_principal_account1, arn_role1],
+                    [arn_principal_account2, arn_role3],
+                ],
+                'expected_accounts': {
+                    account1.account_name: {
+                        aws_role1.role_arn: {'name': aws_role1.role_name, 'principal_arn': aws_role1.principal_arn},
+                    },
+                    account2.account_no: {
+                        aws_role3.role_arn: {'name': aws_role3.role_name, 'principal_arn': aws_role3.principal_arn},
+                    }
+                },
+                'aliases': {
+                    account1.account_no: account1.account_name,
+                },
+            },
         }
 
         for scenario_name in extracted_iam_roles_scenarios.keys():

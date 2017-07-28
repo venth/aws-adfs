@@ -54,6 +54,10 @@ def _aggregate_roles_by_account_alias(session,
     for (principal_arn, role_arn) in principal_roles:
         role_name = role_arn.split(':role/')[1]
         account_no = role_arn.split(':')[4]
+
+        if account_no not in account_aliases:
+            account_aliases[account_no] = account_no
+        
         if account_aliases[account_no] not in aggregated_accounts:
             aggregated_accounts[account_aliases[account_no]] = {}
         aggregated_accounts[account_aliases[account_no]][role_arn] = { 'name': role_name, 'principal_arn': principal_arn }
