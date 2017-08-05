@@ -1,20 +1,12 @@
 #!/usr/bin/env python
 
-import re
 import codecs
 from os import path
 from platform import system
+
 from setuptools import setup
 
-
-VERSIONFILE = "aws_adfs/_version.py"
-verstrline = open(VERSIONFILE, "rt").read()
-VSRE = r"^__version__ = '([^']+)'"
-mo = re.search(VSRE, verstrline, re.MULTILINE)
-if mo:
-    version = mo.group(1)
-else:
-    raise RuntimeError("Unable to find version string in %s." % (VERSIONFILE,))
+import versioneer
 
 tests_require = [
     'pytest-runner',
@@ -28,15 +20,18 @@ install_requires = [
     'click',
     'boto3',
     'requests[security]',
-    'configparser'
+    'configparser',
 ]
 
 if system() == 'Windows':
     install_requires.append('requests-negotiate-sspi')
 
+version = versioneer.get_version()
+
 setup(
     name='aws-adfs',
     version=version,
+    cmdclass=versioneer.get_cmdclass(),
     description='AWS Cli authenticator via ADFS - small command-line tool '
                 'to authenticate via ADFS and assume chosen role',
     long_description=codecs.open(
