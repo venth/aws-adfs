@@ -28,7 +28,7 @@ def authenticate(config, username=None, password=None):
         principal_roles, assertion, aws_session_duration = extract_strategy()
 
         if assertion is None:
-            logging.debug(u'''Cannot extract saml assertion from request's response. Second factor authentication failed?:
+            logging.debug(u'''Cannot extract saml assertion from request's response. Re-authentication needed?:
                 * url: {}
                 * headers: {}
             Response:
@@ -42,7 +42,7 @@ def authenticate(config, username=None, password=None):
                 response.headers,
                 response.text
             ))
-            logging.error(u'Cannot extract saml assertion. Second factor authentication failed?')
+            logging.error(u'Cannot extract saml assertion. Re-authentication needed?')
         else:
             aggregated_principal_roles = _aggregate_roles_by_account_alias(session,
                                                                            config,
