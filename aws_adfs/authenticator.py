@@ -28,6 +28,20 @@ def authenticate(config, username=None, password=None):
         principal_roles, assertion, aws_session_duration = extract_strategy()
 
         if assertion is None:
+            logging.debug(u'''Cannot extract saml assertion from request's response. Second factor authentication failed?:
+                * url: {}
+                * headers: {}
+            Response:
+                * status: {}
+                * headers: {}
+                * body: {}
+            '''.format(
+                response.url,
+                response.request.headers,
+                response.status_code,
+                response.headers,
+                response.text
+            ))
             logging.error(u'Cannot extract saml assertion. Second factor authentication failed?')
         else:
             aggregated_principal_roles = _aggregate_roles_by_account_alias(session,
@@ -38,6 +52,20 @@ def authenticate(config, username=None, password=None):
                                                                            principal_roles)
 
     else:
+        logging.debug(u'''Cannot extract roles from request's response:
+                * url: {}
+                * headers: {}
+            Response:
+                * status: {}
+                * headers: {}
+                * body: {}
+            '''.format(
+            response.url,
+            response.request.headers,
+            response.status_code,
+            response.headers,
+            response.text
+        ))
         logging.error(u'Cannot extract roles from response')
 
     return aggregated_principal_roles, assertion, aws_session_duration
@@ -60,7 +88,7 @@ def _aggregate_roles_by_account_alias(session,
         
         if account_aliases[account_no] not in aggregated_accounts:
             aggregated_accounts[account_aliases[account_no]] = {}
-        aggregated_accounts[account_aliases[account_no]][role_arn] = { 'name': role_name, 'principal_arn': principal_arn }
+        aggregated_accounts[account_aliases[account_no]][role_arn] = {'name': role_name, 'principal_arn': principal_arn}
     return aggregated_accounts
 
 
