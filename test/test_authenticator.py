@@ -25,7 +25,7 @@ class TestAuthenticator:
         valid_user = 'valid user'
         valid_password = 'valid password'
 
-        authenticated_response = type('', (), {})()
+        authenticated_response = self._http_response()
         authenticated_response.status_code = 200
         html_roles_fetcher.fetch_html_encoded_roles = lambda **kwargs: \
             (authenticated_response, self.http_session)
@@ -52,7 +52,7 @@ class TestAuthenticator:
         invalid_user = 'invalid user'
         invalid_password = 'invalid password'
 
-        not_authenticated_response = type('', (), {})()
+        not_authenticated_response = self._http_response()
         not_authenticated_response.status_code = 403
         html_roles_fetcher.fetch_html_encoded_roles = lambda **kwargs: \
             (not_authenticated_response, self.http_session)
@@ -65,7 +65,7 @@ class TestAuthenticator:
             )
         )
 
-        forbidden_response = type('', (), {})()
+        forbidden_response = self._http_response()
         forbidden_response.status_code = 403
         self.http_session.post = lambda *args, **kwargs: forbidden_response
 
@@ -82,7 +82,7 @@ class TestAuthenticator:
         invalid_user = 'invalid user'
         invalid_password = 'invalid password'
 
-        not_authenticated_response = type('', (), {})()
+        not_authenticated_response = self._http_response()
         not_authenticated_response.status_code = 403
         html_roles_fetcher.fetch_html_encoded_roles = lambda **kwargs: \
             (not_authenticated_response, self.http_session)
@@ -95,7 +95,7 @@ class TestAuthenticator:
             )
         )
 
-        forbidden_response = type('', (), {})()
+        forbidden_response = self._http_response()
         forbidden_response.status_code = 403
         self.http_session.post = lambda *args, **kwargs: forbidden_response
 
@@ -112,7 +112,7 @@ class TestAuthenticator:
         valid_user = 'valid user'
         valid_password = 'valid password'
 
-        authenticated_response = type('', (), {})()
+        authenticated_response = self._http_response()
         authenticated_response.status_code = 200
         self.http_session.post = lambda *args, **kwargs: authenticated_response
         html_roles_fetcher.fetch_html_encoded_roles = lambda **kwargs: \
@@ -264,6 +264,15 @@ class TestAuthenticator:
                 for iam_role in expected_accounts[account_alias].keys():
                     assert principal_roles[account_alias][iam_role] == \
                            expected_accounts[account_alias][iam_role], 'scenario name: {}'.format(scenario_name)
+
+    def _http_response(self):
+        response = type('', (), {})()
+        response.url = u'irrelevant_url'
+        response.request = type('', (), {})()
+        response.request.headers = {}
+        response.headers = {}
+        response.text = u'irrelevant response body'
+        return response
 
     def setup_method(self, method):
         self.original_fetch_html_encoded_roles = html_roles_fetcher.fetch_html_encoded_roles
