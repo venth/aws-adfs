@@ -2,8 +2,11 @@
 [![PyPI version](https://badge.fury.io/py/aws-adfs.svg)](https://badge.fury.io/py/aws-adfs)
 [![Travis build](https://api.travis-ci.org/venth/aws-adfs.svg?branch=master)](https://api.travis-ci.org/venth/aws-adfs.svg?branch=master)
 
-Command line tool to easier aws cli authentication against ADFS (multi factor authentication with active directory).
+The project provides two command line tools:
+1. `aws-adfs` to ease aws cli authentication against ADFS (multi factor authentication with active directory) and
+1. `awsr` to ease automatic re-authentication against ADFS server in case of AWS token expiration.
 
+## `aws-adfs` command line tool
 Thanks to [Brandond](https://github.com/brandond) contribution - "Remove storage of credentials, in favor of storing ADFS session cookies"
 aws-adfs:
 
@@ -20,14 +23,27 @@ aws-adfs supports ansible by providing two keys with security token:
 Thanks to [Brandond](https://github.com/brandond) contribution - "Add support for Kerberos SSO on Windows via requests_negotiate_sspi"
 * on windows os will be used Security Support Provider Interface
 
-# Compatibility
+### Compatibility
 
 As of version 0.2.0, this tool acts on the 'default' profile unless an alternate profile name has been specified on the command line or in your environment. Previous versions acted on the 'adfs' profile by default.
 
-# MFA integration
+### MFA integration
 
 aws-adfs integrates with:
 * [duo security](https://duo.com) MFA provider
+
+## `awsr` command line tool
+`awsr` command line tool decorating `aws` command line tool provided by `awscli` python package. It delegates
+the execution to `aws` command and verifies the return code. When the return code indicates that AWS token has expired
+then `aws-adfs` is invoked for an attempt of re-authentication. If re-authentication is finished with success then
+original `aws` command is invoked for the second time.
+
+### Fish command completion
+
+Place somewhere in your config.fish
+```fish
+test -x (which aws_completer); and complete --command awsr --no-files --arguments '(begin; set --local --export COMP_SHELL fish; set --local --export COMP_LINE (commandline); aws_completer | sed \'s/ $//\'; end)'
+```
 
 # Installation
 
@@ -58,6 +74,7 @@ aws-adfs integrates with:
 
 # Examples of usage
 
+## `aws-adfs`
 * login to your adfs host with disabled ssl verification on aws cli profile: adfs
 
     ```
@@ -152,6 +169,18 @@ aws-adfs integrates with:
       --profile TEXT  AWS cli profile that will be removed
       --help          Show this message and exit.
     ```
+
+## `awsr`
+
+* list buckets on s3
+  ```bash
+  awsr s3 ls
+  ```
+* list buckets on s3 using sandbox profile
+  ```bash
+  awsr --profile sandbox s3 ls
+  ```
+
 
 # Known issues
 * duo-security

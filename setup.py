@@ -18,7 +18,11 @@ tests_require = [
 install_requires = [
     'lxml',
     'click',
-    'boto3',
+    # defined by the specific awscli version - see its setup.py
+    'botocore==1.7.12',
+    # corresponding to botocore awscli version
+    'awscli==1.11.154',
+    'boto3>=1.4.6',
     'requests[security]',
     'configparser',
 ]
@@ -67,7 +71,7 @@ setup(
         'test': tests_require
     },
     entry_points={
-        'console_scripts': ['aws-adfs=aws_adfs.commands:cli']
+        'console_scripts': ['aws-adfs=aws_adfs.commands:cli', 'awsr=aws_adfs.aws_refreshable:decorate']
     },
     include_package_data=True,
 )
