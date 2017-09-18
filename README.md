@@ -38,6 +38,12 @@ the execution to `aws` command and verifies the return code. When the return cod
 then `aws-adfs` is invoked for an attempt of re-authentication. If re-authentication is finished with success then
 original `aws` command is invoked for the second time.
 
+### Replacing `aws` command with `awsr`
+Replacement of `aws` command with `awsr` can be done by aliasing `aws` command.
+
+* bash: `alias aws='awsr'`
+* fish: `alias aws 'awsr'`
+
 ### Fish command completion
 
 Place somewhere in your config.fish
