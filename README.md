@@ -33,7 +33,7 @@ aws-adfs integrates with:
 * [duo security](https://duo.com) MFA provider
 
 ## `awsr` command line tool
-`awsr` command line tool decorating `aws` command line tool provided by `awscli` python package. It delegates
+`awsr` command decorates `aws` command provided by `awscli` python package. It delegates
 the execution to `aws` command and verifies the return code. When the return code indicates that AWS token has expired
 then `aws-adfs` is invoked for an attempt of re-authentication. If re-authentication is finished with success then
 original `aws` command is invoked for the second time.
