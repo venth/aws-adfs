@@ -35,6 +35,7 @@ def decorate():
 
 def _re_authenticate(driver):
     profile = driver.session.get_config_variable('profile')
+    profile = 'default' if profile is None else profile
     subprocess.check_call('aws-adfs login --profile {}'.format(profile), shell=True)
 
 
