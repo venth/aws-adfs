@@ -68,6 +68,8 @@ def authenticate(config, username=None, password=None):
         ))
         logging.error(u'Cannot extract roles from response')
 
+    logging.debug(u'Roles along with principals found after authentication: {}'.format(aggregated_principal_roles))
+
     return aggregated_principal_roles, assertion, aws_session_duration
 
 

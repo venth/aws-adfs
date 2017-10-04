@@ -6,17 +6,18 @@ class TestRoleChooser:
 
     def test_returns_no_roles_for_empty_list(self):
         # given user without roles
-        empty_roles_collection = {}
+        empty_roles_collection = [{}, None, []]
 
-        # when an user is asked to choose a role
-        chosen_principal_arn, chosen_role_arn = role_chooser.choose_role_to_assume(
-            config=self.irrelevant_config,
-            principal_roles=empty_roles_collection
-        )
+        for empty_principal_roles in empty_roles_collection:
+            # when an user is asked to choose a role
+            chosen_principal_arn, chosen_role_arn = role_chooser.choose_role_to_assume(
+                config=self.irrelevant_config,
+                principal_roles=empty_principal_roles
+            )
 
-        # then there are not roles
-        assert chosen_principal_arn is None
-        assert chosen_role_arn is None
+            # then there are not roles
+            assert chosen_principal_arn is None
+            assert chosen_role_arn is None
 
     def test_returns_already_chosen_roles_when_it_is_named_for_an_user(self):
         # given role already chosen by an user
@@ -29,7 +30,8 @@ class TestRoleChooser:
         already_chosen_principal_arn = 'already_chosen_principal_arn'
         roles_collection_with_already_chosen_one = {
             'awesome_account': {
-                already_chosen_role_arn: {'name': 'irrelevant', 'principal_arn': already_chosen_principal_arn}
+                'irrelevant_arn': {'name': 'irrelevant', 'principal_arn': 'irrelevant'},
+                already_chosen_role_arn: {'name': 'irrelevant', 'principal_arn': already_chosen_principal_arn},
             }
         }
 

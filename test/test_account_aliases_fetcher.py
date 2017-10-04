@@ -37,6 +37,10 @@ def _account_page_response(accounts):
     )
 
 
+def _failed_account_page_response():
+    return _account_page_response_text(u'<html></html>')
+
+
 class TestAccountAliasesFetcher:
     
     def test_returns_empty_account_dictionary_when_no_account_are_named(self):
@@ -105,6 +109,36 @@ class TestAccountAliasesFetcher:
 
         # then account numbers matches
         assert accounts.keys() == expected_accounts.keys()
+
+    def test_returns_two_accounts_expected_for_real_case_response(self):
+        # given response with accounts
+        response_text, expected_accounts = self._response_with_two_expected_aliases()
+        self.authenticated_session.post = lambda *args, **kwargs: _account_page_response_text(response_text)
+
+        # when gets account aliases via fetcher
+        accounts = account_aliases_fetcher.account_aliases(self.authenticated_session,
+                                                           self.irrelevant_username,
+                                                           self.irrelevant_password,
+                                                           self.irrelevant_auth_method,
+                                                           self.authenticated_saml_response,
+                                                           self.irrelevant_config)
+
+        # then account numbers matches
+        assert accounts.keys() == expected_accounts.keys()
+
+    def test_returns_no_aliases_when_the_call_for_aliases_failed(self):
+        # given failed response
+        self.authenticated_session.post = lambda *args, **kwargs: _failed_account_page_response()
+
+        # when gets account aliases via fetcher
+        accounts = account_aliases_fetcher.account_aliases(self.authenticated_session,
+                                                           self.irrelevant_username,
+                                                           self.irrelevant_password,
+                                                           self.irrelevant_auth_method,
+                                                           self.authenticated_saml_response,
+                                                           self.irrelevant_config)
+        # then there are no aliases
+        assert accounts == {}
 
     def test_returns_full_saml_name_account_when_no_account_alias_is_provided(self):
         # given aws account without alias
@@ -211,6 +245,58 @@ class TestAccountAliasesFetcher:
             '223456789012': 'mydomain-account2',
             '323456789012': 'mydomain-account1',
             '423456789012': '423456789012',
+        }
+
+    def _response_with_two_expected_aliases(self):
+        return u'''
+        <html>
+        <body>
+
+<div id="container">
+
+  <h1 class="background">Amazon Web Services Login</h1>
+
+  <div id="content">
+
+  <div id="main_error"></div>
+
+  <form id="saml_form" name="saml_form" action="/saml" method="post">
+          <input type="hidden" name="RelayState" value="" />
+          <input type="hidden" name="SAMLResponse" value="valueofSAMLRESPONSE" />
+          <input type="hidden" name="name" value="" />
+          <input type="hidden" name="portal" value="" />
+          <p style="font-size: 16px; padding-left: 20px;">Select a role:</p>
+<fieldset>
+            <div  class="saml-account"> <div onClick="expandCollapse(0);">
+              <img id="image0" src="/static/image/down.png" valign="middle"></img>
+              <div class="saml-account-name">Account: zefr (123456789012)</div>
+              </div>
+              <hr style="border: 1px solid #ddd;">
+              <div id="0" class="saml-account" >  
+                <div class="saml-role" onClick="checkRadio(this);">
+                    <input type="radio" name="roleIndex" value="arn:aws:iam::123456789012:role/CORP-ROLE1" class="saml-radio" id="arn:aws:iam::123456789012:role/CORP-ROLE1" />
+                    <label for="arn:aws:iam::123456789012:role/CORP-ROLE1" class="saml-role-description">CORP-ROLE1</label>
+                    <span style="clear: both;"></span>
+                </div>
+                
+                <div class="saml-role" onClick="checkRadio(this);">
+                    <input type="radio" name="roleIndex" value="arn:aws:iam::123456789012:role/CORP-ROLE2" class="saml-radio" id="arn:aws:iam::123456789012:role/CORP-ROLE2" />
+                    <label for="arn:aws:iam::123456789012:role/CORP-ROLE2" class="saml-role-description">CORP-ROLE2</label>
+                    <span style="clear: both;"></span>
+                </div>
+                 </div></div>
+          </fieldset>
+          <br>
+          <div class="buttoninput" id="input_signin_button">
+              <a id="signin_button" class="css3button" href="#" alt="Continue" value="Continue">Sign In</a>
+          </div>
+
+  </form>
+  </div>
+  </body>
+  </html>
+        ''', {
+            '123456789012': 'zefr',
         }
 
     def setup_method(self, method):

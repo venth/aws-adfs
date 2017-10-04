@@ -203,6 +203,19 @@ class TestAuthenticator:
                     '9999': 'account1'
                 },
             },
+            'one account with 2 roles and no aliases': {
+                'extracted_iam_roles': [
+                    [aws_role1.principal_arn, aws_role1.role_arn],
+                    [aws_role2.principal_arn, aws_role2.role_arn],
+                ],
+                'expected_accounts': {
+                    account1.account_no: {
+                        aws_role1.role_arn: {'name': aws_role1.role_name, 'principal_arn': aws_role1.principal_arn},
+                        aws_role2.role_arn: {'name': aws_role2.role_name, 'principal_arn': aws_role2.principal_arn},
+                    }
+                },
+                'aliases': {},
+            },
             '2 accounts with 1 role in each of them': {
                 'extracted_iam_roles': [
                     [arn_principal_account1, arn_role1],

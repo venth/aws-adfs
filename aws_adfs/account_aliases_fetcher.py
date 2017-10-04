@@ -4,8 +4,8 @@ import re
 import lxml.etree as ET
 
 
-_account_alias_pattern = re.compile("Account: ([^(]+) +\(([0-9]+)\)")
-_account_without_alias_pattern = re.compile("Account: +\(?([0-9]+)\)?")
+_account_alias_pattern = re.compile("Account: *([^(]+) *\(([0-9]+)\)")
+_account_without_alias_pattern = re.compile("Account: *\(?([0-9]+)\)?")
 
 
 def account_aliases(session, username, password, auth_method, saml_response, config):
@@ -45,13 +45,14 @@ def account_aliases(session, username, password, auth_method, saml_response, con
     accounts = {}
     account_element_query = './/div[@class="saml-account-name"]'
     for account_element in html_response.iterfind(account_element_query):
+        logging.debug(u'Found SAML account name: {}', account_element.text)
         m = _account_alias_pattern.search(account_element.text)
         if m is not None:
-            accounts[m.group(2)] = m.group(1)
+            accounts[m.group(2)] = m.group(1).strip()
 
         if m is None:
             m = _account_without_alias_pattern.search(account_element.text)
             if m is not None:
-                accounts[m.group(1)] = m.group(0)
+                accounts[m.group(1)] = m.group(0).strip()
 
     return accounts

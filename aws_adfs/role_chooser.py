@@ -1,5 +1,7 @@
-import click
 import collections
+import logging
+
+import click
 
 
 def choose_role_to_assume(config, principal_roles):
@@ -17,18 +19,24 @@ def choose_role_to_assume(config, principal_roles):
         for role_arn in roles.keys():
             role_collection.append([roles[role_arn]['principal_arn'], role_arn])
 
+    logging.debug(u'Role arn from config: {}'.format(config.role_arn))
+
     chosen_principal_role = [role for role in role_collection if config.role_arn == role[1]]
 
+    logging.debug(u'Chosen principal role based on previously used role_arn stored in config: {}'
+                  .format(chosen_principal_role))
+
+    logging.debug(u'Calculated role collection: {}'.format(role_collection))
     if chosen_principal_role:
-        chosen_role_arn = chosen_principal_role[0][0]
-        chosen_principal_arn = chosen_principal_role[0][1]
-        return chosen_role_arn, chosen_principal_arn
+        chosen_principal_arn = chosen_principal_role[0][0]
+        chosen_role_arn = chosen_principal_role[0][1]
+        return chosen_principal_arn, chosen_role_arn
 
     if len(role_collection) == 1:
         chosen_principal_arn = role_collection[0][0]
         chosen_role_arn = role_collection[0][1]
     elif len(principal_roles) > 1:
-        click.echo('Please choose the role you would like to assume:')
+        click.echo(u'Please choose the role you would like to assume:')
         i = 0
         for account_name in principal_roles.keys():
             roles = principal_roles[account_name]
