@@ -91,6 +91,37 @@ class TestRoleChooser:
         assert chosen_principal_arn == chosen_by_the_user_principal_arn
         assert chosen_role_arn == chosen_by_the_user_role_arn
 
+    def test_goes_for_roles_choice_when_there_wasnt_any_previously_used_role_in_config(self):
+        # given roles collection for the user contains two roles
+        first_principal_arn = 'first_principal_arn'
+        first_role_arn = 'first_role_arn'
+        chosen_by_the_user_principal_arn = 'chosen_by_the_user_principal_arn'
+        chosen_by_the_user_role_arn = 'chosen_by_the_user_role_arn'
+        roles_collection_with_one_available_role = {
+            'awesome_account': {
+                first_role_arn: {'name': first_role_arn, 'principal_arn': first_principal_arn}
+            },
+            'second_account': {
+                chosen_by_the_user_role_arn: {'name': chosen_by_the_user_role_arn, 'principal_arn': chosen_by_the_user_principal_arn}
+            }
+        }
+
+        # and there wasn't any previously used role
+        config_without_previously_used_role = type('', (), {})()
+        config_without_previously_used_role.role_arn = None
+
+        # and the user chosen second role
+        click.prompt = lambda **kwargs: 1
+
+        # when an user is asked to choose a role from only one available
+        chosen_principal_arn, chosen_role_arn = role_chooser.choose_role_to_assume(
+            config=self.irrelevant_config,
+            principal_roles=roles_collection_with_one_available_role
+        )
+        # then returns the role that was chosen by the user
+        assert chosen_principal_arn == chosen_by_the_user_principal_arn
+        assert chosen_role_arn == chosen_by_the_user_role_arn
+
     def test_lets_user_choose_in_case_of_missing_already_chosen_role_in_current_list(self):
         # given role already chosen by an user
         already_chosen_role_arn = 'already_chosen_role_arn'

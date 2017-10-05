@@ -27,7 +27,7 @@ def choose_role_to_assume(config, principal_roles):
                   .format(chosen_principal_role))
 
     logging.debug(u'Calculated role collection: {}'.format(role_collection))
-    if chosen_principal_role:
+    if len(chosen_principal_role) == 1:
         chosen_principal_arn = chosen_principal_role[0][0]
         chosen_role_arn = chosen_principal_role[0][1]
         return chosen_principal_arn, chosen_role_arn
