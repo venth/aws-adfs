@@ -115,7 +115,7 @@ class TestRoleChooser:
 
         # when an user is asked to choose a role from only one available
         chosen_principal_arn, chosen_role_arn = role_chooser.choose_role_to_assume(
-            config=self.irrelevant_config,
+            config=config_without_previously_used_role,
             principal_roles=roles_collection_with_one_available_role
         )
         # then returns the role that was chosen by the user
@@ -154,6 +154,27 @@ class TestRoleChooser:
         # then returns the role that was chosen by the user
         assert chosen_principal_arn == chosen_by_the_user_principal_arn
         assert chosen_role_arn == chosen_by_the_user_role_arn
+
+    def test_asks_user_to_choose_a_role(self):
+        # given the role is assumed for the first time
+        config = type('', (), {})()
+        config.role_arn = None
+
+        # and the user chosen second role
+        click.prompt = lambda **kwargs: 1
+
+        # when an user is asked to choose a role from two available
+        chosen_principal_arn, chosen_role_arn = role_chooser.choose_role_to_assume(
+            config=config,
+            principal_roles=self._two_roles_grouped_in_one_account()
+        )
+
+        # then returns the role that was chosen by the user
+        assert chosen_principal_arn is not None
+        assert chosen_role_arn is not None
+
+    def _two_roles_grouped_in_one_account(self):
+        return {'COMPANY': {'arn:aws:iam::AWSACCOUNT:role/CORP-SuperAdmin': {'principal_arn': 'arn:aws:iam::AWSACCOUNT:saml-provider/ADFS', 'name': 'CORP-SuperAdmin'}, 'arn:aws:iam::AWSACCOUNT:role/CORP-DataScience': {'principal_arn': 'arn:aws:iam::AWSACCOUNT:saml-provider/ADFS', 'name': 'CORP-DataScience'}}}
 
     def setup_method(self, method):
         self.irrelevant_config = type('', (), {})()
