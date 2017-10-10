@@ -3,6 +3,7 @@ import lxml.etree as ET
 
 from . import account_aliases_fetcher
 from . import _duo_authenticator as duo_auth
+from . import _symantec_vip_access as symantec_vip_access
 from . import html_roles_fetcher
 from . import roles_assertion_extractor
 
@@ -108,10 +109,17 @@ def _strategy(response, config, session):
             return duo_auth.extract(html_response, config.ssl_verification, session)
         return extract
 
+    def _symantec_vip_extractor():
+        def extract():
+            return symantec_vip_access.extract(html_response, config.ssl_verification, session)
+        return extract
+
     chosen_strategy = _plain_extractor
 
     if _is_duo_authentication(html_response):
         chosen_strategy = _duo_extractor
+    elif _is_symantec_vip_authentication(html_response):
+        chosen_strategy = _symantec_vip_extractor
 
     return chosen_strategy()
 
@@ -122,3 +130,11 @@ def _is_duo_authentication(html_response):
     duo = element is not None
     duo = duo and element.get('value') == 'DuoAdfsAdapter'
     return duo
+
+def _is_symantec_vip_authentication(html_response):
+    auth_method = './/input[@id="authMethod"]'
+    element = html_response.find(auth_method)
+    return (
+        element is not None
+        and element.get('value') == 'VIPAuthenticationProviderWindowsAccountName'
+    )
