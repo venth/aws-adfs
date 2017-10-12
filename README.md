@@ -231,3 +231,4 @@ test -x (which aws_completer); and complete --command awsr --no-files --argument
 * [AndrewFarley](https://github.com/AndrewFarley) for: Bug in parsing Duo host and signature, backwards compatible
 * [eikenb](https://github.com/eikenb) for: Version 0.3.4 returns no roles - thanks for vigilance of [eikenb](https://github.com/eikenb) spoiled egg was identified
 * [eikenb](https://github.com/eikenb) for: add login argument to accept username/password from stdin
+* [irgeek](https://github.com/irgeek) for: Add Symantec VIP Access support
