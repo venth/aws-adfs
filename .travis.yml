@@ -6,6 +6,7 @@ python:
   - "3.5"
   - "3.5-dev" # 3.5 development branch
 before_install:
+  - pip install --upgrade setuptools
   - pip install pytest
 # command to install dependencies
 install:
