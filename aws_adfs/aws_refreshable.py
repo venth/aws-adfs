@@ -41,7 +41,7 @@ def _re_authenticate(driver):
 
 def _was_token_expired(return_code, error_text):
     return return_code == 255 and \
-           u'An error occurred (ExpiredToken) when calling the ListBuckets operation: The provided token has expired.' \
+           u'(ExpiredToken)' \
            in error_text
 
 
