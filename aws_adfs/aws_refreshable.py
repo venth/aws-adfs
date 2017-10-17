@@ -40,7 +40,7 @@ def _re_authenticate(driver):
 
 
 def _was_token_expired(return_code, error_text):
-    return return_code == 255 and \
+    return return_code != 0 and \
            u'(ExpiredToken)' \
            in error_text
 
