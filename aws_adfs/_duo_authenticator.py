@@ -87,6 +87,9 @@ def _context(html_response):
 
 def _retrieve_roles_page(roles_page_url, context, session, ssl_verification_enabled,
                          signed_response):
+    logging.debug('context: {}'.format(context))
+    logging.debug('sig_response: {}'.format(signed_response))
+
     response = session.post(
         roles_page_url,
         verify=ssl_verification_enabled,
