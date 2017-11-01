@@ -16,7 +16,7 @@ _headers = {'Accept-Language': 'en'}
 # so that it servers up a redirect to the IWA page.
 try:
     from requests_negotiate_sspi import HttpNegotiateAuth
-    _auth_provider = HttpNegotiateAuth()
+    _auth_provider = HttpNegotiateAuth
     _headers['User-Agent'] = 'Mozilla/5.0 (Windows NT 6.1; WOW64; Trident/7.0; rv:11.0) like Gecko'
 except ImportError:
     pass
@@ -48,18 +48,32 @@ def fetch_html_encoded_roles(
             u'The error: {}'.format(error_message)
         )
 
+    if _auth_provider:
+        domain = None
+        if username:
+            if '@' in username: # User principal name (UPN) format
+                username, domain = username.split('@', 1)
+            elif '\\' in username: # Down-level logon name format
+                domain, username = username.split('\\', 1)
+
+        auth = _auth_provider(username, password, domain)
+        data = None
+    else:
+        auth = None
+        data={
+            'UserName': username,
+            'Password': password,
+            'AuthMethod': provider_id
+        }
+
     # Opens the initial AD FS URL and follows all of the HTTP302 redirects
     authentication_url = _IDP_ENTRY_URL.format(adfs_host, provider_id)
     response = session.post(
         authentication_url,
         verify=ssl_verification_enabled,
         headers=_headers,
-        auth=_auth_provider,
-        data={
-            'UserName': username,
-            'Password': password,
-            'AuthMethod': provider_id
-        }
+        auth=auth,
+        data=data
     )
 
     logging.debug(u'''Request:
@@ -86,6 +100,8 @@ def fetch_html_encoded_roles(
     finally:
         os.umask(mask)
 
+    del auth
+    del data
     del username
     password = '###################################################'
     del password
