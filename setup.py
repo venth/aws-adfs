@@ -28,7 +28,7 @@ install_requires = [
 ]
 
 if system() == 'Windows':
-    install_requires.append('requests-negotiate-sspi')
+    install_requires.append('requests-negotiate-sspi>=0.3.4')
 
 version = versioneer.get_version()
 
