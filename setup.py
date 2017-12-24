@@ -19,11 +19,11 @@ install_requires = [
     'lxml',
     'click',
     # defined by the specific awscli version - see its setup.py
-    'botocore==1.8.15',
+    'botocore==1.8.20',
     # corresponding to botocore awscli version
     'awscli==1.14.11',
     # corresponding to botocore version
-    'boto3>=1.5.1',
+    'boto3>=1.5.6,<1.6.0',
     'requests[security]',
     'configparser',
 ]
