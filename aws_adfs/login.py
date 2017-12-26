@@ -53,6 +53,10 @@ from . import role_chooser
     is_flag=True,
     help='Read username, password from standard input separated by a newline.',
 )
+@click.option(
+    '--role-arn',
+    help='Predefined role arn to select',
+)
 def login(
         profile,
         region,
@@ -62,6 +66,7 @@ def login(
         provider_id,
         s3_signature_version,
         stdin,
+        role_arn,
 ):
     """
     Authenticates an user with active directory credentials
@@ -94,7 +99,8 @@ def login(
         del username
         password = '########################################'
         del password
-
+    if(role_arn is not None):
+        config.role_arn=role_arn
     principal_arn, config.role_arn = role_chooser.choose_role_to_assume(config, principal_roles)
     if principal_arn is None or config.role_arn is None:
         click.echo('This account does not have access to any roles', err=True)
