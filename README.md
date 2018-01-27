@@ -164,6 +164,7 @@ test -x (which aws_completer); and complete --command awsr --no-files --argument
                                       authenticated requests. Valid values: s3v4
       --stdin                         Read username, password from standard input
                                       separated by a newline.
+      --role-arn TEXT                 Predefined role arn to select
       --help                          Show this message and exit.
     ```
     ```
@@ -233,3 +234,4 @@ test -x (which aws_completer); and complete --command awsr --no-files --argument
 * [eikenb](https://github.com/eikenb) for: add login argument to accept username/password from stdin
 * [irgeek](https://github.com/irgeek) for: Add Symantec VIP Access support
 * [Brandond](https://github.com/brandond) for: Fix Negotiate auth on non-domain-joined Windows hosts
+* [giafar](https://github.com/giafar) for: Role arn as parameter
