@@ -60,6 +60,11 @@ from . import role_chooser
     help='Read username, password from standard input separated by a newline.',
 )
 @click.option(
+    '--stdout',
+    is_flag=True,
+    help='Print aws_session_token in json on stdout.',
+)
+@click.option(
     '--role-arn',
     help='Predefined role arn to select',
 )
@@ -73,6 +78,7 @@ def login(
         s3_signature_version,
         env,
         stdin,
+        stdout,
         role_arn,
 ):
     """
@@ -109,7 +115,7 @@ def login(
         password = '########################################'
         del password
     if(role_arn is not None):
-        config.role_arn=role_arn
+        config.role_arn = role_arn
     principal_arn, config.role_arn = role_chooser.choose_role_to_assume(config, principal_roles)
     if principal_arn is None or config.role_arn is None:
         click.echo('This account does not have access to any roles', err=True)
@@ -144,8 +150,21 @@ def login(
         DurationSeconds=3600,
     )
 
-    _store(config, aws_session_token)
-    _emit_summary(config, aws_session_duration)
+    if stdout:
+        _emit_json(aws_session_token)
+    else:
+        _store(config, aws_session_token)
+        _emit_summary(config, aws_session_duration)
+
+
+def _emit_json(aws_session_token):
+    click.echo(
+        u"""{{"AccessKeyId": "{}", "SecretAccessKey": "{}", "SessionToken": "{}"}}""".format(
+            aws_session_token['Credentials']['AccessKeyId'],
+            aws_session_token['Credentials']['SecretAccessKey'],
+            aws_session_token['Credentials']['SessionToken']
+        )
+    )
 
 
 def _emit_summary(config, session_duration):
