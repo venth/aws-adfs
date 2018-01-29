@@ -4,6 +4,7 @@ import boto3
 import botocore
 import click
 from botocore import client
+from os import environ
 
 from . import authenticator
 from . import prepare
@@ -49,6 +50,11 @@ from . import role_chooser
          'authenticated requests. Valid values: s3v4',
 )
 @click.option(
+    '--env',
+    is_flag=True,
+    help='Read username, password from environment variables (username and password).',
+)
+@click.option(
     '--stdin',
     is_flag=True,
     help='Read username, password from standard input separated by a newline.',
@@ -65,6 +71,7 @@ def login(
         output_format,
         provider_id,
         s3_signature_version,
+        env,
         stdin,
         role_arn,
 ):
@@ -90,6 +97,8 @@ def login(
     if assertion is None:
         if stdin:
             username, password = _stdin_user_credentials()
+        if env:
+            username, password = _env_user_credentials()
         else:
             username, password = _get_user_credentials(config)
 
@@ -171,6 +180,16 @@ def _get_user_credentials(config):
     password = click.prompt('Password', type=str, hide_input=True)
 
     return config.adfs_user, password
+
+
+def _env_user_credentials():
+    try:
+        username = environ['username']
+        password = environ['password']
+    except KeyError:
+        raise click.ClickException("Failed to read username or "
+                                   "password from env.")
+    return username, password
 
 
 def _stdin_user_credentials():
