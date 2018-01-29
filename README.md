@@ -106,6 +106,34 @@ test -x (which aws_completer); and complete --command awsr --no-files --argument
     aws --profile=specified-profile s3 ls
     ```
 
+* login to your adfs host within ansible playbook
+
+    ```
+    ---
+    - name: "Auth sts aws"
+      command: "aws-adfs login --adfs-host sts.example.com --env --stdout --role-arn arn:aws:iam::000123456789:role/ADMIN"
+      register: sts_result
+      environment:
+        - username: "{{ ansible_user }}@example.com"
+        - password: "{{ ansible_ssh_pass }}"
+    
+    - name: "Set sts facts"
+      set_fact:
+        sts: "{{ sts_result.stdout | from_json }}"
+    
+    - name: "List s3 Buckets"
+      aws_s3_bucket_facts:
+        aws_access_key: "{{ sts.AccessKeyId }}"
+        aws_secret_key: "{{ sts.SecretAccessKey }}"
+        security_token: "{{ sts.SessionToken }}"
+        region: "us-east-1"
+      register: buckets
+    
+    - name: "Print Buckets"
+      debug:
+        var: buckets
+    ```
+
 * help, help, help?
     ```
     $ aws-adfs --help
