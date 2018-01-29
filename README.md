@@ -162,6 +162,8 @@ test -x (which aws_completer); and complete --command awsr --no-files --argument
       --s3-signature-version [s3v4]   s3 signature version: Identifies the version
                                       of AWS Signature to support for
                                       authenticated requests. Valid values: s3v4
+      --env                           Read username, password from environment
+                                      variables (username and password).
       --stdin                         Read username, password from standard input
                                       separated by a newline.
       --role-arn TEXT                 Predefined role arn to select
