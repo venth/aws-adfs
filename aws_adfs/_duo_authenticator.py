@@ -33,7 +33,7 @@ def extract(html_response, ssl_verification_enabled, session):
     duo_request_signature = _duo_request_signature(html_response)
     roles_page_url = _action_url_on_validation_success(html_response)
 
-    click.echo("Sending request for authentication")
+    click.echo("Sending request for authentication", err=True)
     (sid, preferred_factor, preferred_device), initiated = _initiate_authentication(
         duo_host,
         duo_request_signature,
@@ -51,7 +51,7 @@ def extract(html_response, ssl_verification_enabled, session):
             ssl_verification_enabled
         )
 
-        click.echo("Waiting for additional authentication")
+        click.echo("Waiting for additional authentication", err=True)
         _verify_that_code_was_sent(
             duo_host,
             sid,
@@ -67,7 +67,7 @@ def extract(html_response, ssl_verification_enabled, session):
             ssl_verification_enabled
         )
 
-        click.echo('Going for aws roles')
+        click.echo('Going for aws roles', err=True)
         return _retrieve_roles_page(
             roles_page_url,
             _context(html_response),

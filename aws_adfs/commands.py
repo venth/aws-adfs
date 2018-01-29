@@ -39,7 +39,7 @@ def cli(verbose):
                  '- %(levelname)s: %(message)s'
     logging.basicConfig(
         format=log_format,
-        stream=sys.stdout,
+        stream=sys.stderr,
         level=logging.DEBUG if verbose else logging.ERROR,
     )
 

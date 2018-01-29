@@ -24,7 +24,7 @@ def extract(html_response, ssl_verification_enabled, session):
 
     vip_security_code = click.prompt(text='Enter your Symantec VIP Access code', type=str)
 
-    click.echo('Going for aws roles')
+    click.echo('Going for aws roles', err=True)
     return _retrieve_roles_page(
         roles_page_url,
         _context(html_response),
