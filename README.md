@@ -266,3 +266,4 @@ test -x (which aws_completer); and complete --command awsr --no-files --argument
 * [irgeek](https://github.com/irgeek) for: Add Symantec VIP Access support
 * [Brandond](https://github.com/brandond) for: Fix Negotiate auth on non-domain-joined Windows hosts
 * [giafar](https://github.com/giafar) for: Role arn as parameter
+* [zanettibo](https://github.com/zanettibo) for: Add support for Ansible Tower/AWX workflow authentication
