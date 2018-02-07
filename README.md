@@ -195,7 +195,8 @@ test -x (which aws_completer); and complete --command awsr --no-files --argument
       --stdin                         Read username, password from standard input
                                       separated by a newline.
       --stdout                        Print aws_session_token in json on stdout.
-      --role-arn TEXT                 Predefined role arn to select
+      --role-arn TEXT                 Predefined role arn to selects, 
+                                      e.g. aws-adfs login --role-arn arn:aws:iam::123456789012:role/YourSpecialRole
       --help                          Show this message and exit.
     ```
     ```

@@ -66,7 +66,7 @@ from . import role_chooser
 )
 @click.option(
     '--role-arn',
-    help='Predefined role arn to select',
+    help='Predefined role arn to selects, e.g. aws-adfs login --role-arn arn:aws:iam::123456789012:role/YourSpecialRole',
 )
 def login(
         profile,
