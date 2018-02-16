@@ -2,7 +2,7 @@ import configparser
 
 import click
 
-from .prepare import adfs_config
+from .prepare import create_adfs_default_config
 
 
 @click.command(name='list')
@@ -12,6 +12,7 @@ def list_profiles():
     """
 
     config = configparser.RawConfigParser()
+    adfs_config = create_adfs_default_config('default')
     config.read(adfs_config.aws_config_location)
 
     profiles = config.sections()

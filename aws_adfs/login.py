@@ -2,6 +2,8 @@ import configparser
 
 import boto3
 import botocore
+import botocore.exceptions
+import botocore.session
 import click
 from botocore import client
 from os import environ
@@ -142,6 +144,7 @@ def login(
     # Note, too, that if a SessionNotOnOrAfter attribute is also defined,
     # then the lesser value of the two attributes, SessionDuration or SessionNotOnOrAfter,
     # establishes the maximum duration of the console session.
+    _bind_aws_session_to_chosen_profile(config)
     conn = boto3.client('sts', config=client.Config(signature_version=botocore.UNSIGNED))
     aws_session_token = conn.assume_role_with_saml(
         RoleArn=config.role_arn,
@@ -155,6 +158,13 @@ def login(
     else:
         _store(config, aws_session_token)
         _emit_summary(config, aws_session_duration)
+
+
+def _bind_aws_session_to_chosen_profile(config):
+    try:
+        boto3.setup_default_session(profile_name=config.profile)
+    except botocore.exceptions.ProfileNotFound:
+        pass
 
 
 def _emit_json(aws_session_token):

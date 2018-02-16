@@ -2,6 +2,7 @@ import ast
 import configparser
 import os
 import botocore.session
+import botocore.exceptions
 from types import MethodType
 
 
@@ -34,6 +35,8 @@ def get_prepared_config(
     def default_if_none(value, default):
         return value if value is not None else default
 
+    adfs_config = create_adfs_default_config(profile='default123')
+
     adfs_config.profile = default_if_none(profile, adfs_config.profile)
 
     _create_base_aws_cli_config_files_if_needed(adfs_config)
@@ -52,11 +55,11 @@ def get_prepared_config(
     return adfs_config
 
 
-def _create_adfs_default_config():
+def create_adfs_default_config(profile):
     config = type('', (), {})()
 
     # Use botocore session API to get defaults
-    session = botocore.session.Session()
+    session = _create_aws_session(profile)
 
     # region: The default AWS region that this script will connect
     # to for all API calls
@@ -96,6 +99,24 @@ def _create_adfs_default_config():
     config.s3_signature_version = None
 
     return config
+
+
+def _create_aws_session(profile):
+
+    def _create_and_verify(profile_to_use=None):
+        session = botocore.session.Session(profile=profile_to_use)
+        session.get_config_variable('region')
+        return session
+
+    try:
+        session = _create_and_verify(profile)
+    except botocore.exceptions.ProfileNotFound:
+        try:
+            session = _create_and_verify('default')
+        except botocore.exceptions.ProfileNotFound:
+            session = _create_and_verify()
+
+    return session
 
 
 def _load_adfs_config_from_stored_profile(adfs_config, profile):
@@ -167,6 +188,3 @@ def _create_base_aws_cli_config_files_if_needed(adfs_config):
 
     if not os.path.exists(adfs_config.aws_config_location):
         touch(adfs_config.aws_config_location)
-
-
-adfs_config = _create_adfs_default_config()

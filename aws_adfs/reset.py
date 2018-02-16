@@ -2,19 +2,19 @@ import configparser
 
 import click
 
-from .prepare import adfs_config
+from .prepare import create_adfs_default_config
 
 
 @click.command()
 @click.option(
     '--profile',
-    default=lambda: adfs_config.profile,
     help='AWS cli profile that will be removed'
 )
 def reset(profile):
     """
     removes stored profile
     """
+    adfs_config = create_adfs_default_config('default')
     _clear_credentials(adfs_config, profile)
     click.echo('Profile: \'{}\' has been wiped out'.format(profile))
 
