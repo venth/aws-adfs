@@ -89,7 +89,7 @@ def _create_adfs_default_config():
     config.adfs_user = None
 
     # aws provider id. (Optional - 9/10 times it will always be urn:amazon:websevices)
-    config.provider_id = session.profile or 'urn:amazon:webservices'
+    config.provider_id = 'urn:amazon:webservices'
 
     # Note: if your bucket require CORS, it is advised that you use path style addressing
     # (which is set by default in signature version 4).
