@@ -199,10 +199,6 @@ def _print_environment_variables(aws_session_token,config):
     click.echo(
         u"""{} AWS_DEFAULT_REGION={}""".format(envcommand,config.region))
 
-    #environ['AWS_ACCESS_KEY_ID'] = aws_session_token['Credentials']['AccessKeyId']
-    #environ['AWS_SECRET_ACCESS_KEY'] = aws_session_token['Credentials']['SecretAccessKey']
-    #environ['AWS_SESSION_TOKEN'] = aws_session_token['Credentials']['SessionToken']
-
 
 def _emit_summary(config, session_duration):
     click.echo(
