@@ -7,7 +7,7 @@ import botocore.session
 import click
 from botocore import client
 from os import environ
-
+import sys
 from . import authenticator
 from . import prepare
 from . import role_chooser
@@ -67,6 +67,11 @@ from . import role_chooser
     help='Print aws_session_token in json on stdout.',
 )
 @click.option(
+    '--printenv',
+    is_flag=True,
+    help='Output commands to set AWS_* environmental variables instead of saving to file',
+)
+@click.option(
     '--role-arn',
     help='Predefined role arn to selects, e.g. aws-adfs login --role-arn arn:aws:iam::123456789012:role/YourSpecialRole',
 )
@@ -81,6 +86,7 @@ def login(
         env,
         stdin,
         stdout,
+        printenv,
         role_arn,
 ):
     """
@@ -155,6 +161,9 @@ def login(
 
     if stdout:
         _emit_json(aws_session_token)
+    elif printenv:
+        _emit_summary(config, aws_session_duration)
+        _print_environment_variables(aws_session_token,config)
     else:
         _store(config, aws_session_token)
         _emit_summary(config, aws_session_duration)
@@ -175,6 +184,24 @@ def _emit_json(aws_session_token):
             aws_session_token['Credentials']['SessionToken']
         )
     )
+
+def _print_environment_variables(aws_session_token,config):
+    envcommand = "export"
+    if(sys.platform=="win32"):
+        envcommand="set"
+
+    click.echo(
+        u"""{} AWS_ACCESS_KEY_ID={}""".format(envcommand,aws_session_token['Credentials']['AccessKeyId']))
+    click.echo(
+        u"""{} AWS_SECRET_ACCESS_KEY={}""".format(envcommand,aws_session_token['Credentials']['SecretAccessKey']))
+    click.echo(
+        u"""{} AWS_SESSION_TOKEN={}""".format(envcommand,aws_session_token['Credentials']['SessionToken']))
+    click.echo(
+        u"""{} AWS_DEFAULT_REGION={}""".format(envcommand,config.region))
+
+    #environ['AWS_ACCESS_KEY_ID'] = aws_session_token['Credentials']['AccessKeyId']
+    #environ['AWS_SECRET_ACCESS_KEY'] = aws_session_token['Credentials']['SecretAccessKey']
+    #environ['AWS_SESSION_TOKEN'] = aws_session_token['Credentials']['SessionToken']
 
 
 def _emit_summary(config, session_duration):
