@@ -184,6 +184,9 @@ test -x (which aws_completer); and complete --command awsr --no-files --argument
                                       it will be loaded from the stored
                                       configuration
       --output-format [json|text|table]
+      --printenv                      Output commands to set AWS_ACCESS_KEY_ID, 
+                                      AWS_SECRET_ACCESS_KEY, AWS_SESSION_TOKEN, AWS_DEFAULT_REGION 
+                                      environmental variables instead of saving them to the aws configuration file.',
                                       Output format used by aws cli
       --provider-id TEXT              Provider ID, e.g urn:amazon:webservices
                                       (optional)
@@ -243,6 +246,7 @@ test -x (which aws_completer); and complete --command awsr --no-files --argument
 
 * python 2.6 is not supported
 * python 3.2 is not supported
+* aws-adfs package depends on aws-cli package which requires non-current versions of botocore and boto3.
 
 
 # Credits
