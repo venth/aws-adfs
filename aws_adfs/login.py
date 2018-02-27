@@ -69,7 +69,7 @@ from . import role_chooser
 @click.option(
     '--printenv',
     is_flag=True,
-    help='Output commands to set AWS_* environmental variables instead of saving to file',
+    help='Output commands to set AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, AWS_SESSION_TOKEN, AWS_DEFAULT_REGION environmental variables instead of saving them to the aws configuration file.',
 )
 @click.option(
     '--role-arn',
