@@ -72,7 +72,7 @@ setup(
         'test': tests_require
     },
     entry_points={
-        'console_scripts': ['aws-adfs=aws_adfs.commands:cli', 'awsr=aws_adfs.aws_refreshable:decorate']
+        'console_scripts': ['aws-adfs=aws_adfs.commands:cli']
     },
     include_package_data=True,
 )

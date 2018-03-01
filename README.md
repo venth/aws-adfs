@@ -2,9 +2,7 @@
 [![PyPI version](https://badge.fury.io/py/aws-adfs.svg)](https://badge.fury.io/py/aws-adfs)
 [![Travis build](https://api.travis-ci.org/venth/aws-adfs.svg?branch=master)](https://api.travis-ci.org/venth/aws-adfs.svg?branch=master)
 
-The project provides two command line tools:
-1. `aws-adfs` to ease aws cli authentication against ADFS (multi factor authentication with active directory) and
-1. `awsr` to ease automatic re-authentication against ADFS server in case of AWS token expiration.
+The project provides command line tool - `aws-adfs` to ease aws cli authentication against ADFS (multi factor authentication with active directory) and
 
 ## `aws-adfs` command line tool
 Thanks to [Brandond](https://github.com/brandond) contribution - "Remove storage of credentials, in favor of storing ADFS session cookies"
@@ -32,25 +30,6 @@ As of version 0.2.0, this tool acts on the 'default' profile unless an alternate
 aws-adfs integrates with:
 * [duo security](https://duo.com) MFA provider
 * [Symantec VIP](https://vip.symantec.com/) MFA provider
-
-## `awsr` command line tool
-`awsr` command decorates `aws` command provided by `awscli` python package. It delegates
-the execution to `aws` command and verifies the return code. When the return code indicates that AWS token has expired
-then `aws-adfs` is invoked for an attempt of re-authentication. If re-authentication is finished with success then
-original `aws` command is invoked for the second time.
-
-### Replacing `aws` command with `awsr`
-Replacement of `aws` command with `awsr` can be done by aliasing `aws` command.
-
-* bash: `alias aws='awsr'`
-* fish: `alias aws 'awsr'`
-
-### Fish command completion
-
-Place somewhere in your config.fish
-```fish
-test -x (which aws_completer); and complete --command awsr --no-files --arguments '(begin; set --local --export COMP_SHELL fish; set --local --export COMP_LINE (commandline); aws_completer | sed \'s/ $//\'; end)'
-```
 
 # Installation
 
@@ -213,18 +192,6 @@ test -x (which aws_completer); and complete --command awsr --no-files --argument
       --help          Show this message and exit.
     ```
 
-## `awsr`
-
-* list buckets on s3
-  ```bash
-  awsr s3 ls
-  ```
-* list buckets on s3 using sandbox profile
-  ```bash
-  awsr --profile sandbox s3 ls
-  ```
-
-
 # Known issues
 * duo-security
     * Error: Cannot begin authentication process. The error response: {"message": "Unknown authentication method.", "stat": "FAIL"}
@@ -246,7 +213,6 @@ test -x (which aws_completer); and complete --command awsr --no-files --argument
 
 * python 2.6 is not supported
 * python 3.2 is not supported
-* aws-adfs package depends on aws-cli package which requires non-current versions of botocore and boto3.
 
 
 # Credits
