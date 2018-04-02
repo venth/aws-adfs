@@ -180,47 +180,52 @@ def _authentication_result(
 
 def _verify_that_code_was_sent(duo_host, sid, duo_transaction_id, session,
                                ssl_verification_enabled):
-    status_for_url = "https://{}/frame/status".format(duo_host)
-    response = session.post(
-        status_for_url,
-        verify=ssl_verification_enabled,
-        headers=_headers,
-        data={
-            'sid': sid,
-            'txid': duo_transaction_id
-        }
-    )
-    logging.debug(u'''Request:
-        * url: {}
-        * headers: {}
-    Response:
-        * status: {}
-        * headers: {}
-        * body: {}
-    '''.format(status_for_url, response.request.headers, response.status_code, response.headers,
-               response.text))
-
-    if response.status_code != 200:
-        raise click.ClickException(
-            u'Issues during sending code to the devide. The error response {}'.format(
-                response
-            )
+    while True:
+        status_for_url = "https://{}/frame/status".format(duo_host)
+        response = session.post(
+            status_for_url,
+            verify=ssl_verification_enabled,
+            headers=_headers,
+            data={
+                'sid': sid,
+                'txid': duo_transaction_id
+            }
         )
+        logging.debug(u'''Request:
+            * url: {}
+            * headers: {}
+        Response:
+            * status: {}
+            * headers: {}
+            * body: {}
+        '''.format(status_for_url, response.request.headers, response.status_code, response.headers,
+                response.text))
 
-    json_response = response.json()
-    if json_response['stat'] != 'OK':
-        raise click.ClickException(
-            u'There was an issue during sending code to the device. The error response: {}'.format(
-                response.text
+        if response.status_code != 200:
+            raise click.ClickException(
+                u'Issues during sending code to the devide. The error response {}'.format(
+                    response
+                )
             )
-        )
 
-    if json_response['response']['status_code'] != 'pushed':
-        raise click.ClickException(
-            u'There was an issue during sending code to the device. The error response: {}'.format(
-                response.text
+        json_response = response.json()
+        if json_response['stat'] != 'OK':
+            raise click.ClickException(
+                u'There was an issue during sending code to the device. The error response: {}'.format(
+                    response.text
+                )
             )
-        )
+
+        if json_response['response']['status_code'] not in ['answered', 'calling', 'pushed']:
+            raise click.ClickException(
+                u'There was an issue during sending code to the device. The error response: {}'.format(
+                    response.text
+                )
+            )
+
+        if json_response['response']['status_code'] in ['pushed', 'answered']:
+            return
+
 
 
 _tx_pattern = re.compile("(TX\|[^:]+):APP.+")
