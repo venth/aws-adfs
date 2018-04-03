@@ -20,6 +20,7 @@ class TestConfigPreparation:
         default_output_format = 'default_output_format'
         default_provider_id = 'default_provider_id'
         default_s3_signature_version = None
+        default_session_duration = 3600
 
         # when configuration is prepared for not existing profile
         adfs_config = prepare.get_prepared_config(
@@ -30,6 +31,7 @@ class TestConfigPreparation:
             default_output_format,
             default_provider_id,
             default_s3_signature_version,
+            default_session_duration,
         )
 
         # then resolved config contains defaults values
@@ -37,6 +39,7 @@ class TestConfigPreparation:
         assert default_region == adfs_config.region
         assert default_adfs_host == adfs_config.adfs_host
         assert default_output_format == adfs_config.output_format
+        assert default_session_duration == adfs_config.session_duration
 
     def test_when_the_profile_exists_but_lacks_ssl_verification_use_default_value(self):
         # given profile to read the configuration exists
@@ -56,6 +59,7 @@ class TestConfigPreparation:
         irrelevant_output_format = 'irrelevant_output_format'
         irrelevant_provider_id = 'irrelevant_provider_id'
         irrelevant_s3_signature_version = 'irrelevant_s3_signature_version'
+        irrelevant_session_duration = 'irrelevant_session_duration'
 
         # when configuration is prepared for existing profile
         adfs_config = prepare.get_prepared_config(
@@ -66,6 +70,7 @@ class TestConfigPreparation:
             irrelevant_output_format,
             irrelevant_provider_id,
             irrelevant_s3_signature_version,
+            irrelevant_session_duration,
         )
 
         # then resolved ssl verification holds the default value

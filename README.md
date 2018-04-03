@@ -179,6 +179,8 @@ aws-adfs integrates with:
       --stdout                        Print aws_session_token in json on stdout.
       --role-arn TEXT                 Predefined role arn to selects, 
                                       e.g. aws-adfs login --role-arn arn:aws:iam::123456789012:role/YourSpecialRole
+      --session-duration INTEGER      Define the amount of seconds you want to establish your STS session, 
+                                      e.g. aws-adfs login --session-duration 3600
       --help                          Show this message and exit.
     ```
     ```
