@@ -75,6 +75,11 @@ from . import role_chooser
     '--role-arn',
     help='Predefined role arn to selects, e.g. aws-adfs login --role-arn arn:aws:iam::123456789012:role/YourSpecialRole',
 )
+@click.option(
+    '--session-duration',
+    help='Define the amount of seconds you want to establish your STS session, e.g. aws-adfs login --role-arn 3600',
+    type=int,
+)
 def login(
         profile,
         region,
@@ -88,6 +93,7 @@ def login(
         stdout,
         printenv,
         role_arn,
+        session_duration,
 ):
     """
     Authenticates an user with active directory credentials
@@ -100,6 +106,7 @@ def login(
         output_format,
         provider_id,
         s3_signature_version,
+        session_duration,
     )
 
     _verification_checks(config)
@@ -156,7 +163,7 @@ def login(
         RoleArn=config.role_arn,
         PrincipalArn=principal_arn,
         SAMLAssertion=assertion,
-        DurationSeconds=3600,
+        DurationSeconds=config.session_duration,
     )
 
     if stdout:
@@ -213,6 +220,7 @@ def _emit_summary(config, session_duration):
             * ADFS Session Duration in seconds  : '{}'
             * Provider ID                       : '{}'
             * S3 Signature Version              : '{}'
+            * STS Session Duration in seconds   : '{}'
         """.format(
             config.profile,
             config.region,
@@ -223,6 +231,7 @@ def _emit_summary(config, session_duration):
             session_duration,
             config.provider_id,
             config.s3_signature_version,
+            config.session_duration,
         )
     )
 
@@ -286,6 +295,7 @@ def _store(config, aws_session_token):
         config_file.set(profile, 'adfs_config.adfs_user', config.adfs_user)
         if config.s3_signature_version:
             config_file.set(profile, 's3', '\nsignature_version = {}'.format(config.s3_signature_version))
+        config_file.set(profile, 'adfs_config.session_duration', config.session_duration)
 
     store_config(config.profile, config.aws_credentials_location, credentials_storer)
     if config.profile == 'default':

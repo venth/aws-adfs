@@ -14,6 +14,7 @@ def get_prepared_config(
         output_format,
         provider_id,
         s3_signature_version,
+        session_duration,
 ):
     """
     Prepares ADF configuration for login task.
@@ -31,6 +32,7 @@ def get_prepared_config(
     :param profile: aws cli profile
     :param provider_id: Provider ID, e.g urn:amazon:webservices (optional)
     :param s3_signature_version: s3 signature version
+    :param session_duration: AWS API/CLI session duration (default 1 hour)
     """
     def default_if_none(value, default):
         return value if value is not None else default
@@ -51,6 +53,7 @@ def get_prepared_config(
         s3_signature_version,
         adfs_config.s3_signature_version
     )
+    adfs_config.session_duration = default_if_none(session_duration, adfs_config.session_duration)
 
     return adfs_config
 
@@ -97,6 +100,9 @@ def create_adfs_default_config(profile):
     # Note: if your bucket require CORS, it is advised that you use path style addressing
     # (which is set by default in signature version 4).
     config.s3_signature_version = None
+
+    # AWS STS session duration, default is 3600 seconds
+    config.session_duration = 3600
 
     return config
 
@@ -157,6 +163,9 @@ def _load_adfs_config_from_stored_profile(adfs_config, profile):
                 'signature_version',
                 adfs_config.s3_signature_version
             )
+        adfs_config.session_duration = ast.literal_eval(config.get_or(
+            profile, 'adfs_config.session_duration',
+            int(adfs_config.session_duration)))
 
     if profile == 'default':
         load_from_config(adfs_config.aws_config_location, profile, load_config)
