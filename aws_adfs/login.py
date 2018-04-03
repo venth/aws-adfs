@@ -77,7 +77,7 @@ from . import role_chooser
 )
 @click.option(
     '--session-duration',
-    help='Define the amount of seconds you want to establish your STS session, e.g. aws-adfs login --role-arn 3600',
+    help='Define the amount of seconds you want to establish your STS session, e.g. aws-adfs login --session-duration 3600',
     type=int,
 )
 def login(

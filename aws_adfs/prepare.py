@@ -32,7 +32,7 @@ def get_prepared_config(
     :param profile: aws cli profile
     :param provider_id: Provider ID, e.g urn:amazon:webservices (optional)
     :param s3_signature_version: s3 signature version
-    :param session_duration: AWS API/CLI session duration (default 1 hour)
+    :param session_duration: AWS STS session duration (default 1 hour)
     """
     def default_if_none(value, default):
         return value if value is not None else default
