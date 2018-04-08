@@ -180,7 +180,8 @@ def _authentication_result(
 
 def _verify_that_code_was_sent(duo_host, sid, duo_transaction_id, session,
                                ssl_verification_enabled):
-    while True:
+    responses = []
+    while len(responses) < 10:
         status_for_url = "https://{}/frame/status".format(duo_host)
         response = session.post(
             status_for_url,
@@ -225,6 +226,14 @@ def _verify_that_code_was_sent(duo_host, sid, duo_transaction_id, session,
 
         if json_response['response']['status_code'] in ['pushed', 'answered']:
             return
+
+        responses.append(response.text)
+
+    raise click.ClickException(
+        u'There was an issue during sending code to the device. The responses: {}'.format(
+            responses
+        )
+    )
 
 
 
