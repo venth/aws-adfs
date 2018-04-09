@@ -241,3 +241,4 @@ aws-adfs integrates with:
 * [giafar](https://github.com/giafar) for: Role arn as parameter
 * [zanettibo](https://github.com/zanettibo) for: Add support for Ansible Tower/AWX workflow authentication
 * [anthoneous](https://github.com/anthoneous) and [KyleJamesWalker](https://github.com/KyleJamesWalker) for: add session duration flag
+* [KyleJamesWalker](https://github.com/KyleJamesWalker) for: Allow phone call authentication
