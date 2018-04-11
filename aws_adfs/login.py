@@ -62,6 +62,10 @@ from . import role_chooser
     help='Read username, password from standard input separated by a newline.',
 )
 @click.option(
+    '--authfile',
+    help='Read username, password from a local file (optional)',
+)
+@click.option(
     '--stdout',
     is_flag=True,
     help='Print aws_session_token in json on stdout.',
@@ -90,6 +94,7 @@ def login(
         s3_signature_version,
         env,
         stdin,
+        authfile,
         stdout,
         printenv,
         role_arn,
@@ -120,6 +125,8 @@ def login(
             username, password = _stdin_user_credentials()
         if env:
             username, password = _env_user_credentials()
+        if authfile:
+            username, password = _file_user_credentials(authfile)
         else:
             username, password = _get_user_credentials(config)
 
@@ -241,6 +248,14 @@ def _get_user_credentials(config):
     password = click.prompt('Password', type=str, hide_input=True)
 
     return config.adfs_user, password
+
+def _file_user_credentials(credentials_file):
+    config = configparser.ConfigParser()
+    config.read(credentials_file)
+    username = config.get("aws-adfs", "username")
+    password = config.get("aws-adfs", "password")
+
+    return username, password
 
 
 def _env_user_credentials():
