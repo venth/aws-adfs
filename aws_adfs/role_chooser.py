@@ -2,6 +2,17 @@ import collections
 import logging
 
 import click
+from future.utils import iteritems
+
+_ROLE_OPTION_FMT = '|{:<3}|{:<25}|{:<30}|{:<25}|'
+
+def _display_role_list(principal_roles):
+    click.echo(_ROLE_OPTION_FMT.format('#', 'Account', 'Role Name', 'Role ARN'))
+    idx = 0
+    for (account_name, account_roles) in iteritems(principal_roles):
+        for (arn, role_data) in iteritems(account_roles):
+            click.echo(_ROLE_OPTION_FMT.format(idx, account_name, role_data['name'], arn))
+            idx += 1
 
 
 def choose_role_to_assume(config, principal_roles):
@@ -38,14 +49,15 @@ def choose_role_to_assume(config, principal_roles):
     elif len(role_collection) > 1:
         logging.debug(u'Manual choice')
         click.echo(u'Please choose the role you would like to assume:')
-        i = 0
-        for account_name in principal_roles.keys():
-            roles = principal_roles[account_name]
-            click.echo('{}:'.format(account_name))
-            for role_arn in roles.keys():
-                role_entry = roles[role_arn]
-                click.echo('    [ {} -> {} ]: {}'.format(role_entry['name'].ljust(30, ' ' if i % 2 == 0 else '.'), i, role_arn))
-                i += 1
+        _display_role_list(principal_roles)
+        #i = 0
+        #for account_name in principal_roles.keys():
+        #    roles = principal_roles[account_name]
+        #    click.echo('{}:'.format(account_name))
+        #    for role_arn in roles.keys():
+        #        role_entry = roles[role_arn]
+        #        click.echo('    [ {} -> {} ]: {}'.format(role_entry['name'].ljust(30, ' ' if i % 2 == 0 else '.'), i, role_arn))
+        #        i += 1
 
         selected_index = click.prompt(text='Selection', type=click.IntRange(0, len(role_collection)))
 

@@ -22,6 +22,7 @@ install_requires = [
     'boto3>=1.6.2',
     'requests[security]',
     'configparser',
+    'future'
 ]
 
 if system() == 'Windows':
