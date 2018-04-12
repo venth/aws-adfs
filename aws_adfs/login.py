@@ -254,15 +254,17 @@ def _file_user_credentials(profile, authfile):
 
     try:
         if len(config.read(authfile)) == 0:
-            raise FileNotFoundError(authfile)
-    except FileNotFoundError as e:
+            raise IOError(authfile)
+    except IOError as e:
         print('Auth file ({}) not found'.format(e))
+        sys.exit(1)
 
     try:
         username = config.get(profile, "username")
         password = config.get(profile, "password")
     except configparser.NoSectionError:
         print('Auth file section header ({}) not found.'.format(profile))
+        sys.exit(1)
 
 
     return username, password
