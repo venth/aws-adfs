@@ -249,11 +249,21 @@ def _get_user_credentials(config):
 
     return config.adfs_user, password
 
-def _file_user_credentials(profile, credentials_file):
+def _file_user_credentials(profile, authfile):
     config = configparser.ConfigParser()
-    config.read(credentials_file)
-    username = config.get(profile, "username")
-    password = config.get(profile, "password")
+
+    try:
+        if len(config.read(authfile)) == 0:
+            raise FileNotFoundError(authfile)
+    except FileNotFoundError as e:
+        print('Auth file ({}) not found'.format(e))
+
+    try:
+        username = config.get(profile, "username")
+        password = config.get(profile, "password")
+    except configparser.NoSectionError:
+        print('Auth file section header ({}) not found.'.format(profile))
+
 
     return username, password
 
