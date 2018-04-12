@@ -62,6 +62,10 @@ from . import role_chooser
     help='Read username, password from standard input separated by a newline.',
 )
 @click.option(
+    '--authfile',
+    help='Read username, password from a local file (optional)',
+)
+@click.option(
     '--stdout',
     is_flag=True,
     help='Print aws_session_token in json on stdout.',
@@ -90,6 +94,7 @@ def login(
         s3_signature_version,
         env,
         stdin,
+        authfile,
         stdout,
         printenv,
         role_arn,
@@ -120,6 +125,8 @@ def login(
             username, password = _stdin_user_credentials()
         if env:
             username, password = _env_user_credentials()
+        if authfile:
+            username, password = _file_user_credentials(config.profile, authfile)
         else:
             username, password = _get_user_credentials(config)
 
@@ -241,6 +248,24 @@ def _get_user_credentials(config):
     password = click.prompt('Password', type=str, hide_input=True)
 
     return config.adfs_user, password
+
+def _file_user_credentials(profile, authfile):
+    config = configparser.ConfigParser()
+
+    try:
+        if len(config.read(authfile)) == 0:
+            raise FileNotFoundError(authfile)
+    except FileNotFoundError as e:
+        print('Auth file ({}) not found'.format(e))
+
+    try:
+        username = config.get(profile, "username")
+        password = config.get(profile, "password")
+    except configparser.NoSectionError:
+        print('Auth file section header ({}) not found.'.format(profile))
+
+
+    return username, password
 
 
 def _env_user_credentials():
