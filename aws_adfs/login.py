@@ -126,7 +126,7 @@ def login(
         if env:
             username, password = _env_user_credentials()
         if authfile:
-            username, password = _file_user_credentials(authfile)
+            username, password = _file_user_credentials(config.profile, authfile)
         else:
             username, password = _get_user_credentials(config)
 
@@ -249,11 +249,11 @@ def _get_user_credentials(config):
 
     return config.adfs_user, password
 
-def _file_user_credentials(credentials_file):
+def _file_user_credentials(profile, credentials_file):
     config = configparser.ConfigParser()
     config.read(credentials_file)
-    username = config.get("aws-adfs", "username")
-    password = config.get("aws-adfs", "password")
+    username = config.get(profile, "username")
+    password = config.get(profile, "password")
 
     return username, password
 

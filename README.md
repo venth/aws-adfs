@@ -113,6 +113,20 @@ aws-adfs integrates with:
         var: buckets
     ```
 
+* login to your adfs host by passing username and password credentials via a file
+
+    ```
+    aws-adfs login --adfs-host=your-adfs-hostname --authfile=/path/and/file/name
+    ```
+
+    Auth file should be in format of
+
+    ```
+    [profile_name]
+    username = your_username
+    password = your_password
+    ```
+
 * help, help, help?
     ```
     $ aws-adfs --help
