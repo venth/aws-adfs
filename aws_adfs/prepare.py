@@ -37,7 +37,7 @@ def get_prepared_config(
     def default_if_none(value, default):
         return value if value is not None else default
 
-    adfs_config = create_adfs_default_config(profile='default123')
+    adfs_config = create_adfs_default_config(profile='default')
 
     adfs_config.profile = default_if_none(profile, adfs_config.profile)
 
