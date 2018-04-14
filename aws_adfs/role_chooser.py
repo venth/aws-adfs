@@ -7,6 +7,7 @@ from future.utils import iteritems
 
 def _display_role_list(principal_roles):
     idx = 0
+    click.echo(u'Please choose the role you would like to assume:')
     for (account_name, account_roles) in iteritems(principal_roles):
         if account_name.startswith('Account:'):
             click.secho(account_name, fg='blue')
@@ -50,10 +51,10 @@ def choose_role_to_assume(config, principal_roles):
         chosen_role_arn = role_collection[0][1]
     elif len(role_collection) > 1:
         logging.debug(u'Manual choice')
-        click.echo(u'Please choose the role you would like to assume:')
         _display_role_list(principal_roles)
-
-        selected_index = click.prompt(text='Selection', type=click.IntRange(0, len(role_collection)))
+        prompt_text = 'Selection [{}-{}]'.format(0, len(role_collection) - 1)
+        selected_index = click.prompt(text=prompt_text,
+                                      type=click.IntRange(0, len(role_collection)))
 
         chosen_principal_arn = role_collection[selected_index][0]
         chosen_role_arn = role_collection[selected_index][1]
