@@ -18,8 +18,8 @@ tests_require = [
 install_requires = [
     'lxml',
     'click',
-    'botocore>=1.9.2',
-    'boto3>=1.6.2',
+    'botocore>=1.10.4',
+    'boto3>=1.7.4',
     'requests[security]',
     'configparser',
 ]
