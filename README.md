@@ -256,3 +256,6 @@ aws-adfs integrates with:
 * [zanettibo](https://github.com/zanettibo) for: Add support for Ansible Tower/AWX workflow authentication
 * [anthoneous](https://github.com/anthoneous) and [KyleJamesWalker](https://github.com/KyleJamesWalker) for: add session duration flag
 * [KyleJamesWalker](https://github.com/KyleJamesWalker) for: Allow phone call authentication
+* [KyleJamesWalker](https://github.com/KyleJamesWalker) for: Change default profile to default
+* [kwhitlock](https://github.com/kwhitlock) for: Feature/read username and password from file
+
