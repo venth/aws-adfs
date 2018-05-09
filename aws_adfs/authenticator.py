@@ -8,7 +8,7 @@ from . import html_roles_fetcher
 from . import roles_assertion_extractor
 
 
-def authenticate(config, username=None, password=None):
+def authenticate(config, username=None, password=None, assertfile=None):
 
     response, session = html_roles_fetcher.fetch_html_encoded_roles(
         adfs_host=config.adfs_host,
@@ -24,7 +24,7 @@ def authenticate(config, username=None, password=None):
 
     aggregated_principal_roles = None
     if response.status_code == 200:
-        extract_strategy = _strategy(response, config, session)
+        extract_strategy = _strategy(response, config, session, assertfile)
 
         principal_roles, assertion, aws_session_duration = extract_strategy()
 
@@ -95,7 +95,7 @@ def _aggregate_roles_by_account_alias(session,
     return aggregated_accounts
 
 
-def _strategy(response, config, session):
+def _strategy(response, config, session, assertfile=None):
 
     html_response = ET.fromstring(response.text, ET.HTMLParser())
 
@@ -113,8 +113,16 @@ def _strategy(response, config, session):
         def extract():
             return symantec_vip_access.extract(html_response, config.ssl_verification, session)
         return extract
+    
+    def _file_extractor():
+        def extract():
+            return roles_assertion_extractor.extract_file(assertfile)
+        return extract
 
-    chosen_strategy = _plain_extractor
+    if assertfile is None:
+        chosen_strategy = _plain_extractor
+    else:
+        chosen_strategy = _file_extractor
 
     if _is_duo_authentication(html_response):
         chosen_strategy = _duo_extractor

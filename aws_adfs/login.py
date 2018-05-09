@@ -84,6 +84,10 @@ from . import role_chooser
     help='Define the amount of seconds you want to establish your STS session, e.g. aws-adfs login --session-duration 3600',
     type=int,
 )
+@click.option(
+    '--assertfile',
+    help='Use SAML assertion response from a local file'
+)
 def login(
         profile,
         region,
@@ -99,6 +103,7 @@ def login(
         printenv,
         role_arn,
         session_duration,
+        assertfile
 ):
     """
     Authenticates an user with active directory credentials
@@ -117,7 +122,7 @@ def login(
     _verification_checks(config)
 
     # Try re-authenticating using an existing ADFS session
-    principal_roles, assertion, aws_session_duration = authenticator.authenticate(config)
+    principal_roles, assertion, aws_session_duration = authenticator.authenticate(config, assertfile=assertfile)
 
     # If we fail to get an assertion, prompt for credentials and try again
     if assertion is None:
@@ -136,6 +141,7 @@ def login(
         del username
         password = '########################################'
         del password
+
     if(role_arn is not None):
         config.role_arn = role_arn
     principal_arn, config.role_arn = role_chooser.choose_role_to_assume(config, principal_roles)
