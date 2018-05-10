@@ -258,4 +258,4 @@ aws-adfs integrates with:
 * [KyleJamesWalker](https://github.com/KyleJamesWalker) for: Allow phone call authentication
 * [KyleJamesWalker](https://github.com/KyleJamesWalker) for: Change default profile to default
 * [kwhitlock](https://github.com/kwhitlock) for: Feature/read username and password from file
-
+* [avoidik](https://github.com/avoidik) for: Workaround of Symantec VIP obfuscated form
