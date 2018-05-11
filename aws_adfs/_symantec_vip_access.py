@@ -46,9 +46,9 @@ def _retrieve_roles_page(roles_page_url, context, session, ssl_verification_enab
         verify=ssl_verification_enabled,
         allow_redirects=True,
         data={
-            'AuthMethod': 'VIPAuthenticationProviderWindowsAccountName',
+            'AuthMethod': 'SymantecVipAdapter',
             'Context': context,
-            'security_code': vip_security_code,
+            'SecurityCode': vip_security_code,
         }
     )
     logging.debug(u'''Request:
@@ -72,6 +72,6 @@ def _retrieve_roles_page(roles_page_url, context, session, ssl_verification_enab
     return roles_assertion_extractor.extract(html_response)
 
 def _action_url_on_validation_success(html_response):
-    duo_auth_method = './/form[@id="options"]'
-    element = html_response.find(duo_auth_method)
+    vip_auth_method = './/form[@id="options"]'
+    element = html_response.find(vip_auth_method)
     return element.get('action')

@@ -144,5 +144,5 @@ def _is_symantec_vip_authentication(html_response):
     element = html_response.find(auth_method)
     return (
         element is not None
-        and element.get('value') == 'VIPAuthenticationProviderWindowsAccountName'
+        and element.get('value') == 'SymantecVipAdapter'
     )
