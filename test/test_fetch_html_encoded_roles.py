@@ -89,6 +89,7 @@ class TestFetchHtmlEncodedRoles:
             provider_id=no_provider_id_provided,
             username=no_credentials_provided,
             password=no_credentials_provided,
+            disable_sspi=True
         )
 
         # then en was requested as preferred language
@@ -100,7 +101,7 @@ class TestFetchHtmlEncodedRoles:
             data={
                 'UserName': no_credentials_provided,
                 'Password': no_credentials_provided,
-                'AuthMethod': provider_id
+                'AuthMethod': 'FormsAuthentication'
             }
         )
 

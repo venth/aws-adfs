@@ -31,7 +31,8 @@ def fetch_html_encoded_roles(
         ssl_verification_enabled,
         provider_id,
         username=None,
-        password=None
+        password=None,
+        disable_sspi=False
 ):
     # Initiate session handler
     session = requests.Session()
@@ -48,7 +49,7 @@ def fetch_html_encoded_roles(
             u'The error: {}'.format(error_message)
         )
 
-    if _auth_provider:
+    if _auth_provider and disable_sspi == False:
         domain = None
         if username:
             if '@' in username: # User principal name (UPN) format
@@ -63,7 +64,7 @@ def fetch_html_encoded_roles(
         data={
             'UserName': username,
             'Password': password,
-            'AuthMethod': provider_id
+            'AuthMethod': 'FormsAuthentication'
         }
 
     # Opens the initial AD FS URL and follows all of the HTTP302 redirects

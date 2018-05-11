@@ -8,7 +8,7 @@ from . import html_roles_fetcher
 from . import roles_assertion_extractor
 
 
-def authenticate(config, username=None, password=None, assertfile=None):
+def authenticate(config, username=None, password=None, assertfile=None, disable_sspi=False):
 
     response, session = html_roles_fetcher.fetch_html_encoded_roles(
         adfs_host=config.adfs_host,
@@ -17,6 +17,7 @@ def authenticate(config, username=None, password=None, assertfile=None):
         provider_id=config.provider_id,
         username=username,
         password=password,
+        disable_sspi=disable_sspi
     )
 
     assertion = None
