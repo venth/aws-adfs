@@ -8,7 +8,7 @@ from . import html_roles_fetcher
 from . import roles_assertion_extractor
 
 
-def authenticate(config, username=None, password=None, assertfile=None):
+def authenticate(config, username=None, password=None, assertfile=None, sspi=True):
 
     response, session = html_roles_fetcher.fetch_html_encoded_roles(
         adfs_host=config.adfs_host,
@@ -17,6 +17,7 @@ def authenticate(config, username=None, password=None, assertfile=None):
         provider_id=config.provider_id,
         username=username,
         password=password,
+        sspi=sspi
     )
 
     assertion = None
@@ -88,7 +89,7 @@ def _aggregate_roles_by_account_alias(session,
 
         if account_no not in account_aliases:
             account_aliases[account_no] = account_no
-        
+
         if account_aliases[account_no] not in aggregated_accounts:
             aggregated_accounts[account_aliases[account_no]] = {}
         aggregated_accounts[account_aliases[account_no]][role_arn] = {'name': role_name, 'principal_arn': principal_arn}
@@ -113,7 +114,7 @@ def _strategy(response, config, session, assertfile=None):
         def extract():
             return symantec_vip_access.extract(html_response, config.ssl_verification, session)
         return extract
-    
+
     def _file_extractor():
         def extract():
             return roles_assertion_extractor.extract_file(assertfile)
