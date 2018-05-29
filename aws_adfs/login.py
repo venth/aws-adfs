@@ -88,6 +88,11 @@ from . import role_chooser
     '--assertfile',
     help='Use SAML assertion response from a local file'
 )
+@click.option(
+    '--sspi/--no-sspi',
+    default=True,
+    help='Whether or not to use Kerberos SSO authentication via SSPI, which may not work in some environments.',
+)
 def login(
         profile,
         region,
@@ -103,7 +108,8 @@ def login(
         printenv,
         role_arn,
         session_duration,
-        assertfile
+        assertfile,
+        sspi
 ):
     """
     Authenticates an user with active directory credentials
@@ -135,7 +141,7 @@ def login(
         else:
             username, password = _get_user_credentials(config)
 
-        principal_roles, assertion, aws_session_duration = authenticator.authenticate(config, username, password)
+        principal_roles, assertion, aws_session_duration = authenticator.authenticate(config, username, password, sspi=sspi)
 
         username = '########################################'
         del username
