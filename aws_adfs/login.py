@@ -128,9 +128,9 @@ def login(
     if assertion is None:
         if stdin:
             username, password = _stdin_user_credentials()
-        if env:
+        elif env:
             username, password = _env_user_credentials()
-        if authfile:
+        elif authfile:
             username, password = _file_user_credentials(config.profile, authfile)
         else:
             username, password = _get_user_credentials(config)
