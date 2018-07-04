@@ -30,6 +30,7 @@ As of version 0.2.0, this tool acts on the 'default' profile unless an alternate
 aws-adfs integrates with:
 * [duo security](https://duo.com) MFA provider
 * [Symantec VIP](https://vip.symantec.com/) MFA provider
+* [RSA SecurID](https://www.rsa.com/) MFA provider
 
 # Installation
 
