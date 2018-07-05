@@ -261,3 +261,5 @@ aws-adfs integrates with:
 * [kwhitlock](https://github.com/kwhitlock) for: Feature/read username and password from file
 * [avoidik](https://github.com/avoidik) for: Workaround of Symantec VIP obfuscated form
 * [leonardo-test](https://github.com/leonardo-test) for fix: The --env flag is not being called and therefore using the env parameter will not work.
+* [NotMrSteve](https://github.com/NotMrSteve) for: Add RSA SecurID MFA
+* [JLambeth](https://github.com/JLambeth) for: Added flag for disabling Kerberos SSO authentication via SSPI
