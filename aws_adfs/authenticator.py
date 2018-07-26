@@ -1,12 +1,54 @@
 import logging
 import lxml.etree as ET
 
+import click
+
 from . import account_aliases_fetcher
 from . import _duo_authenticator as duo_auth
 from . import _rsa_authenticator as rsa_auth
 from . import _symantec_vip_access as symantec_vip_access
 from . import html_roles_fetcher
 from . import roles_assertion_extractor
+
+
+def select_mfa_method(response, config, session):
+    html_response = ET.fromstring(response.text, ET.HTMLParser())
+    option_element = html_response.find('.//input[@id="optionSelection"]')
+    form_element = html_response.find('.//form[@id="options"]')
+    if option_element is None or \
+            form_element is None or \
+            form_element.get('action') is None:
+        return response, session
+
+    if not config.mfa_auth_method:
+        options = form_element.findall('.//a[@class="actionLink"]')
+        if options:
+            i = 0
+            click.echo(u'Choose your multi-factor authentication method:')
+            for element in options:
+                # The MFA page for DUO/RSA also contain a link back to change
+                # method. If this is hit, we return so the selected MFA page
+                # can be run
+                if i == 0 and options[0].get('id') == 'otherOptions':
+                    return response, session
+                click.echo('[{}]: {}'.format(i, element.text))
+                i += 1
+            selected_index = click.prompt(text='Selection',
+                                          type=click.IntRange(0, 1))
+            config.mfa_auth_method = options[selected_index].get('id')
+        else:
+            return response, session
+
+    new_response = session.post(
+        form_element.get('action'),
+        verify=config.ssl_verification,
+        allow_redirects=True,
+        data={
+            'AuthMethod': config.mfa_auth_method,
+        }
+    )
+
+    return new_response, session
 
 
 def authenticate(config, username=None, password=None, assertfile=None, sspi=True):
@@ -26,6 +68,8 @@ def authenticate(config, username=None, password=None, assertfile=None, sspi=Tru
 
     aggregated_principal_roles = None
     if response.status_code == 200:
+        response, session = select_mfa_method(response, config, session)
+
         extract_strategy = _strategy(response, config, session, assertfile)
 
         principal_roles, assertion, aws_session_duration = extract_strategy()
