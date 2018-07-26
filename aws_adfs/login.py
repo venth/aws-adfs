@@ -85,6 +85,10 @@ from . import role_chooser
     type=int,
 )
 @click.option(
+    '--mfa-auth-method',
+    help='The multifactor authentication method to use when more than one is available'
+)
+@click.option(
     '--assertfile',
     help='Use SAML assertion response from a local file'
 )
@@ -108,6 +112,7 @@ def login(
         printenv,
         role_arn,
         session_duration,
+        mfa_auth_method,
         assertfile,
         sspi
 ):
@@ -123,6 +128,7 @@ def login(
         provider_id,
         s3_signature_version,
         session_duration,
+        mfa_auth_method,
     )
 
     _verification_checks(config)
@@ -332,6 +338,7 @@ def _store(config, aws_session_token):
         config_file.set(profile, 'adfs_config.role_arn', config.role_arn)
         config_file.set(profile, 'adfs_config.adfs_host', config.adfs_host)
         config_file.set(profile, 'adfs_config.adfs_user', config.adfs_user)
+        config_file.set(profile, 'adfs_config.mfa_auth_method', config.mfa_auth_method)
         if config.s3_signature_version:
             config_file.set(profile, 's3', '\nsignature_version = {}'.format(config.s3_signature_version))
         config_file.set(profile, 'adfs_config.session_duration', config.session_duration)
