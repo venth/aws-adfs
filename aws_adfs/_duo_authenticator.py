@@ -118,6 +118,9 @@ def _retrieve_roles_page(roles_page_url, context, session, ssl_verification_enab
             )
         )
 
+    # Save session cookies to avoid having to repeat MFA on each login
+    session.cookies.save(ignore_discard=True)
+
     html_response = ET.fromstring(response.text, ET.HTMLParser())
     return roles_assertion_extractor.extract(html_response)
 
