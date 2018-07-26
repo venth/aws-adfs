@@ -15,6 +15,7 @@ def get_prepared_config(
         provider_id,
         s3_signature_version,
         session_duration,
+        mfa_auth_method,
 ):
     """
     Prepares ADF configuration for login task.
@@ -54,6 +55,7 @@ def get_prepared_config(
         adfs_config.s3_signature_version
     )
     adfs_config.session_duration = default_if_none(session_duration, adfs_config.session_duration)
+    adfs_config.mfa_auth_method = default_if_none(mfa_auth_method, adfs_config.mfa_auth_method)
 
     return adfs_config
 
@@ -104,6 +106,8 @@ def create_adfs_default_config(profile):
     # AWS STS session duration, default is 3600 seconds
     config.session_duration = int(3600)
 
+    config.mfa_auth_method = ''
+
     return config
 
 
@@ -151,6 +155,7 @@ def _load_adfs_config_from_stored_profile(adfs_config, profile):
         adfs_config.adfs_host = config.get_or(profile, 'adfs_config.adfs_host', adfs_config.adfs_host)
         adfs_config.adfs_user = config.get_or(profile, 'adfs_config.adfs_user', adfs_config.adfs_user)
         adfs_config.provider_id = config.get_or(profile, 'adfs_config.provider_id', adfs_config.provider_id)
+        adfs_config.mfa_auth_method = config.get_or(profile, 'adfs_config.mfa_auth_method', adfs_config.mfa_auth_method)
 
         adfs_config.s3_signature_version = None
         rawS3SubSection = config.get_or(profile, 's3', None)
