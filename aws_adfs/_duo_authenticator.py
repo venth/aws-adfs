@@ -211,8 +211,6 @@ def _load_duo_result_url(
                 response
             )
         )
-    print "Response JSON:"
-    print json.dumps(response.json())
     json_response = response.json()
     print 
     if json_response['stat'] != 'OK':
@@ -222,8 +220,6 @@ def _load_duo_result_url(
                 response.text
             )
         )
-    print "Response JSON:"
-    print json.dumps(response.json())
     return response
 
 def _verify_that_code_was_sent(duo_host, sid, duo_transaction_id, session,
