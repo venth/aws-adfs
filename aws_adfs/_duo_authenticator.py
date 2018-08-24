@@ -173,10 +173,58 @@ def _authentication_result(
                 response.text
             )
         )
-
-    auth_signature = response.json()['response']['cookie']
+    result_url = response.json()['response']['result_url']
+    duo_result_response = _load_duo_result_url(duo_host, result_url, sid, session, ssl_verification_enabled)
+    auth_signature = duo_result_response.json()['response']['cookie']
     return auth_signature
 
+def _load_duo_result_url(
+        duo_host,
+        result_url,
+        sid,
+        session,
+        ssl_verification_enabled
+):
+    result_for_url = 'https://{}'.format(duo_host) + result_url
+    response = session.post(
+        result_for_url,
+        verify=ssl_verification_enabled,
+        headers=_headers,
+        data={
+            'sid': sid
+        }
+    )
+    logging.debug(u'''Request:
+        * url: {}
+        * headers: {}
+    Response:
+        * status: {}
+        * headers: {}
+        * body: {}
+    '''.format(result_for_url, response.request.headers, response.status_code, response.headers,
+               response.text))
+
+    if response.status_code != 200:
+        raise click.ClickException(
+            u'Issues when following the Duo result URL after '
+            u'authentication. The error response {}'.format(
+                response
+            )
+        )
+    print "Response JSON:"
+    print json.dumps(response.json())
+    json_response = response.json()
+    print 
+    if json_response['stat'] != 'OK':
+        raise click.ClickException(
+            u'There was an issue when following the Duo result URL after authentication.'
+            u' The error response: {}'.format(
+                response.text
+            )
+        )
+    print "Response JSON:"
+    print json.dumps(response.json())
+    return response
 
 def _verify_that_code_was_sent(duo_host, sid, duo_transaction_id, session,
                                ssl_verification_enabled):
