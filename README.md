@@ -230,6 +230,7 @@ aws-adfs integrates with:
 
 * python 2.6 is not supported
 * python 3.2 is not supported
+* python 3.3 is not supported
 
 
 # Credits
@@ -263,3 +264,4 @@ aws-adfs integrates with:
 * [leonardo-test](https://github.com/leonardo-test) for fix: The --env flag is not being called and therefore using the env parameter will not work.
 * [NotMrSteve](https://github.com/NotMrSteve) for: Add RSA SecurID MFA
 * [JLambeth](https://github.com/JLambeth) for: Added flag for disabling Kerberos SSO authentication via SSPI
+* [bghinkle](https://github.com/bghinkle) for: Fix Duo API change - follow result_url and return cookie from result
