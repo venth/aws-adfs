@@ -265,3 +265,4 @@ aws-adfs integrates with:
 * [NotMrSteve](https://github.com/NotMrSteve) for: Add RSA SecurID MFA
 * [JLambeth](https://github.com/JLambeth) for: Added flag for disabling Kerberos SSO authentication via SSPI
 * [bghinkle](https://github.com/bghinkle) for: Fix Duo API change - follow result_url and return cookie from result
+* [jan-molak](https://github.com/jan-molak) for: Corrected the XPath expression to work with the latest version of AWS…
