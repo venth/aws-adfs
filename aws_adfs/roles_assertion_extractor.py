@@ -18,7 +18,7 @@ def extract(html):
             exit(-1)
 
     # Retrieve Base64-encoded SAML assertion from form SAMLResponse input field
-    for element in html.findall('.//form[@name="hiddenform"]/input[@name="SAMLResponse"]'):
+    for element in html.findall('.//input[@name="SAMLResponse"]'):
         assertion = element.get('value')
 
     # If we did not get an error, but also do not have an assertion,
