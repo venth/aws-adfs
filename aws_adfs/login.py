@@ -132,19 +132,23 @@ def login(
 
     # If we fail to get an assertion, prompt for credentials and try again
     if assertion is None:
+        password = None
+
         if stdin:
-            username, password = _stdin_user_credentials()
+            config.adfs_user, password = _stdin_user_credentials()
         elif env:
-            username, password = _env_user_credentials()
+            config.adfs_user, password = _env_user_credentials()
         elif authfile:
-            username, password = _file_user_credentials(config.profile, authfile)
-        else:
-            username, password = _get_user_credentials(config)
+            config.adfs_user, password = _file_user_credentials(config.profile, authfile)
 
-        principal_roles, assertion, aws_session_duration = authenticator.authenticate(config, username, password, sspi=sspi)
+        if not config.adfs_user:
+            config.adfs_user = click.prompt(text='Username', type=str, default=config.adfs_user)
 
-        username = '########################################'
-        del username
+        if not password:
+            password = click.prompt('Password', type=str, hide_input=True)
+
+        principal_roles, assertion, aws_session_duration = authenticator.authenticate(config, config.adfs_user, password, sspi=sspi)
+
         password = '########################################'
         del password
 
@@ -255,12 +259,6 @@ def _emit_summary(config, session_duration):
     )
 
 
-def _get_user_credentials(config):
-    config.adfs_user = click.prompt(text='Username', type=str, default=config.adfs_user)
-    password = click.prompt('Password', type=str, hide_input=True)
-
-    return config.adfs_user, password
-
 def _file_user_credentials(profile, authfile):
     config = configparser.ConfigParser()
 
@@ -269,15 +267,19 @@ def _file_user_credentials(profile, authfile):
             raise IOError(authfile)
     except IOError as e:
         print('Auth file ({}) not found'.format(e))
-        sys.exit(1)
+        return None, None
 
     try:
         username = config.get(profile, "username")
-        password = config.get(profile, "password")
-    except configparser.NoSectionError:
-        print('Auth file section header ({}) not found.'.format(profile))
-        sys.exit(1)
+    except configparser.Error:
+        print('Failed to read username from auth file, section ({}).'.format(profile))
+        username = None
 
+    try:
+        password = config.get(profile, "password")
+    except configparser.Error:
+        print('Failed to read password from auth file, section ({}).'.format(profile))
+        password = None
 
     return username, password
 
@@ -285,10 +287,16 @@ def _file_user_credentials(profile, authfile):
 def _env_user_credentials():
     try:
         username = environ['username']
+    except:
+        print('Failed to read username from env')
+        username = None
+
+    try:
         password = environ['password']
-    except KeyError:
-        raise click.ClickException("Failed to read username or "
-                                   "password from env.")
+    except:
+        print('Failed to read password from env')
+        password = None
+
     return username, password
 
 
@@ -298,8 +306,10 @@ def _stdin_user_credentials():
     try:
         username, password = stdin_lines[:2]
     except ValueError:
-        raise click.ClickException("Failed to read newline separated "
-                                   "username and password from stdin.")
+        print('Failed to read newline separated username and password from stdin.')
+        username = None
+        password = None
+
     return username, password
 
 
