@@ -266,3 +266,5 @@ aws-adfs integrates with:
 * [JLambeth](https://github.com/JLambeth) for: Added flag for disabling Kerberos SSO authentication via SSPI
 * [bghinkle](https://github.com/bghinkle) for: Fix Duo API change - follow result_url and return cookie from result
 * [jan-molak](https://github.com/jan-molak) for: Corrected the XPath expression to work with the latest version of AWS…
+* [NotMrSteve](https://github.com/NotMrSteve) for: Save duo session cookies
+* [pdecat](https://github.com/pdecat) for: Fallback on prompt if env, stdin or auth file do not provide both username and password
