@@ -5,6 +5,7 @@ from . import account_aliases_fetcher
 from . import _duo_authenticator as duo_auth
 from . import _rsa_authenticator as rsa_auth
 from . import _symantec_vip_access as symantec_vip_access
+from . import _azure_mfa_authenticator as azure_mfa_auth
 from . import html_roles_fetcher
 from . import roles_assertion_extractor
 
@@ -126,6 +127,11 @@ def _strategy(response, config, session, assertfile=None):
             return rsa_auth.extract(html_response, config.ssl_verification, session)
         return extract
 
+    def _azure_mfa_extractor():
+        def extract():
+            return azure_mfa_auth.extract(html_response, config.ssl_verification, session)
+        return extract
+
     if assertfile is None:
         chosen_strategy = _plain_extractor
     else:
@@ -137,6 +143,8 @@ def _strategy(response, config, session, assertfile=None):
         chosen_strategy = _symantec_vip_extractor
     elif _is_rsa_authentication(html_response):
         chosen_strategy = _rsa_auth_extractor
+    elif _is_azure_mfa_authentication(html_response):
+        chosen_strategy = _azure_mfa_extractor
 
     return chosen_strategy()
 
@@ -162,4 +170,12 @@ def _is_rsa_authentication(html_response):
     return (
         element is not None
         and element.get('value') == 'SecurIDAuthentication'
+    )
+
+def _is_azure_mfa_authentication(html_response):
+    auth_method = './/input[@id="authMethod"]'
+    element = html_response.find(auth_method)
+    return (
+        element is not None
+        and element.get('value') == 'AzureMfaServerAuthentication'
     )
