@@ -268,3 +268,4 @@ aws-adfs integrates with:
 * [jan-molak](https://github.com/jan-molak) for: Corrected the XPath expression to work with the latest version of AWS…
 * [NotMrSteve](https://github.com/NotMrSteve) for: Save duo session cookies
 * [pdecat](https://github.com/pdecat) for: Fallback on prompt if env, stdin or auth file do not provide both username and password
+* [0x91](https://github.com/0x91) for: Support for Azure MFA Server
