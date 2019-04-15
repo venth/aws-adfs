@@ -349,13 +349,13 @@ def _initiate_authentication(duo_host, duo_request_signature, roles_page_url, se
                response.text))
 
     if response.status_code != 200 or response.url is None:
-        return None, False
+        return (None, None, None), False
 
     o = urlparse(response.url)
     query = parse_qs(o.query)
 
     if 'sid' not in query:
-        return None, False
+        return (None, None, None), False
 
     sid = query['sid']
     html_response = ET.fromstring(response.text, ET.HTMLParser())
