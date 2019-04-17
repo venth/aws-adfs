@@ -30,6 +30,7 @@ def fetch_html_encoded_roles(
         adfs_cookie_location,
         ssl_verification_enabled,
         provider_id,
+        adfs_ca_bundle=None,
         username=None,
         password=None,
         sspi=True
@@ -67,11 +68,16 @@ def fetch_html_encoded_roles(
             'AuthMethod': provider_id
         }
 
+    if adfs_ca_bundle:
+        ssl_verification = adfs_ca_bundle
+    else:
+        ssl_verification = ssl_verification_enabled
+
     # Opens the initial AD FS URL and follows all of the HTTP302 redirects
     authentication_url = _IDP_ENTRY_URL.format(adfs_host, provider_id)
     response = session.post(
         authentication_url,
-        verify=ssl_verification_enabled,
+        verify=ssl_verification,
         headers=_headers,
         auth=auth,
         data=data

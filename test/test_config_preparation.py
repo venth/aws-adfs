@@ -15,6 +15,7 @@ class TestConfigPreparation:
 
         # and defaults are setup as follows
         default_ssl_config = True
+        default_adfs_ca_bundle = None
         default_region = 'default_region'
         default_adfs_host = 'default_adfs_host'
         default_output_format = 'default_output_format'
@@ -27,6 +28,7 @@ class TestConfigPreparation:
             not_existing_profile,
             default_region,
             default_ssl_config,
+            default_adfs_ca_bundle,
             default_adfs_host,
             default_output_format,
             default_provider_id,
@@ -36,6 +38,7 @@ class TestConfigPreparation:
 
         # then resolved config contains defaults values
         assert default_ssl_config == adfs_config.ssl_verification
+        assert default_adfs_ca_bundle == adfs_config.adfs_ca_bundle
         assert default_region == adfs_config.region
         assert default_adfs_host == adfs_config.adfs_host
         assert default_output_format == adfs_config.output_format
@@ -54,6 +57,7 @@ class TestConfigPreparation:
 
         # and defaults are setup as follows
         default_ssl_config = True
+        default_adfs_ca_bundle = None
         irrelevant_region = 'irrelevant_region'
         irrelevant_adfs_host = 'irrelevant_adfs_host'
         irrelevant_output_format = 'irrelevant_output_format'
@@ -66,6 +70,7 @@ class TestConfigPreparation:
             empty_profile,
             irrelevant_region,
             default_ssl_config,
+            default_adfs_ca_bundle,
             irrelevant_adfs_host,
             irrelevant_output_format,
             irrelevant_provider_id,
@@ -75,3 +80,4 @@ class TestConfigPreparation:
 
         # then resolved ssl verification holds the default value
         assert default_ssl_config == adfs_config.ssl_verification
+        assert default_adfs_ca_bundle == adfs_config.adfs_ca_bundle

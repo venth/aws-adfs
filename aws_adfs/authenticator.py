@@ -16,6 +16,7 @@ def authenticate(config, username=None, password=None, assertfile=None, sspi=Tru
         adfs_host=config.adfs_host,
         adfs_cookie_location=config.adfs_cookie_location,
         ssl_verification_enabled=config.ssl_verification,
+        adfs_ca_bundle=config.adfs_ca_bundle,
         provider_id=config.provider_id,
         username=username,
         password=password,
