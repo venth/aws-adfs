@@ -32,6 +32,11 @@ from . import role_chooser
          'verification is done, False should only be used for dev/test',
 )
 @click.option(
+    '--adfs-ca-bundle',
+    default=None,
+    help='Override CA bundle for SSL certificate verification for ADFS server only.',
+)
+@click.option(
     '--adfs-host',
     help='For the first time for a profile it has to be provided, next time for the same profile\n'
          'it will be loaded from the stored configuration',
@@ -97,6 +102,7 @@ def login(
         profile,
         region,
         ssl_verification,
+        adfs_ca_bundle,
         adfs_host,
         output_format,
         provider_id,
@@ -118,6 +124,7 @@ def login(
         profile,
         region,
         ssl_verification,
+        adfs_ca_bundle,
         adfs_host,
         output_format,
         provider_id,

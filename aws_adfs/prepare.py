@@ -10,6 +10,7 @@ def get_prepared_config(
         profile,
         region,
         ssl_verification,
+        adfs_ca_bundle,
         adfs_host,
         output_format,
         provider_id,
@@ -27,6 +28,8 @@ def get_prepared_config(
     :param adfs_host: fqdn of adfs host that will be used to authenticate user
     :param ssl_verification: SSL certificate verification: Whether or not strict certificate
                              verification is done, False should only be used for dev/test
+    :param adfs_ca_bundle: Override CA bundle for SSL certificate
+                           verification for ADFS server only.
     :param region: The default AWS region that this script will connect
                    to for all API calls
     :param profile: aws cli profile
@@ -45,6 +48,7 @@ def get_prepared_config(
     _load_adfs_config_from_stored_profile(adfs_config, adfs_config.profile)
 
     adfs_config.ssl_verification = default_if_none(ssl_verification, adfs_config.ssl_verification)
+    adfs_config.adfs_ca_bundle = default_if_none(adfs_ca_bundle, adfs_config.adfs_ca_bundle)
     adfs_config.region = default_if_none(region, adfs_config.region)
     adfs_config.adfs_host = default_if_none(adfs_host, adfs_config.adfs_host)
     adfs_config.output_format = default_if_none(output_format, adfs_config.output_format)
@@ -86,6 +90,9 @@ def create_adfs_default_config(profile):
     # SSL certificate verification: Whether or not strict certificate
     # verification is done, False should only be used for dev/test
     config.ssl_verification = True
+
+    # Override CA bundle for SSL certificate verification for ADFS server only.
+    config.adfs_ca_bundle = None
 
     # AWS role arn
     config.role_arn = None

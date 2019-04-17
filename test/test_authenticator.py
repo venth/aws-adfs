@@ -295,6 +295,7 @@ class TestAuthenticator:
         self.irrelevant_config.adfs_host = 'irrelevant host'
         self.irrelevant_config.adfs_cookie_location = 'irrelevant cookie location'
         self.irrelevant_config.ssl_verification = True
+        self.irrelevant_config.adfs_ca_bundle = None
         self.irrelevant_config.provider_id = 'irrelevant provider identifier'
 
         self.http_session = type('', (), {})()
