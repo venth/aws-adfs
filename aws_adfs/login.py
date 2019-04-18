@@ -341,10 +341,12 @@ def _store(config, aws_session_token):
         config_file.set(profile, 'adfs_config.ssl_verification', config.ssl_verification)
         config_file.set(profile, 'adfs_config.role_arn', config.role_arn)
         config_file.set(profile, 'adfs_config.adfs_host', config.adfs_host)
-        config_file.set(profile, 'adfs_config.adfs_user', config.adfs_user)
+        if config.adfs_user:
+            config_file.set(profile, 'adfs_config.adfs_user', config.adfs_user)
         if config.s3_signature_version:
             config_file.set(profile, 's3', '\nsignature_version = {}'.format(config.s3_signature_version))
         config_file.set(profile, 'adfs_config.session_duration', config.session_duration)
+        config_file.set(profile, 'adfs_config.provider_id', config.provider_id)
 
     store_config(config.profile, config.aws_credentials_location, credentials_storer)
     if config.profile == 'default':
