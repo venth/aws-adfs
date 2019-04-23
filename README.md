@@ -173,14 +173,13 @@ aws-adfs integrates with:
                                       strict certificate
                                       verification is done,
                                       False should only be used for dev/test
+      --adfs-ca-bundle TEXT           Override CA bundle for SSL certificate
+                                      verification for ADFS server only.
       --adfs-host TEXT                For the first time for a profile it has to
                                       be provided, next time for the same profile
                                       it will be loaded from the stored
                                       configuration
       --output-format [json|text|table]
-      --printenv                      Output commands to set AWS_ACCESS_KEY_ID, 
-                                      AWS_SECRET_ACCESS_KEY, AWS_SESSION_TOKEN, AWS_DEFAULT_REGION 
-                                      environmental variables instead of saving them to the aws configuration file.',
                                       Output format used by aws cli
       --provider-id TEXT              Provider ID, e.g urn:amazon:webservices
                                       (optional)
@@ -191,11 +190,25 @@ aws-adfs integrates with:
                                       variables (username and password).
       --stdin                         Read username, password from standard input
                                       separated by a newline.
+      --authfile TEXT                 Read username, password from a local file
+                                      (optional)
       --stdout                        Print aws_session_token in json on stdout.
-      --role-arn TEXT                 Predefined role arn to selects, 
-                                      e.g. aws-adfs login --role-arn arn:aws:iam::123456789012:role/YourSpecialRole
-      --session-duration INTEGER      Define the amount of seconds you want to establish your STS session, 
-                                      e.g. aws-adfs login --session-duration 3600
+      --printenv                      Output commands to set AWS_ACCESS_KEY_ID,
+                                      AWS_SECRET_ACCESS_KEY, AWS_SESSION_TOKEN,
+                                      AWS_DEFAULT_REGION environmental variables
+                                      instead of saving them to the aws
+                                      configuration file.
+      --role-arn TEXT                 Predefined role arn to selects, e.g. aws-
+                                      adfs login --role-arn arn:aws:iam::123456789
+                                      012:role/YourSpecialRole
+      --session-duration INTEGER      Define the amount of seconds you want to
+                                      establish your STS session, e.g. aws-adfs
+                                      login --session-duration 3600
+      --assertfile TEXT               Use SAML assertion response from a local
+                                      file
+      --sspi / --no-sspi              Whether or not to use Kerberos SSO
+                                      authentication via SSPI, which may not work
+                                      in some environments.
       --help                          Show this message and exit.
     ```
     ```
