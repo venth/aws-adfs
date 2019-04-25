@@ -283,4 +283,6 @@ aws-adfs integrates with:
 * [pdecat](https://github.com/pdecat) for: Fallback on prompt if env, stdin or auth file do not provide both username and password
 * [0x91](https://github.com/0x91) for: Support for Azure MFA Server
 * [pdecat](https://github.com/pdecat) for: Fix Duo authentication initiation failure messages 
-* [tommywo](https://github.com/tommywo) for: save provider_id config 
+* [tommywo](https://github.com/tommywo) for: save provider_id config
+* [budzejko](https://github.com/budzejko) for: Add support for adfs-ca-bundle option
+ 
