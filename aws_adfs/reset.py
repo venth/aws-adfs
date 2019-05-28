@@ -2,12 +2,14 @@ import configparser
 
 import click
 
+from os import environ
 from .prepare import create_adfs_default_config
 
 
 @click.command()
 @click.option(
     '--profile',
+    default=lambda: environ.get('AWS_DEFAULT_PROFILE', 'default'),
     help='AWS cli profile that will be removed'
 )
 def reset(profile):
