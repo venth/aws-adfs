@@ -16,6 +16,7 @@ from . import role_chooser
 @click.command()
 @click.option(
     '--profile',
+    default=lambda: environ.get('AWS_DEFAULT_PROFILE', 'default'),
     help='AWS cli profile that will be authenticated.\n'
          'After successful authentication just use:\n'
          'aws --profile <authenticated profile> <service> ...',
