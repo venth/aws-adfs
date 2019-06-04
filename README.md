@@ -285,4 +285,5 @@ aws-adfs integrates with:
 * [pdecat](https://github.com/pdecat) for: Fix Duo authentication initiation failure messages 
 * [tommywo](https://github.com/tommywo) for: save provider_id config
 * [budzejko](https://github.com/budzejko) for: Add support for adfs-ca-bundle option
+* [rinrinne](https://github.com/rinrinne) for: Respect AWS_DEFAULT_PROFILE if defined
  
