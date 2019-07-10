@@ -96,7 +96,7 @@ from . import role_chooser
 )
 @click.option(
     '--sspi/--no-sspi',
-    default=True,
+    default=None,
     help='Whether or not to use Kerberos SSO authentication via SSPI, which may not work in some environments.',
 )
 def login(
@@ -131,6 +131,7 @@ def login(
         provider_id,
         s3_signature_version,
         session_duration,
+        sspi
     )
 
     _verification_checks(config)
@@ -155,7 +156,7 @@ def login(
         if not password:
             password = click.prompt('Password', type=str, hide_input=True)
 
-        principal_roles, assertion, aws_session_duration = authenticator.authenticate(config, config.adfs_user, password, sspi=sspi)
+        principal_roles, assertion, aws_session_duration = authenticator.authenticate(config, config.adfs_user, password)
 
         password = '########################################'
         del password
@@ -263,6 +264,7 @@ def _emit_summary(config, session_duration):
             config.provider_id,
             config.s3_signature_version,
             config.session_duration,
+            config.sspi,
         )
     )
 
@@ -355,6 +357,7 @@ def _store(config, aws_session_token):
             config_file.set(profile, 's3', '\nsignature_version = {}'.format(config.s3_signature_version))
         config_file.set(profile, 'adfs_config.session_duration', config.session_duration)
         config_file.set(profile, 'adfs_config.provider_id', config.provider_id)
+        config_file.set(profile, 'adfs_config.sspi', config.sspi)
 
     store_config(config.profile, config.aws_credentials_location, credentials_storer)
     if config.profile == 'default':

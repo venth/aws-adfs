@@ -22,6 +22,7 @@ class TestConfigPreparation:
         default_provider_id = 'default_provider_id'
         default_s3_signature_version = None
         default_session_duration = 3600
+        default_sspi = False
 
         # when configuration is prepared for not existing profile
         adfs_config = prepare.get_prepared_config(
@@ -34,6 +35,7 @@ class TestConfigPreparation:
             default_provider_id,
             default_s3_signature_version,
             default_session_duration,
+            default_sspi,
         )
 
         # then resolved config contains defaults values
@@ -58,13 +60,14 @@ class TestConfigPreparation:
         # and defaults are setup as follows
         default_ssl_config = True
         default_adfs_ca_bundle = None
+        default_sspi = True
         irrelevant_region = 'irrelevant_region'
         irrelevant_adfs_host = 'irrelevant_adfs_host'
         irrelevant_output_format = 'irrelevant_output_format'
         irrelevant_provider_id = 'irrelevant_provider_id'
         irrelevant_s3_signature_version = 'irrelevant_s3_signature_version'
         irrelevant_session_duration = 'irrelevant_session_duration'
-
+        
         # when configuration is prepared for existing profile
         adfs_config = prepare.get_prepared_config(
             empty_profile,
@@ -76,8 +79,10 @@ class TestConfigPreparation:
             irrelevant_provider_id,
             irrelevant_s3_signature_version,
             irrelevant_session_duration,
+            default_sspi,            
         )
 
         # then resolved ssl verification holds the default value
         assert default_ssl_config == adfs_config.ssl_verification
         assert default_adfs_ca_bundle == adfs_config.adfs_ca_bundle
+        assert default_sspi == adfs_config.sspi

@@ -10,8 +10,7 @@ from . import html_roles_fetcher
 from . import roles_assertion_extractor
 
 
-def authenticate(config, username=None, password=None, assertfile=None, sspi=True):
-
+def authenticate(config, username=None, password=None, assertfile=None):
     response, session = html_roles_fetcher.fetch_html_encoded_roles(
         adfs_host=config.adfs_host,
         adfs_cookie_location=config.adfs_cookie_location,
@@ -20,7 +19,7 @@ def authenticate(config, username=None, password=None, assertfile=None, sspi=Tru
         provider_id=config.provider_id,
         username=username,
         password=password,
-        sspi=sspi
+        sspi=config.sspi
     )
 
     assertion = None
@@ -160,10 +159,14 @@ def _is_duo_authentication(html_response):
 def _is_symantec_vip_authentication(html_response):
     auth_method = './/input[@id="authMethod"]'
     element = html_response.find(auth_method)
-    return (
+    if (
         element is not None
         and element.get('value') == 'SymantecVipAdapter'
-    )
+    ) or (
+        element is not None
+        and element.get('value') == 'VIPAuthenticationProviderWindowsAccountName'
+    ):
+        return True
 
 def _is_rsa_authentication(html_response):
     auth_method = './/input[@id="authMethod"]'
