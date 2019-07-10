@@ -9,6 +9,7 @@ class TestFetchHtmlEncodedRoles:
         # given adfs host which doesn't care that ssl is enabled or not
         adfs_host = 'adfs.awsome.com'
         ssl_verification_is_irrelevant = False
+        sspi_is_irrelevant=False
 
         requests = html_roles_fetcher.requests = mock.Mock()
 
@@ -42,6 +43,7 @@ class TestFetchHtmlEncodedRoles:
             provider_id=no_provider_id_provided,
             username=no_credentials_provided,
             password=no_credentials_provided,
+            sspi=sspi_is_irrelevant
         )
 
         # then returned html is empty
@@ -53,6 +55,7 @@ class TestFetchHtmlEncodedRoles:
         adfs_host = 'adfs.awsome.com'
         provider_id = None
         ssl_verification_is_irrelevant = False
+        sspi_is_irrelevant = False
 
         requests = html_roles_fetcher.requests = mock.Mock()
 
@@ -89,6 +92,7 @@ class TestFetchHtmlEncodedRoles:
             provider_id=no_provider_id_provided,
             username=no_credentials_provided,
             password=no_credentials_provided,
+            sspi=sspi_is_irrelevant
         )
 
         # then en was requested as preferred language

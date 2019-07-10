@@ -26,6 +26,7 @@ def extract(html_response, ssl_verification_enabled, session):
 
     click.echo('Going for aws roles', err=True)
     return _retrieve_roles_page(
+        html_response,
         roles_page_url,
         _context(html_response),
         session,
@@ -39,17 +40,30 @@ def _context(html_response):
     return element.get('value')
 
 
-def _retrieve_roles_page(roles_page_url, context, session, ssl_verification_enabled,
+def _retrieve_roles_page(html_response, roles_page_url, context, session, ssl_verification_enabled,
                          vip_security_code):
+    post_data={
+            'Context': context,
+        }
+
+    auth_query = './/input[@id="authMethod"]'
+    element = html_response.find(auth_query)
+    authMethod = element.get('value')
+
+    if authMethod == 'VIPAuthenticationProviderWindowsAccountName':
+        post_data.update({
+            'AuthMethod': 'VIPAuthenticationProviderWindowsAccountName',
+            'security_code': vip_security_code})
+    else:
+        post_data.update({
+            'AuthMethod': 'SymantecVipAdapter',
+            'SecurityCode': vip_security_code})
+
     response = session.post(
         roles_page_url,
         verify=ssl_verification_enabled,
         allow_redirects=True,
-        data={
-            'AuthMethod': 'SymantecVipAdapter',
-            'Context': context,
-            'SecurityCode': vip_security_code,
-        }
+        data=post_data
     )
     logging.debug(u'''Request:
             * url: {}

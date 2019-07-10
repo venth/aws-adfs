@@ -16,6 +16,7 @@ def get_prepared_config(
         provider_id,
         s3_signature_version,
         session_duration,
+        sspi,
 ):
     """
     Prepares ADF configuration for login task.
@@ -36,6 +37,7 @@ def get_prepared_config(
     :param provider_id: Provider ID, e.g urn:amazon:webservices (optional)
     :param s3_signature_version: s3 signature version
     :param session_duration: AWS STS session duration (default 1 hour)
+    :param sspi: Whether SSPI is enabled
     """
     def default_if_none(value, default):
         return value if value is not None else default
@@ -46,7 +48,6 @@ def get_prepared_config(
 
     _create_base_aws_cli_config_files_if_needed(adfs_config)
     _load_adfs_config_from_stored_profile(adfs_config, adfs_config.profile)
-
     adfs_config.ssl_verification = default_if_none(ssl_verification, adfs_config.ssl_verification)
     adfs_config.adfs_ca_bundle = default_if_none(adfs_ca_bundle, adfs_config.adfs_ca_bundle)
     adfs_config.region = default_if_none(region, adfs_config.region)
@@ -58,6 +59,7 @@ def get_prepared_config(
         adfs_config.s3_signature_version
     )
     adfs_config.session_duration = default_if_none(session_duration, adfs_config.session_duration)
+    adfs_config.sspi = default_if_none(sspi, adfs_config.sspi)
 
     return adfs_config
 
@@ -110,6 +112,9 @@ def create_adfs_default_config(profile):
 
     # AWS STS session duration, default is 3600 seconds
     config.session_duration = int(3600)
+
+    # Whether SSPI is enabled
+    config.sspi = True
 
     return config
 
@@ -173,6 +178,9 @@ def _load_adfs_config_from_stored_profile(adfs_config, profile):
         adfs_config.session_duration = config.get_or(
             profile, 'adfs_config.session_duration',
             adfs_config.session_duration)
+        adfs_config.sspi = ast.literal_eval(config.get_or(
+            profile, 'adfs_config.sspi',
+            str(adfs_config.sspi)))
 
     if profile == 'default':
         load_from_config(adfs_config.aws_config_location, profile, load_config)

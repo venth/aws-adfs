@@ -11,13 +11,9 @@ except ImportError:
 _auth_provider = None
 _headers = {'Accept-Language': 'en'}
 
-# Support for Kerberos SSO on Windows via requests_negotiate_sspi
-# also requires tricking the server into thinking we're using IE
-# so that it servers up a redirect to the IWA page.
 try:
     from requests_negotiate_sspi import HttpNegotiateAuth
     _auth_provider = HttpNegotiateAuth
-    _headers['User-Agent'] = 'Mozilla/5.0 (Windows NT 6.1; WOW64; Trident/7.0; rv:11.0) like Gecko'
 except ImportError:
     pass
 
@@ -35,6 +31,13 @@ def fetch_html_encoded_roles(
         password=None,
         sspi=True
 ):
+
+    # Support for Kerberos SSO on Windows via requests_negotiate_sspi
+    # also requires tricking the server into thinking we're using IEq
+    # so that it servers up a redirect to the IWA page.
+    if sspi:
+        _headers['User-Agent'] = 'Mozilla/5.0 (Windows NT 6.1; WOW64; Trident/7.0; rv:11.0) like Gecko'
+
     # Initiate session handler
     session = requests.Session()
     session.cookies = cookielib.LWPCookieJar(filename=adfs_cookie_location)
