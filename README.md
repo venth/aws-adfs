@@ -286,4 +286,6 @@ aws-adfs integrates with:
 * [tommywo](https://github.com/tommywo) for: save provider_id config
 * [budzejko](https://github.com/budzejko) for: Add support for adfs-ca-bundle option
 * [rinrinne](https://github.com/rinrinne) for: Respect AWS_DEFAULT_PROFILE if defined
+* [mjernsell](https://github.com/mjernsell) for: Add support for AzureMfaAuthentication
+* [kfattig](https://github.com/kfattig) for: Handle sspi like other config options
  
