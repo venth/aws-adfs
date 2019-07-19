@@ -282,7 +282,7 @@ def _verify_authentication_status(duo_host, sid, duo_transaction_id, session,
             )
 
         if json_response['response']['status_code'] in ['pushed', 'answered', 'allow']:
-            return
+            return duo_transaction_id
 
         if json_response['response']['status_code'] == 'u2f_sent' and len(json_response['response']['u2f_sign_request']) > 0:
             u2f_sign_requests = json_response['response']['u2f_sign_request']
