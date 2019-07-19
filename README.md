@@ -28,7 +28,7 @@ As of version 0.2.0, this tool acts on the 'default' profile unless an alternate
 ### MFA integration
 
 aws-adfs integrates with:
-* [duo security](https://duo.com) MFA provider
+* [duo security](https://duo.com) MFA provider with support for FIDO U2F hardware authenticator
 * [Symantec VIP](https://vip.symantec.com/) MFA provider
 * [RSA SecurID](https://www.rsa.com/) MFA provider
 

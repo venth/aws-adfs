@@ -42,7 +42,13 @@ def cli(verbose):
         stream=sys.stderr,
         level=logging.DEBUG if verbose else logging.ERROR,
     )
-
+    if verbose:
+        try:
+            import http.client as http_client
+        except ImportError:
+            # Python 2
+            import httplib as http_client
+        http_client.HTTPConnection.debuglevel = 1
 
 cli.add_command(list_profiles.list_profiles)
 cli.add_command(login.login)

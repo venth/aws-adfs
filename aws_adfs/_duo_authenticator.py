@@ -1,8 +1,18 @@
 import click
 import lxml.etree as ET
 
+from fido2.client import ClientData, ClientError, U2fClient
+from fido2.hid import CtapHidDevice
+try:
+    from fido2.pcsc import CtapPcscDevice
+except ImportError:
+    CtapPcscDevice = None
+
 import logging
+import json
 import re
+
+from threading import Event
 
 try:
     # Python 3
@@ -34,7 +44,7 @@ def extract(html_response, ssl_verification_enabled, session):
     roles_page_url = _action_url_on_validation_success(html_response)
 
     click.echo("Sending request for authentication", err=True)
-    (sid, preferred_factor, preferred_device), initiated = _initiate_authentication(
+    (sid, preferred_factor, preferred_device, u2f_supported), initiated = _initiate_authentication(
         duo_host,
         duo_request_signature,
         roles_page_url,
@@ -47,12 +57,13 @@ def extract(html_response, ssl_verification_enabled, session):
             sid,
             preferred_factor,
             preferred_device,
+            u2f_supported,
             session,
             ssl_verification_enabled
         )
 
         click.echo("Waiting for additional authentication", err=True)
-        _verify_that_code_was_sent(
+        transaction_id =_verify_authentication_status(
             duo_host,
             sid,
             transaction_id,
@@ -224,8 +235,8 @@ def _load_duo_result_url(
         )
     return response
 
-def _verify_that_code_was_sent(duo_host, sid, duo_transaction_id, session,
-                               ssl_verification_enabled):
+def _verify_authentication_status(duo_host, sid, duo_transaction_id, session,
+                                  ssl_verification_enabled):
     responses = []
     while len(responses) < 10:
         status_for_url = "https://{}/frame/status".format(duo_host)
@@ -250,7 +261,7 @@ def _verify_that_code_was_sent(duo_host, sid, duo_transaction_id, session,
 
         if response.status_code != 200:
             raise click.ClickException(
-                u'Issues during sending code to the devide. The error response {}'.format(
+                u'Issues during second factor verification. The error response {}'.format(
                     response
                 )
             )
@@ -258,29 +269,55 @@ def _verify_that_code_was_sent(duo_host, sid, duo_transaction_id, session,
         json_response = response.json()
         if json_response['stat'] != 'OK':
             raise click.ClickException(
-                u'There was an issue during sending code to the device. The error response: {}'.format(
+                u'There was an issue during second factor verification. The error response: {}'.format(
                     response.text
                 )
             )
 
-        if json_response['response']['status_code'] not in ['answered', 'calling', 'pushed']:
+        if json_response['response']['status_code'] not in ['answered', 'calling', 'pushed', 'u2f_sent']:
             raise click.ClickException(
-                u'There was an issue during sending code to the device. The error response: {}'.format(
+                u'There was an issue during second factor verification. The error response: {}'.format(
                     response.text
                 )
             )
 
-        if json_response['response']['status_code'] in ['pushed', 'answered']:
+        if json_response['response']['status_code'] in ['pushed', 'answered', 'allow']:
             return
+
+        if json_response['response']['status_code'] == 'u2f_sent' and len(json_response['response']['u2f_sign_request']) > 0:
+            u2f_sign_requests = json_response['response']['u2f_sign_request']
+
+            # appId, challenge and session is the same for all requests, get them from the first
+            u2f_app_id = u2f_sign_requests[0]['appId']
+            u2f_challenge = u2f_sign_requests[0]['challenge']
+            u2f_session_id = u2f_sign_requests[0]['sessionId']
+
+            devices = CtapHidDevice.list_devices()
+            if CtapPcscDevice:
+                devices.append(CtapPcscDevice.list_devices())
+            for device in devices:
+                client = U2fClient(device, u2f_app_id)
+                event = Event()
+                click.echo("Activate your FIDO U2F authenticator now...", err=True)
+                u2f_response = client.sign(
+                    u2f_app_id,
+                    u2f_challenge,
+                    u2f_sign_requests,
+                    timeout=event
+                )
+                u2f_response['sessionId'] = u2f_session_id
+                transaction_id = _submit_u2f_response(duo_host, sid, u2f_response, session, ssl_verification_enabled)
+                device.close()
+                return transaction_id
+            raise click.ClickException("No FIDO U2F authenticator is eligible.")
 
         responses.append(response.text)
 
     raise click.ClickException(
-        u'There was an issue during sending code to the device. The responses: {}'.format(
+        u'There was an issue during second factor verification. The responses: {}'.format(
             responses
         )
     )
-
 
 
 _tx_pattern = re.compile("(TX\|[^:]+):APP.+")
@@ -302,20 +339,12 @@ def _app(request_signature):
 def _initiate_authentication(duo_host, duo_request_signature, roles_page_url, session,
                              ssl_verification_enabled):
     prompt_for_url = 'https://{}/frame/web/v1/auth'.format(duo_host)
-    parent = "{}{}".format(
-        roles_page_url,
-        "&java_version="
-        "&flash_version="
-        "&screen_resolution_width=1280"
-        "&screen_resolution_height=800"
-        "&color_depth=24"
-    )
     response = session.post(
         prompt_for_url,
         verify=ssl_verification_enabled,
         headers={
             'Host': duo_host,
-            'User-Agent': "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.12; rv:52.0) Gecko/20100101 Firefox/52.0",
+            'User-Agent': "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/75.0.3770.100 Safari/537.36",
             'Accept': "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
             'Accept-Language': "en-US,en;q=0.5",
             'Accept-Encoding': "gzip, deflate, br",
@@ -326,13 +355,13 @@ def _initiate_authentication(duo_host, duo_request_signature, roles_page_url, se
         allow_redirects=True,
         params={
             'tx': _tx(duo_request_signature),
-            'parent': parent,
+            'parent': roles_page_url,
             'v': '2.3',
         },
         data={
-            'parent': parent,
+            'parent': roles_page_url,
             'java_version': '',
-            'flash_version': '22.0.0.209',
+            'flash_version': '',
             'screen_resolution_width': '1280',
             'screen_resolution_height': '800',
             'color_depth': '24',
@@ -361,7 +390,8 @@ def _initiate_authentication(duo_host, duo_request_signature, roles_page_url, se
     html_response = ET.fromstring(response.text, ET.HTMLParser())
     preferred_factor = _preferred_factor(html_response)
     preferred_device = _preferred_device(html_response)
-    return (sid, preferred_factor, preferred_device), True
+    u2f_supported = _u2f_supported(html_response)
+    return (sid, preferred_factor, preferred_device, u2f_supported), True
 
 
 def _preferred_factor(html_response):
@@ -376,20 +406,39 @@ def _preferred_device(html_response):
     return element.get('value')
 
 
-def _begin_authentication_transaction(duo_host, sid, preferred_factor, preferred_device, session,
+def _u2f_supported(html_response):
+    u2f_supported_query = './/input[@name="factor"][@value="U2F Token"]'
+    elements = html_response.findall(u2f_supported_query)
+    return len(elements) > 0
+
+
+def _begin_authentication_transaction(duo_host, sid, preferred_factor, preferred_device, u2f_supported, session,
                                       ssl_verification_enabled):
     prompt_for_url = "https://{}/frame/prompt".format(duo_host)
-    response = session.post(
-        prompt_for_url,
-        verify=ssl_verification_enabled,
-        headers=_headers,
-        data={
-            'sid': sid,
-            'factor': preferred_factor,
-            'device': preferred_device,
-            'out_of_date': ''
-        }
-    )
+    if u2f_supported:
+        response = session.post(
+            prompt_for_url,
+            verify=ssl_verification_enabled,
+            headers=_headers,
+            data={
+                'sid': sid,
+                'factor': "U2F Token",
+                'device': 'u2f_token',
+                'post_auth_action': ''
+            }
+        )
+    else:
+        response = session.post(
+            prompt_for_url,
+            verify=ssl_verification_enabled,
+            headers=_headers,
+            data={
+                'sid': sid,
+                'factor': preferred_factor,
+                'device': preferred_device,
+                'out_of_date': ''
+            }
+        )
     logging.debug(u'''Request:
         * url: {}
         * headers: {}
@@ -411,6 +460,45 @@ def _begin_authentication_transaction(duo_host, sid, preferred_factor, preferred
     if json_response['stat'] != 'OK':
         raise click.ClickException(
             u'Cannot begin authentication process. The error response: {}'.format(response.text)
+        )
+
+    return json_response['response']['txid']
+
+
+def _submit_u2f_response(duo_host, sid, u2f_response, session, ssl_verification_enabled):
+    prompt_for_url = "https://{}/frame/prompt".format(duo_host)
+    response = session.post(
+        prompt_for_url,
+        verify=ssl_verification_enabled,
+        headers=_headers,
+        data={
+            'sid': sid,
+            'device': 'u2f_token',
+            'factor': "u2f_finish",
+            'response_data': json.dumps(u2f_response),
+        }
+    )
+    logging.debug(u'''Request:
+        * url: {}
+        * headers: {}
+    Response:
+        * status: {}
+        * headers: {}
+        * body: {}
+    '''.format(prompt_for_url, response.request.headers, response.status_code, response.headers,
+               response.text))
+
+    if response.status_code != 200:
+        raise click.ClickException(
+            u'Issues during submitting U2F response for the authentication process. The error response {}'.format(
+                response
+            )
+        )
+
+    json_response = response.json()
+    if json_response['stat'] != 'OK':
+        raise click.ClickException(
+            u'Cannot complete authentication process. The error response: {}'.format(response.text)
         )
 
     return json_response['response']['txid']
