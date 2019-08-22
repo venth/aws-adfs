@@ -40,7 +40,12 @@ def fetch_html_encoded_roles(
 
     # Initiate session handler
     session = requests.Session()
-    session.cookies = cookielib.LWPCookieJar(filename=adfs_cookie_location)
+
+    # LWPCookieJar has an issue on Windows when cookies have an 'expires' date too far in the future and they are converted from timestamp to datetime.
+    # MozillaCookieJar works because it does not convert the timestamps.
+    # Duo uses 253402300799 for its cookies which translates into 9999-12-31T23:59:59Z.
+    # Windows 64bit maximum date is 3000-12-31T23:59:59Z, and 32bit is 2038-01-18T23:59:59Z.
+    session.cookies = cookielib.MozillaCookieJar(filename=adfs_cookie_location)
 
     try:
         have_creds = (username and password) or _auth_provider
