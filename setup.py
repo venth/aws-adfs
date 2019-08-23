@@ -16,7 +16,8 @@ tests_require = [
 ]
 
 install_requires = [
-    'lxml',
+    'lxml<4.4.0;python_version<"3.5"',
+    'lxml;python_version>="3.5"',
     'click',
     'botocore>=1.12.6',
     'boto3>=1.9.6',
