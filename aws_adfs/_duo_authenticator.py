@@ -12,7 +12,7 @@ import logging
 import json
 import re
 
-from threading import Event
+from threading import Event, Thread
 
 try:
     # Python 3
@@ -295,21 +295,27 @@ def _verify_authentication_status(duo_host, sid, duo_transaction_id, session,
             devices = CtapHidDevice.list_devices()
             if CtapPcscDevice:
                 devices.append(CtapPcscDevice.list_devices())
+
+            if not devices:
+                raise click.ClickException("No FIDO U2F authenticator is eligible.")
+
+            threads = []
+            cancel = Event()
+            u2f_response = {
+                "sessionId": u2f_session_id
+            }
             for device in devices:
-                client = U2fClient(device, u2f_app_id)
-                event = Event()
-                click.echo("Activate your FIDO U2F authenticator now...", err=True)
-                u2f_response = client.sign(
-                    u2f_app_id,
-                    u2f_challenge,
-                    u2f_sign_requests,
-                    timeout=event
-                )
-                u2f_response['sessionId'] = u2f_session_id
-                transaction_id = _submit_u2f_response(duo_host, sid, u2f_response, session, ssl_verification_enabled)
-                device.close()
-                return transaction_id
-            raise click.ClickException("No FIDO U2F authenticator is eligible.")
+                t = Thread(target=_u2f_sign, args=(device, u2f_app_id, u2f_challenge, u2f_sign_requests, u2f_response, cancel))
+                threads.append(t)
+                t.start()
+
+            for t in threads:
+                t.join()
+
+            if not cancel.is_set():
+                raise click.ClickException("FIDO U2F authentication timed out.")
+
+            return _submit_u2f_response(duo_host, sid, u2f_response, session, ssl_verification_enabled)
 
         responses.append(response.text)
 
@@ -318,6 +324,27 @@ def _verify_authentication_status(duo_host, sid, duo_transaction_id, session,
             responses
         )
     )
+
+
+def _u2f_sign(device, u2f_app_id, u2f_challenge, u2f_sign_requests, u2f_response, cancel):
+    click.echo("Activate your FIDO U2F authenticator now: '{}'".format(device), err=True)
+    client = U2fClient(device, u2f_app_id)
+    try:
+        u2f_response.update(
+                client.sign(
+                u2f_app_id,
+                u2f_challenge,
+                u2f_sign_requests,
+                timeout=cancel
+            )
+        )
+        click.echo("Got response from FIDO U2F authenticator: '{}'".format(device), err=True)
+    except:
+        pass
+    finally:
+        device.close()
+
+    cancel.set()
 
 
 _tx_pattern = re.compile("(TX\|[^:]+):APP.+")
