@@ -59,9 +59,8 @@ def extract(html_response, ssl_verification_enabled, session):
         rq = queue.Queue()
         if u2f_supported:
             # Trigger U2F authentication
-            Thread(
+            t = Thread(
                 target=_perform_authentication_transaction,
-                daemon = True,
                 args=(
                     duo_host,
                     sid,
@@ -72,12 +71,13 @@ def extract(html_response, ssl_verification_enabled, session):
                     ssl_verification_enabled,
                     rq,
                 )
-            ).start()
+            )
+            t.daemon = True
+            t.start()
 
         # Always trigger default authentication (call or push) concurrently to U2F
-        Thread(
+        t = Thread(
             target=_perform_authentication_transaction,
-            daemon = True,
             args=(
                 duo_host,
                 sid,
@@ -88,7 +88,9 @@ def extract(html_response, ssl_verification_enabled, session):
                 ssl_verification_enabled,
                 rq,
             )
-        ).start()
+        )
+        t.daemon = True
+        t.start()
 
         # Wait for first response
         auth_signature = rq.get()
@@ -352,7 +354,6 @@ def _verify_authentication_status(duo_host, sid, duo_transaction_id, session,
             for device in devices:
                 t = Thread(
                     target=_u2f_sign,
-                    daemon = True,
                     args=(
                         device,
                         u2f_app_id,
@@ -367,6 +368,7 @@ def _verify_authentication_status(duo_host, sid, duo_transaction_id, session,
                         rq
                     )
                 )
+                t.daemon = True
                 threads.append(t)
                 t.start()
 
