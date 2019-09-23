@@ -59,6 +59,32 @@ aws-adfs integrates with:
     deactivate
     ```
 
+* Windows 10
+
+   - Install latest supported Visual C++ downloads from Microsoft for Visual Studio 2015, 2017 and 2019:
+      - https://support.microsoft.com/en-us/help/2977003/the-latest-supported-visual-c-downloads
+      - https://aka.ms/vs/16/release/vc_redist.x64.exe
+    - Install Python 3.7 from Microsoft Store:
+      - https://www.microsoft.com/en-us/p/python-37/9nj46sx7x90p
+    - Start PowerShell as Administrator
+    - Go to `C:\Program Files`:
+        ```
+        C:
+        cd 'C:\Program Files\'
+        ```
+    - Create virtual env:
+      ```
+      python3 -m venv aws-adfs
+      ```
+    - Install `aws-adfs`:
+      ```
+      & 'C:\Program Files\aws-adfs\Scripts\pip' install aws-adfs
+      ```
+    - Run it:
+      ```
+      & 'C:\Program Files\aws-adfs\Scripts\aws-adfs' login --adfs-host=your-adfs-hostname
+      ```
+
 # Examples of usage
 
 ## `aws-adfs`
@@ -224,9 +250,26 @@ aws-adfs integrates with:
 
 # Known issues
 * duo-security
-    * Error: Cannot begin authentication process. The error response: {"message": "Unknown authentication method.", "stat": "FAIL"}
-    
-        Please setup preferred auth method in duo-sercurity settings (settings' -> 'My Settings & Devices').
+
+    `Error: Cannot begin authentication process. The error response: {"message": "Unknown authentication method.", "stat": "FAIL"}`
+
+    Please setup preferred auth method in duo-security settings (settings' -> 'My Settings & Devices').
+
+* USB FIDO U2F does not work in Windows Subsystem for Linux (WSL)
+
+    `OSError: [Errno 2] No such file or directory: '/sys/class/hidraw'`
+
+    USB devices are not accessible in WSL, please install and run `aws-adfs` on the Windows 10 host and then access the credentials in WSL from the filesystem. Example:
+
+    ```
+    export AWS_CONFIG_FILE=/mnt/c/Users/username/.aws/config
+    export AWS_SHARED_CREDENTIALS_FILE=/mnt/c/Users/username/.aws/credentials
+    ```
+
+*  FIDO U2F devices are not detected on Windows 10 build 1903 or newer
+
+    Running `aws-adfs` as Administrator is required since Windows 10 build 1903 to access FIDO U2F devices, cf. https://github.com/Yubico/python-fido2/issues/55)
+
 * in cases of trouble with lxml please install
 
   ```
