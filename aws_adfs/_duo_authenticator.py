@@ -17,9 +17,11 @@ from threading import Event, Thread
 try:
     # Python 3
     from urllib.parse import urlparse, parse_qs
+    import queue
 except ImportError:
     # Python 2
     from urlparse import urlparse, parse_qs
+    import Queue as queue
 
 from . import roles_assertion_extractor
 
@@ -52,31 +54,44 @@ def extract(html_response, ssl_verification_enabled, session):
         ssl_verification_enabled
     )
     if initiated:
-        transaction_id = _begin_authentication_transaction(
-            duo_host,
-            sid,
-            preferred_factor,
-            preferred_device,
-            u2f_supported,
-            session,
-            ssl_verification_enabled
-        )
-
         click.echo("Waiting for additional authentication", err=True)
-        transaction_id =_verify_authentication_status(
-            duo_host,
-            sid,
-            transaction_id,
-            session,
-            ssl_verification_enabled
-        )
-        auth_signature = _authentication_result(
-            duo_host,
-            sid,
-            transaction_id,
-            session,
-            ssl_verification_enabled
-        )
+
+        rq = queue.Queue()
+        if u2f_supported:
+            # Trigger U2F authentication
+            Thread(
+                target=_perform_authentication_transaction,
+                daemon = True,
+                args=(
+                    duo_host,
+                    sid,
+                    preferred_factor,
+                    preferred_device,
+                    True,
+                    session,
+                    ssl_verification_enabled,
+                    rq,
+                )
+            ).start()
+
+        # Always trigger default authentication (call or push) concurrently to U2F
+        Thread(
+            target=_perform_authentication_transaction,
+            daemon = True,
+            args=(
+                duo_host,
+                sid,
+                preferred_factor,
+                preferred_device,
+                False,
+                session,
+                ssl_verification_enabled,
+                rq,
+            )
+        ).start()
+
+        # Wait for first response
+        auth_signature = rq.get()
 
         click.echo('Going for aws roles', err=True)
         return _retrieve_roles_page(
@@ -88,6 +103,35 @@ def extract(html_response, ssl_verification_enabled, session):
         )
 
     return None, None, None
+
+
+def _perform_authentication_transaction(duo_host, sid, preferred_factor, preferred_device, use_u2f, session, ssl_verification_enabled, rq):
+    transaction_id = _begin_authentication_transaction(
+        duo_host,
+        sid,
+        preferred_factor,
+        preferred_device,
+        use_u2f,
+        session,
+        ssl_verification_enabled
+    )
+
+    transaction_id =_verify_authentication_status(
+        duo_host,
+        sid,
+        transaction_id,
+        session,
+        ssl_verification_enabled,
+    )
+    rq.put(
+        _authentication_result(
+            duo_host,
+            sid,
+            transaction_id,
+            session,
+            ssl_verification_enabled
+        )
+    )
 
 
 def _context(html_response):
@@ -300,22 +344,34 @@ def _verify_authentication_status(duo_host, sid, duo_transaction_id, session,
                 raise click.ClickException("No FIDO U2F authenticator is eligible.")
 
             threads = []
-            cancel = Event()
             u2f_response = {
                 "sessionId": u2f_session_id
             }
+            rq = queue.Queue()
+            cancel = Event()
             for device in devices:
-                t = Thread(target=_u2f_sign, args=(device, u2f_app_id, u2f_challenge, u2f_sign_requests, u2f_response, cancel))
+                t = Thread(
+                    target=_u2f_sign,
+                    daemon = True,
+                    args=(
+                        device,
+                        u2f_app_id,
+                        u2f_challenge,
+                        u2f_sign_requests,
+                        duo_host,
+                        sid,
+                        u2f_response,
+                        session,
+                        ssl_verification_enabled,
+                        cancel,
+                        rq
+                    )
+                )
                 threads.append(t)
                 t.start()
 
-            for t in threads:
-                t.join()
-
-            if not cancel.is_set():
-                raise click.ClickException("FIDO U2F authentication timed out.")
-
-            return _submit_u2f_response(duo_host, sid, u2f_response, session, ssl_verification_enabled)
+            # Wait for first answer
+            return rq.get()
 
         responses.append(response.text)
 
@@ -326,7 +382,7 @@ def _verify_authentication_status(duo_host, sid, duo_transaction_id, session,
     )
 
 
-def _u2f_sign(device, u2f_app_id, u2f_challenge, u2f_sign_requests, u2f_response, cancel):
+def _u2f_sign(device, u2f_app_id, u2f_challenge, u2f_sign_requests, duo_host, sid, u2f_response, session, ssl_verification_enabled, cancel, rq):
     click.echo("Activate your FIDO U2F authenticator now: '{}'".format(device), err=True)
     client = U2fClient(device, u2f_app_id)
     try:
@@ -338,13 +394,16 @@ def _u2f_sign(device, u2f_app_id, u2f_challenge, u2f_sign_requests, u2f_response
                 timeout=cancel
             )
         )
+
+        # Cancel the other U2F prompts
+        cancel.set()
+        
         click.echo("Got response from FIDO U2F authenticator: '{}'".format(device), err=True)
+        rq.put(_submit_u2f_response(duo_host, sid, u2f_response, session, ssl_verification_enabled))
     except:
         pass
     finally:
         device.close()
-
-    cancel.set()
 
 
 _tx_pattern = re.compile("(TX\|[^:]+):APP.+")
