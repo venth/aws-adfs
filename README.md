@@ -331,4 +331,10 @@ aws-adfs integrates with:
 * [rinrinne](https://github.com/rinrinne) for: Respect AWS_DEFAULT_PROFILE if defined
 * [mjernsell](https://github.com/mjernsell) for: Add support for AzureMfaAuthentication
 * [kfattig](https://github.com/kfattig) for: Handle sspi like other config options
+* [pdecat](https://github.com/pdecat) for
+    * lxml 4.4.0 dropped support for python 3.4
+    * Add Duo U2F support
+    * Use MozillaCookieJar as LWPCookieJar has an issue on Windows when cookies have an 'expires' date too far in the future and they are converted from timestamp to datetime
+    * Fix python 2.7 compatibility
+    * Document Windows 10 and WSL usage/issues
  
