@@ -337,4 +337,5 @@ aws-adfs integrates with:
     * Use MozillaCookieJar as LWPCookieJar has an issue on Windows when cookies have an 'expires' date too far in the future and they are converted from timestamp to datetime
     * Fix python 2.7 compatibility
     * Document Windows 10 and WSL usage/issues
+    * Run tests with python 3.6, 3.7 and 3.8-dev
  
