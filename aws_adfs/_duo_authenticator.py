@@ -33,7 +33,7 @@ _headers = {
 }
 
 
-def extract(html_response, ssl_verification_enabled, session):
+def extract(html_response, ssl_verification_enabled, u2f_trigger_default, session):
     """
     this strategy is based on description from: https://duo.com/docs/duoweb
     :param response: raw http response
@@ -75,22 +75,23 @@ def extract(html_response, ssl_verification_enabled, session):
             t.daemon = True
             t.start()
 
-        # Always trigger default authentication (call or push) concurrently to U2F
-        t = Thread(
-            target=_perform_authentication_transaction,
-            args=(
-                duo_host,
-                sid,
-                preferred_factor,
-                preferred_device,
-                False,
-                session,
-                ssl_verification_enabled,
-                rq,
+        if u2f_trigger_default or not u2f_supported:
+            # Trigger default authentication (call or push) concurrently to U2F
+            t = Thread(
+                target=_perform_authentication_transaction,
+                args=(
+                    duo_host,
+                    sid,
+                    preferred_factor,
+                    preferred_device,
+                    False,
+                    session,
+                    ssl_verification_enabled,
+                    rq,
+                )
             )
-        )
-        t.daemon = True
-        t.start()
+            t.daemon = True
+            t.start()
 
         # Wait for first response
         auth_signature = rq.get()

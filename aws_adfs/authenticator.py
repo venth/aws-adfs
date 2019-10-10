@@ -20,7 +20,8 @@ def authenticate(config, username=None, password=None, assertfile=None):
         provider_id=config.provider_id,
         username=username,
         password=password,
-        sspi=config.sspi
+        sspi=config.sspi,
+        u2f_trigger_default=config.u2f_trigger_default,
     )
 
     assertion = None
@@ -110,7 +111,7 @@ def _strategy(response, config, session, assertfile=None):
 
     def _duo_extractor():
         def extract():
-            return duo_auth.extract(html_response, config.ssl_verification, session)
+            return duo_auth.extract(html_response, config.ssl_verification, config.u2f_trigger_default, session)
         return extract
 
     def _symantec_vip_extractor():
