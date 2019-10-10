@@ -517,6 +517,7 @@ def _begin_authentication_transaction(duo_host, sid, preferred_factor, preferred
             }
         )
     else:
+        click.echo("Triggering default authentication method: '{}'".format(preferred_factor), err=True)
         response = session.post(
             prompt_for_url,
             verify=ssl_verification_enabled,
