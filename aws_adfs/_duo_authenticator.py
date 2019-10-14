@@ -339,9 +339,9 @@ def _verify_authentication_status(duo_host, sid, duo_transaction_id, session,
             u2f_challenge = u2f_sign_requests[0]['challenge']
             u2f_session_id = u2f_sign_requests[0]['sessionId']
 
-            devices = CtapHidDevice.list_devices()
+            devices = list(CtapHidDevice.list_devices())
             if CtapPcscDevice:
-                devices.append(CtapPcscDevice.list_devices())
+                devices.extend(list(CtapPcscDevice.list_devices()))
 
             if not devices:
                 raise click.ClickException("No FIDO U2F authenticator is eligible.")
