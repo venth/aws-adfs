@@ -338,4 +338,6 @@ aws-adfs integrates with:
     * Fix python 2.7 compatibility
     * Document Windows 10 and WSL usage/issues
     * Run tests with python 3.6, 3.7 and 3.8-dev
+    * Add options to trigger or not the default authentication method when U2F is available
+    * Fix AttributeError: 'generator' object has no attribute 'append' on python3
  
