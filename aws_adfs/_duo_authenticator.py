@@ -57,8 +57,10 @@ def extract(html_response, ssl_verification_enabled, u2f_trigger_default, sessio
         click.echo("Waiting for additional authentication", err=True)
 
         rq = queue.Queue()
+        auth_count = 0
         if u2f_supported:
             # Trigger U2F authentication
+            auth_count += 1
             t = Thread(
                 target=_perform_authentication_transaction,
                 args=(
@@ -77,6 +79,7 @@ def extract(html_response, ssl_verification_enabled, u2f_trigger_default, sessio
 
         if u2f_trigger_default or not u2f_supported:
             # Trigger default authentication (call or push) concurrently to U2F
+            auth_count += 1
             t = Thread(
                 target=_perform_authentication_transaction,
                 args=(
@@ -93,8 +96,14 @@ def extract(html_response, ssl_verification_enabled, u2f_trigger_default, sessio
             t.daemon = True
             t.start()
 
-        # Wait for first response
-        auth_signature = rq.get()
+        while "Wait for responses":
+            auth_signature = rq.get()
+            auth_count -= 1
+            if auth_signature != "cancelled":
+                break
+            if auth_count < 1:
+                click.echo("All authentication methods cancelled, aborting.")
+                exit(-2)
 
         click.echo('Going for aws roles', err=True)
         return _retrieve_roles_page(
@@ -126,15 +135,14 @@ def _perform_authentication_transaction(duo_host, sid, preferred_factor, preferr
         session,
         ssl_verification_enabled,
     )
-    rq.put(
-        _authentication_result(
-            duo_host,
-            sid,
-            transaction_id,
-            session,
-            ssl_verification_enabled
+    if transaction_id == "cancelled":
+        rq.put("cancelled")
+    else:
+        rq.put(
+            _authentication_result(
+                duo_host, sid, transaction_id, session, ssl_verification_enabled
+            )
         )
-    )
 
 
 def _context(html_response):
@@ -344,7 +352,8 @@ def _verify_authentication_status(duo_host, sid, duo_transaction_id, session,
                 devices.extend(list(CtapPcscDevice.list_devices()))
 
             if not devices:
-                raise click.ClickException("No FIDO U2F authenticator is eligible.")
+                click.echo("No FIDO U2F authenticator is eligible.")
+                return "cancelled"
 
             threads = []
             u2f_response = {
