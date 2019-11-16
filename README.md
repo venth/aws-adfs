@@ -340,4 +340,5 @@ aws-adfs integrates with:
     * Run tests with python 3.6, 3.7 and 3.8-dev
     * Add options to trigger or not the default authentication method when U2F is available
     * Fix AttributeError: 'generator' object has no attribute 'append' on python3
+    * Do not print stack trace if no U2F device is available
  
