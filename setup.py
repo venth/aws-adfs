@@ -23,7 +23,7 @@ install_requires = [
     'boto3>=1.9.6',
     'requests[security]',
     'configparser',
-    'fido2',
+    'fido2<0.8.0',
 ]
 
 if system() == 'Windows':
