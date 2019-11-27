@@ -403,7 +403,7 @@ def _u2f_sign(device, u2f_app_id, u2f_challenge, u2f_sign_requests, duo_host, si
                 u2f_app_id,
                 u2f_challenge,
                 u2f_sign_requests,
-                timeout=cancel
+                event=cancel
             )
         )
 
