@@ -341,4 +341,6 @@ aws-adfs integrates with:
     * Add options to trigger or not the default authentication method when U2F is available
     * Fix AttributeError: 'generator' object has no attribute 'append' on python3
     * Do not print stack trace if no U2F device is available
+    * Pin fido2 dependency to < 0.8.0 as it is a breaking release
+    * U2F: fido2 v0.8.1 compatibility (U2FClient.sign timeout renamed to event)
  
