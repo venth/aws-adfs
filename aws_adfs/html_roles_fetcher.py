@@ -1,5 +1,6 @@
 import logging
 import os
+from platform import system
 import requests
 
 try:
@@ -12,8 +13,12 @@ _auth_provider = None
 _headers = {'Accept-Language': 'en'}
 
 try:
-    from requests_negotiate_sspi import HttpNegotiateAuth
-    _auth_provider = HttpNegotiateAuth
+    if system() == 'Windows':
+        from requests_negotiate_sspi import HttpNegotiateAuth
+        _auth_provider = HttpNegotiateAuth
+    else:
+        from requests_kerberos import HTTPKerberosAuth, OPTIONAL
+        _auth_provider = HTTPKerberosAuth
 except ImportError:
     pass
 
@@ -67,7 +72,12 @@ def fetch_html_encoded_roles(
             elif '\\' in username: # Down-level logon name format
                 domain, username = username.split('\\', 1)
 
-        auth = _auth_provider(username, password, domain)
+        if system() == 'Windows':
+            auth = _auth_provider(username, password, domain)
+        elif username and domain:
+            auth = _auth_provider(principal="{}@{}".format(username, domain), mutual_authentication=OPTIONAL)
+        else:
+            auth = _auth_provider(mutual_authentication=OPTIONAL)
         data = None
     else:
         auth = None
