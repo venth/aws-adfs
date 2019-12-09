@@ -28,6 +28,8 @@ install_requires = [
 
 if system() == 'Windows':
     install_requires.append('requests-negotiate-sspi>=0.3.4')
+else:
+    install_requires.append('requests_kerberos')
 
 version = versioneer.get_version()
 
