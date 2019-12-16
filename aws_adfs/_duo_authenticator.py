@@ -118,6 +118,11 @@ def extract(html_response, ssl_verification_enabled, u2f_trigger_default, sessio
 
 
 def _perform_authentication_transaction(duo_host, sid, preferred_factor, preferred_device, use_u2f, session, ssl_verification_enabled, rq):
+    if (preferred_factor is None or preferred_device is None) and not use_u2f:
+        click.echo("No default authentication method configured.", err=True)
+        rq.put("cancelled")
+        return
+
     transaction_id = _begin_authentication_transaction(
         duo_host,
         sid,
