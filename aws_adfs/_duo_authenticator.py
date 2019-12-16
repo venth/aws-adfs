@@ -495,13 +495,13 @@ def _initiate_authentication(duo_host, duo_request_signature, roles_page_url, se
 def _preferred_factor(html_response):
     preferred_factor_query = './/input[@name="preferred_factor"]'
     element = html_response.find(preferred_factor_query)
-    return element.get('value')
+    return element is not None and element.get('value') or None
 
 
 def _preferred_device(html_response):
     preferred_device_query = './/input[@name="preferred_device"]'
     element = html_response.find(preferred_device_query)
-    return element.get('value')
+    return element is not None and element.get('value') or None
 
 
 def _u2f_supported(html_response):
