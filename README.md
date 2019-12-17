@@ -343,4 +343,6 @@ aws-adfs integrates with:
     * Do not print stack trace if no U2F device is available
     * Pin fido2 dependency to < 0.8.0 as it is a breaking release
     * U2F: fido2 v0.8.1 compatibility (U2FClient.sign timeout renamed to event)
+* [bodgit](https://github.com/bodgit) for: Kerberos support
+* [pdecat](https://github.com/pdecat) for: Duo: support U2F with no preferred factor or device configured 
  
