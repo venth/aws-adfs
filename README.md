@@ -275,6 +275,13 @@ aws-adfs integrates with:
   ```
   sudo apt-get install python-dev libxml2-dev libxslt1-dev zlib1g-dev
   ```
+
+* in cases of trouble with pykerberos please install
+
+  ```
+  sudo apt-get install python-dev libkrb5-dev
+  ```
+
 * in cases of trouble with OSX Sierra (obsolete OpenSSL), upgrade OpenSSL. Example:
   ```
   brew upgrade openssl
