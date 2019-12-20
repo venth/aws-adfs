@@ -28,3 +28,6 @@ requests-kerberos = "*"
 
 [tool.poetry.extras]
 test = ["coverage", "mock", "pytest", "pytest-runner"]
+
+[tool.poetry.scripts]
+aws-adfs = "aws_adfs.commands:cli"
