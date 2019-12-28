@@ -354,4 +354,5 @@ aws-adfs integrates with:
 * [pdecat](https://github.com/pdecat) for: 
     * Duo: support U2F with no preferred factor or device configured
     * Document new libkrb5-dev system dependency for pykerberos 
- 
+    * Drop boto3 dependency
+
