@@ -183,9 +183,9 @@ aws-adfs integrates with:
     ```
     $ aws-adfs login --help
     Usage: aws-adfs login [OPTIONS]
-    
+
       Authenticates an user with active directory credentials
-    
+
     Options:
       --profile TEXT                  AWS cli profile that will be authenticated.
                                       After successful authentication just use:
@@ -233,8 +233,12 @@ aws-adfs integrates with:
       --assertfile TEXT               Use SAML assertion response from a local
                                       file
       --sspi / --no-sspi              Whether or not to use Kerberos SSO
-                                      authentication via SSPI, which may not work
-                                      in some environments.
+                                      authentication via SSPI (Windows only,
+                                      defaults to True).
+      --u2f-trigger-default / --no-u2f-trigger-default
+                                      Whether or not to also trigger the default
+                                      authentication method when U2F is available
+                                      (only works with Duo for now).
       --help                          Show this message and exit.
     ```
     ```

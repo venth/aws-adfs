@@ -7,6 +7,7 @@ import click
 from botocore import client
 from os import environ
 import logging
+from platform import system
 import sys
 from . import authenticator
 from . import prepare
@@ -96,8 +97,8 @@ from . import role_chooser
 )
 @click.option(
     '--sspi/--no-sspi',
-    default=None,
-    help='Whether or not to use Kerberos SSO authentication via SSPI, which may not work in some environments.',
+    default=system() == 'Windows',
+    help='Whether or not to use Kerberos SSO authentication via SSPI (Windows only, defaults to True).',
 )
 @click.option(
     '--u2f-trigger-default/--no-u2f-trigger-default',
