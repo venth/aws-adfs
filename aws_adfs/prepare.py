@@ -3,6 +3,7 @@ import configparser
 import os
 import botocore.session
 import botocore.exceptions
+from platform import system
 from types import MethodType
 
 
@@ -117,7 +118,7 @@ def create_adfs_default_config(profile):
     config.session_duration = int(3600)
 
     # Whether SSPI is enabled
-    config.sspi = True
+    config.sspi = system() == "Windows"
 
     # Whether to also trigger the default authentication method when U2F is available
     config.u2f_trigger_default = True

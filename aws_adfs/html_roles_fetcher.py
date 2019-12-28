@@ -34,8 +34,8 @@ def fetch_html_encoded_roles(
         adfs_ca_bundle=None,
         username=None,
         password=None,
-        sspi=True,
-        u2f_trigger_default=True,
+        sspi=None,
+        u2f_trigger_default=None,
 ):
 
     # Support for Kerberos SSO on Windows via requests_negotiate_sspi
