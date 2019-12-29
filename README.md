@@ -359,4 +359,4 @@ aws-adfs integrates with:
     * Duo: support U2F with no preferred factor or device configured
     * Document new libkrb5-dev system dependency for pykerberos 
     * Drop boto3 dependency
-
+    * Default SSPI to True on Windows only, False otherwise
