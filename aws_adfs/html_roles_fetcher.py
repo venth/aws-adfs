@@ -84,7 +84,7 @@ def fetch_html_encoded_roles(
         data={
             'UserName': username,
             'Password': password,
-            'AuthMethod': provider_id
+            'AuthMethod': 'FormsAuthentication'
         }
 
     if adfs_ca_bundle:
