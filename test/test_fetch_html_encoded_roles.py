@@ -104,7 +104,7 @@ class TestFetchHtmlEncodedRoles:
             data={
                 'UserName': no_credentials_provided,
                 'Password': no_credentials_provided,
-                'AuthMethod': provider_id
+                'AuthMethod': 'FormsAuthentication'
             }
         )
 
