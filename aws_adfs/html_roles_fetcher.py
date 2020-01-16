@@ -2,6 +2,7 @@ import logging
 import os
 from platform import system
 import requests
+import lxml.etree as ET
 
 try:
     import cookielib
@@ -125,6 +126,35 @@ def fetch_html_encoded_roles(
         session.cookies.save(ignore_discard=True)
     finally:
         os.umask(mask)
+
+    ##CUSTOM CODE - I had to send another request since context was not ready
+    response = session.post(
+        authentication_url,
+        verify=ssl_verification,
+        headers=_headers,
+        auth=auth,
+        data={
+            "__EVENTTARGET": "verificationOption0",
+            'AuthMethod': "AzureMfaServerAuthentication"
+        }
+    )    
+    html_response = ET.fromstring(response.text, ET.HTMLParser())
+    context_query = './/input[@id="context"]'
+    element = html_response.find(context_query)
+    context = element.get('value')
+
+    response = session.post(
+        authentication_url,
+        verify=ssl_verification,
+        headers=_headers,
+        auth=auth,
+        data={
+            "__EVENTTARGET": "verificationOption0",
+            'AuthMethod': "AzureMfaServerAuthentication",
+            'Context': context
+        }
+    )
+    ### CUSTOM  
 
     del auth
     del data
