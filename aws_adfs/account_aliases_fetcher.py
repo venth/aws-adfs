@@ -20,9 +20,6 @@ def account_aliases(session, username, password, auth_method, saml_response, con
         },
         auth=None,
         data={
-            'UserName': username,
-            'Password': password,
-            'AuthMethod': auth_method,
             'SAMLResponse': saml_response,
         }
     )
