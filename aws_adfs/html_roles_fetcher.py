@@ -54,7 +54,7 @@ def fetch_html_encoded_roles(
     session.cookies = cookielib.MozillaCookieJar(filename=adfs_cookie_location)
 
     try:
-        have_creds = (username and password) or _auth_provider
+        have_creds = (username and password) or (_auth_provider and sspi)
         session.cookies.load(ignore_discard=not(have_creds))
     except IOError as e:
         error_message = getattr(e, 'message', e)
