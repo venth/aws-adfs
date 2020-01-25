@@ -362,4 +362,5 @@ aws-adfs integrates with:
     * Default SSPI to True on Windows only, False otherwise
 * [rheemskerk](https://github.com/rheemskerk) for:
     * Fix username and password disclosure 
-    * Fix authentication with cookies on non-windows system. 
+    * Fix authentication with cookies on non-windows system.
+    * Change `AuthMethod` parameter to `FormsAuthentication` 
