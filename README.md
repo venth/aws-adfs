@@ -375,4 +375,5 @@ aws-adfs integrates with:
 * [rheemskerk](https://github.com/rheemskerk) for:
     * Fix username and password disclosure 
     * Fix authentication with cookies on non-windows system.
-    * Change `AuthMethod` parameter to `FormsAuthentication` 
+    * Change `AuthMethod` parameter to `FormsAuthentication`
+* [brodie11](https://github.com/brodie11) and [gregorydulin](https://github.com/gregorydulin) for: Add support for non-public AWS regions
