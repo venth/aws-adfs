@@ -200,11 +200,19 @@ def login(
     try:
         session = botocore.session.get_session()
         session.set_config_variable('profile', config.profile)
-        conn = session.create_client('sts', config=client.Config(signature_version=botocore.UNSIGNED))
+        conn = session.create_client(
+            'sts',
+            region_name=region,
+            config=client.Config(signature_version=botocore.UNSIGNED),
+        )
     except botocore.exceptions.ProfileNotFound:
         logging.debug('Profile {} does not exist yet'.format(config.profile))
         session = botocore.session.get_session()
-        conn = session.create_client('sts', config=client.Config(signature_version=botocore.UNSIGNED))
+        conn = session.create_client(
+            'sts',
+            region_name=region,
+            config=client.Config(signature_version=botocore.UNSIGNED),
+        )
 
     aws_session_token = conn.assume_role_with_saml(
         RoleArn=config.role_arn,
