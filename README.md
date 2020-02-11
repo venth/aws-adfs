@@ -112,6 +112,18 @@ aws-adfs integrates with:
     aws --profile=specified-profile s3 ls
     ```
 
+* login to your adfs host and fetch roles for AWS GovCloud (US)
+
+    ```
+    aws-adfs login --adfs-host=your-adfs-hostname --provider-id urn:amazon:webservices:govcloud --region us-gov-west-1
+    ```
+
+    and verification
+
+    ```
+    aws s3 ls
+    ```
+
 * login to your adfs host within ansible playbook
 
     ```
