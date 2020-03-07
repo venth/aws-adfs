@@ -377,3 +377,4 @@ aws-adfs integrates with:
     * Fix authentication with cookies on non-windows system.
     * Change `AuthMethod` parameter to `FormsAuthentication`
 * [brodie11](https://github.com/brodie11) and [gregorydulin](https://github.com/gregorydulin) for: Add support for non-public AWS regions
+* [johan1252](https://github.com/johan1252) for: Ask for authentication method if there is no default method set in Duo Security settings
