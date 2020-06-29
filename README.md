@@ -166,6 +166,12 @@ aws-adfs integrates with:
     password = your_password
     ```
 
+* .aws/credentials profile for automatically refreshing credentials
+    ```
+    [example-role-ue1]
+    credential-process=aws-adfs login --region=us-east-1 --role-arn=arn:aws:iam::1234567891234:role/example-role --adfs-host=adfs.example.com --stdout
+    ```
+
 * help, help, help?
     ```
     $ aws-adfs --help
