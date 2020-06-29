@@ -222,7 +222,7 @@ def login(
     )
 
     if stdout:
-        _emit_json(aws_session_token)
+        _emit_json(aws_session_token, aws_session_duration)
     elif printenv:
         _emit_summary(config, aws_session_duration)
         _print_environment_variables(aws_session_token,config)
@@ -231,12 +231,13 @@ def login(
         _emit_summary(config, aws_session_duration)
 
 
-def _emit_json(aws_session_token):
+def _emit_json(aws_session_token, aws_session_duration):
     click.echo(
-        u"""{{"AccessKeyId": "{}", "SecretAccessKey": "{}", "SessionToken": "{}", "Version": 1}}""".format(
+        u"""{{"AccessKeyId": "{}", "SecretAccessKey": "{}", "SessionToken": "{}", "Expiration": "{}", "Version": 1}}""".format(
             aws_session_token['Credentials']['AccessKeyId'],
             aws_session_token['Credentials']['SecretAccessKey'],
-            aws_session_token['Credentials']['SessionToken']
+            aws_session_token['Credentials']['SessionToken'],
+            (datetime.datetime.now()+datetime.timedelta(0,aws_session_duration)).isoformat()
         )
     )
 
