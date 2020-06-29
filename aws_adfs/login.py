@@ -233,7 +233,7 @@ def login(
 
 def _emit_json(aws_session_token):
     click.echo(
-        u"""{{"AccessKeyId": "{}", "SecretAccessKey": "{}", "SessionToken": "{}"}}""".format(
+        u"""{{"AccessKeyId": "{}", "SecretAccessKey": "{}", "SessionToken": "{}", "Version": 1}}""".format(
             aws_session_token['Credentials']['AccessKeyId'],
             aws_session_token['Credentials']['SecretAccessKey'],
             aws_session_token['Credentials']['SessionToken']
