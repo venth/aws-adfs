@@ -237,7 +237,7 @@ def _emit_json(aws_session_token, aws_session_duration):
             aws_session_token['Credentials']['AccessKeyId'],
             aws_session_token['Credentials']['SecretAccessKey'],
             aws_session_token['Credentials']['SessionToken'],
-            (datetime.datetime.now()+datetime.timedelta(0,aws_session_duration)).isoformat()
+            (datetime.datetime.now(UTC())+datetime.timedelta(0,aws_session_duration)).isoformat()
         )
     )
 
