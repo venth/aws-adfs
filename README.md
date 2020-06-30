@@ -171,6 +171,7 @@ aws-adfs integrates with:
     [profile example-role-ue1]
     credential_process=aws-adfs login --region=us-east-1 --role-arn=arn:aws:iam::1234567891234:role/example-role --adfs-host=adfs.example.com --stdout
     ```
+    Warning: see [AWS documentation](https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-sourcing-external.html) about security considerations to take when sourcing credentials with an external process.
 
 * help, help, help?
     ```
