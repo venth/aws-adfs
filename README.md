@@ -169,7 +169,7 @@ aws-adfs integrates with:
 * .aws/config profile for automatically refreshing credentials
     ```
     [profile example-role-ue1]
-    credential-process=aws-adfs login --region=us-east-1 --role-arn=arn:aws:iam::1234567891234:role/example-role --adfs-host=adfs.example.com --stdout
+    credential_process=aws-adfs login --region=us-east-1 --role-arn=arn:aws:iam::1234567891234:role/example-role --adfs-host=adfs.example.com --stdout
     ```
 
 * help, help, help?
