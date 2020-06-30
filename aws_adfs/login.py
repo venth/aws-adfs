@@ -9,7 +9,6 @@ from os import environ
 import logging
 from platform import system
 import sys
-import datetime
 from . import authenticator
 from . import prepare
 from . import role_chooser
@@ -223,7 +222,7 @@ def login(
     )
 
     if stdout:
-        _emit_json(aws_session_token, aws_session_duration)
+        _emit_json(aws_session_token)
     elif printenv:
         _emit_summary(config, aws_session_duration)
         _print_environment_variables(aws_session_token,config)
@@ -232,23 +231,13 @@ def login(
         _emit_summary(config, aws_session_duration)
 
 
-def _emit_json(aws_session_token, aws_session_duration):
-    class UTC(datetime.tzinfo):
-        def utcoffset(self, dt):
-            return datetime.timedelta(0)
-
-        def tzname(self, dt):
-            return "UTC"
-
-        def dst(self, dt):
-            return datetime.timedelta(0)
-
+def _emit_json(aws_session_token):
     click.echo(
         u"""{{"AccessKeyId": "{}", "SecretAccessKey": "{}", "SessionToken": "{}", "Expiration": "{}", "Version": 1}}""".format(
             aws_session_token['Credentials']['AccessKeyId'],
             aws_session_token['Credentials']['SecretAccessKey'],
             aws_session_token['Credentials']['SessionToken'],
-            (datetime.datetime.now(UTC())+datetime.timedelta(0,aws_session_duration)).isoformat()
+            aws_session_token['Credentials']['Expiration']
         )
     )
 
