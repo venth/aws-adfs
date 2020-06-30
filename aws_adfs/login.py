@@ -233,7 +233,7 @@ def login(
 
 
 def _emit_json(aws_session_token, aws_session_duration):
-    class UTC(tzinfo):
+    class UTC(datetime.tzinfo):
         def utcoffset(self, dt):
             return datetime.timedelta(0)
 
