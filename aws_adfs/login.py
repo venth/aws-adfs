@@ -238,7 +238,7 @@ def _emit_json(aws_session_token):
         "AccessKeyId": aws_session_token['Credentials']['AccessKeyId'],
         "SecretAccessKey": aws_session_token['Credentials']['SecretAccessKey'],
         "SessionToken": aws_session_token['Credentials']['SessionToken'],
-        "Expiration": aws_session_token['Credentials']['Expiration']
+        "Expiration": aws_session_token['Credentials']['Expiration'].isoformat()
     }))
 
 def _print_environment_variables(aws_session_token,config):
