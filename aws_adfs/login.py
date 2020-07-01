@@ -9,6 +9,7 @@ from os import environ
 import logging
 from platform import system
 import sys
+import json
 from . import authenticator
 from . import prepare
 from . import role_chooser
@@ -232,14 +233,13 @@ def login(
 
 
 def _emit_json(aws_session_token):
-    click.echo(
-        u"""{{"AccessKeyId": "{}", "SecretAccessKey": "{}", "SessionToken": "{}", "Expiration": "{}", "Version": 1}}""".format(
-            aws_session_token['Credentials']['AccessKeyId'],
-            aws_session_token['Credentials']['SecretAccessKey'],
-            aws_session_token['Credentials']['SessionToken'],
-            aws_session_token['Credentials']['Expiration']
-        )
-    )
+    click.echo(json.dumps({
+        "Version": 1,
+        "AccessKeyId": aws_session_token['Credentials']['AccessKeyId'],
+        "SecretAccessKey": aws_session_token['Credentials']['SecretAccessKey'],
+        "SessionToken": aws_session_token['Credentials']['SessionToken'],
+        "Expiration": aws_session_token['Credentials']['Expiration']
+    }))
 
 def _print_environment_variables(aws_session_token,config):
     envcommand = "export"
