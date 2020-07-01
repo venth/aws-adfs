@@ -24,7 +24,7 @@ class TestCredentialProcessJson:
     def _replace_echo(self, value):
         return value
 
-    def test_json_includes_version_1(self):
+    def test_json_is_valid_credential_process_format(self):
         with patch('click.echo', side_effect = self._replace_echo) as fake_out:
             login._emit_json(self.aws_session_token)
 
@@ -32,36 +32,8 @@ class TestCredentialProcessJson:
 
             # Version is currently hardlocked at 1, see https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-sourcing-external.html
             assert result["Version"] == 1
-    
-    def test_json_has_access_key(self):
-        with patch('click.echo', side_effect = self._replace_echo) as fake_out:
-            login._emit_json(self.aws_session_token)
-
-            result = json.loads(fake_out.call_args_list[0].args[0])
-
             assert result["AccessKeyId"] == self.access_key
-
-    def test_json_has_secret_key(self):
-        with patch('click.echo', side_effect = self._replace_echo) as fake_out:
-            login._emit_json(self.aws_session_token)
-
-            result = json.loads(fake_out.call_args_list[0].args[0])
-
             assert result["SecretAccessKey"] == self.secret_key
-
-    def test_json_has_session_token(self):
-        with patch('click.echo', side_effect = self._replace_echo) as fake_out:
-            login._emit_json(self.aws_session_token)
-
-            result = json.loads(fake_out.call_args_list[0].args[0])
-
             assert result["SessionToken"] == self.session_token
-
-    def test_json_has_valid_expiration(self):
-        with patch('click.echo', side_effect = self._replace_echo) as fake_out:
-            login._emit_json(self.aws_session_token)
-
-            result = json.loads(fake_out.call_args_list[0].args[0])
-
-            # Expiration must be a , see https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-sourcing-external.html
+            # Expiration must be ISO8601, see https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-sourcing-external.html
             assert result["Expiration"] == self.expiration
