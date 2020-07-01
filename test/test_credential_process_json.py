@@ -4,7 +4,7 @@ from aws_adfs import login
 from mock import patch
 
 
-class TestCredentialProcesJson:
+class TestCredentialProcessJson:
 
     def setup_method(self, method):
         self.access_key = 'AKIAIOSFODNN7EXAMPLE'
