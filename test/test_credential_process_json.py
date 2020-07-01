@@ -29,6 +29,7 @@ class TestCredentialProcessJson:
             login._emit_json(self.aws_session_token)
 
             result = json.loads(fake_out.call_args_list[0].args[0])
+            print(result)
 
             # Version is currently hardlocked at 1, see https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-sourcing-external.html
             assert result["Version"] == 1
