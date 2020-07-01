@@ -10,7 +10,7 @@ class TestCredentialProcessJson:
         self.access_key = 'AKIAIOSFODNN7EXAMPLE'
         self.secret_key = 'wJalrXUtnFEMI/K7MDENG/bPxRfiCYzEXAMPLEKEY'
         self.session_token = 'AQoDYXdzEPT//////////wEXAMPLEtc764bNrC9SAPBSM22wDOk4x4HIZ8j4FZTwdQWLWsKWHGBuFqwAeMicRXmxfpSPfIeoIYRqTflfKD8YUuwthAx7mSEI/qkPpKPi/kMcGdQrmGdeehM4IC1NtBmUpp2wUE8phUZampKsburEDy0KPkyQDYwT7WZ0wq5VSXDvp75YU9HFvlRd8Tx6q6fE8YQcHNVXAkiY9q6d+xo0rKwT38xVqr7ZD0u0iPPkUL64lIZbqBAz+scqKmlzm8FDrypNC9Yjc8fPOLn9FX9KSYvKTr4rvx3iSIlTJabIQwj2ICCR/oLxBA=='
-        self.expiration = '2020-06-30T20:17:02.439725+00:00'
+        self.expiration = datetime.datetime(2020,6,20)
 
         self.aws_session_token = {
             'Credentials': {
@@ -21,14 +21,15 @@ class TestCredentialProcessJson:
             }
         }
 
+    capture = ''
     def _replace_echo(self, value):
-        return value
+        self.capture = value
 
     def test_json_is_valid_credential_process_format(self):
         with patch('click.echo', side_effect = self._replace_echo) as fake_out:
             login._emit_json(self.aws_session_token)
 
-            result = json.loads(fake_out.call_args_list[0].args[0])
+            result = json.loads(self.capture)
             print(result)
 
             # Version is currently hardlocked at 1, see https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-sourcing-external.html
@@ -37,4 +38,4 @@ class TestCredentialProcessJson:
             assert result["SecretAccessKey"] == self.secret_key
             assert result["SessionToken"] == self.session_token
             # Expiration must be ISO8601, see https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-sourcing-external.html
-            assert result["Expiration"] == self.expiration
+            assert result["Expiration"] == self.expiration.isoformat()
