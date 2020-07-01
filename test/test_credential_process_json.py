@@ -26,7 +26,7 @@ class TestCredentialProcessJson:
         self.capture = value
 
     def test_json_is_valid_credential_process_format(self):
-        with patch('click.echo', side_effect = self._replace_echo) as fake_out:
+        with patch('click.echo', side_effect = self._replace_echo):
             login._emit_json(self.aws_session_token)
 
             result = json.loads(self.capture)
