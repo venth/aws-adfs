@@ -134,11 +134,11 @@ aws-adfs integrates with:
       environment:
         - username: "{{ ansible_user }}@example.com"
         - password: "{{ ansible_ssh_pass }}"
-    
+
     - name: "Set sts facts"
       set_fact:
         sts: "{{ sts_result.stdout | from_json }}"
-    
+
     - name: "List s3 Buckets"
       aws_s3_bucket_facts:
         aws_access_key: "{{ sts.AccessKeyId }}"
@@ -146,7 +146,7 @@ aws-adfs integrates with:
         security_token: "{{ sts.SessionToken }}"
         region: "us-east-1"
       register: buckets
-    
+
     - name: "Print Buckets"
       debug:
         var: buckets
@@ -355,7 +355,7 @@ aws-adfs integrates with:
 * [NotMrSteve](https://github.com/NotMrSteve) for: Save duo session cookies
 * [pdecat](https://github.com/pdecat) for: Fallback on prompt if env, stdin or auth file do not provide both username and password
 * [0x91](https://github.com/0x91) for: Support for Azure MFA Server
-* [pdecat](https://github.com/pdecat) for: Fix Duo authentication initiation failure messages 
+* [pdecat](https://github.com/pdecat) for: Fix Duo authentication initiation failure messages
 * [tommywo](https://github.com/tommywo) for: save provider_id config
 * [budzejko](https://github.com/budzejko) for: Add support for adfs-ca-bundle option
 * [rinrinne](https://github.com/rinrinne) for: Respect AWS_DEFAULT_PROFILE if defined
@@ -374,15 +374,16 @@ aws-adfs integrates with:
     * Pin fido2 dependency to < 0.8.0 as it is a breaking release
     * U2F: fido2 v0.8.1 compatibility (U2FClient.sign timeout renamed to event)
 * [bodgit](https://github.com/bodgit) for: Kerberos support
-* [pdecat](https://github.com/pdecat) for: 
+* [pdecat](https://github.com/pdecat) for:
     * Duo: support U2F with no preferred factor or device configured
-    * Document new libkrb5-dev system dependency for pykerberos 
+    * Document new libkrb5-dev system dependency for pykerberos
     * Drop boto3 dependency
     * Default SSPI to True on Windows only, False otherwise
 * [rheemskerk](https://github.com/rheemskerk) for:
-    * Fix username and password disclosure 
+    * Fix username and password disclosure
     * Fix authentication with cookies on non-windows system.
     * Change `AuthMethod` parameter to `FormsAuthentication`
 * [brodie11](https://github.com/brodie11) and [gregorydulin](https://github.com/gregorydulin) for: Add support for non-public AWS regions
 * [johan1252](https://github.com/johan1252) for: Ask for authentication method if there is no default method set in Duo Security settings
 * [pdecat](https://github.com/pdecat) for: Always return the same number of values from _initiate_authentication()
+* [mikereinhold](https://github.com/mikereinhold) for: Feature credential process
