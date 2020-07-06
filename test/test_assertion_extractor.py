@@ -5,6 +5,10 @@ import pytest
 
 from aws_adfs import roles_assertion_extractor
 
+try:
+  base64_encode = base64.encodebytes
+except:
+  base64_encode = base64.encodestring
 
 class TestAssertionExtractor:
 
@@ -75,7 +79,7 @@ class TestAssertionExtractor:
 </Assertion>
 </samlp:Response>'''
 
-        encoded_assertion = base64.encodestring(assertion.encode('utf-8')).decode('utf-8')
+        encoded_assertion = base64_encode(assertion.encode('utf-8')).decode('utf-8')
 
         return ET.fromstring(
             '''
@@ -109,7 +113,7 @@ class TestAssertionExtractor:
 </Assertion>
 </samlp:Response>'''
 
-        encoded_assertion = base64.encodestring(assertion.encode('utf-8')).decode('utf-8')
+        encoded_assertion = base64_encode(assertion.encode('utf-8')).decode('utf-8')
 
         return ET.fromstring(
             '''
@@ -146,7 +150,7 @@ class TestAssertionExtractor:
 </Assertion>
 </samlp:Response>'''.format(session_duration)
 
-        encoded_assertion = base64.encodestring(assertion.encode('utf-8')).decode('utf-8')
+        encoded_assertion = base64_encode(assertion.encode('utf-8')).decode('utf-8')
 
         return ET.fromstring(
             '''
