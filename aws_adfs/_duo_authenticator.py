@@ -247,6 +247,7 @@ def _authentication_result(
             )
         )
     result_url = response.json()['response']['result_url']
+    sid = response.json()['response']["sid"]
     duo_result_response = _load_duo_result_url(duo_host, result_url, sid, session, ssl_verification_enabled)
     auth_signature = duo_result_response.json()['response']['cookie']
     return auth_signature
