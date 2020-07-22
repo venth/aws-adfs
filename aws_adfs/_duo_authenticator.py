@@ -46,7 +46,7 @@ def extract(html_response, ssl_verification_enabled, u2f_trigger_default, sessio
     roles_page_url = _action_url_on_validation_success(html_response)
 
     click.echo("Sending request for authentication", err=True)
-    (sid, preferred_factor, preferred_device, u2f_supported), initiated = _initiate_authentication(
+    (sid, preferred_factor, preferred_device, u2f_supported, auth_signature), initiated = _initiate_authentication(
         duo_host,
         duo_request_signature,
         roles_page_url,
@@ -54,57 +54,58 @@ def extract(html_response, ssl_verification_enabled, u2f_trigger_default, sessio
         ssl_verification_enabled
     )
     if initiated:
-        click.echo("Waiting for additional authentication", err=True)
+        if auth_signature is None:
+            click.echo("Waiting for additional authentication", err=True)
 
-        rq = queue.Queue()
-        auth_count = 0
-        if u2f_supported:
-            # Trigger U2F authentication
-            auth_count += 1
-            t = Thread(
-                target=_perform_authentication_transaction,
-                args=(
-                    duo_host,
-                    sid,
-                    preferred_factor,
-                    preferred_device,
-                    True,
-                    session,
-                    ssl_verification_enabled,
-                    rq,
+            rq = queue.Queue()
+            auth_count = 0
+            if u2f_supported:
+                # Trigger U2F authentication
+                auth_count += 1
+                t = Thread(
+                    target=_perform_authentication_transaction,
+                    args=(
+                        duo_host,
+                        sid,
+                        preferred_factor,
+                        preferred_device,
+                        True,
+                        session,
+                        ssl_verification_enabled,
+                        rq,
+                    )
                 )
-            )
-            t.daemon = True
-            t.start()
+                t.daemon = True
+                t.start()
 
-        if u2f_trigger_default or not u2f_supported:
-            # Trigger default authentication (call or push) concurrently to U2F
-            auth_count += 1
-            t = Thread(
-                target=_perform_authentication_transaction,
-                args=(
-                    duo_host,
-                    sid,
-                    preferred_factor,
-                    preferred_device,
-                    False,
-                    session,
-                    ssl_verification_enabled,
-                    rq,
+            if u2f_trigger_default or not u2f_supported:
+                # Trigger default authentication (call or push) concurrently to U2F
+                auth_count += 1
+                t = Thread(
+                    target=_perform_authentication_transaction,
+                    args=(
+                        duo_host,
+                        sid,
+                        preferred_factor,
+                        preferred_device,
+                        False,
+                        session,
+                        ssl_verification_enabled,
+                        rq,
+                    )
                 )
-            )
-            t.daemon = True
-            t.start()
+                t.daemon = True
+                t.start()
 
-        while "Wait for responses":
-            auth_signature = rq.get()
-            auth_count -= 1
-            if auth_signature != "cancelled":
-                break
-            if auth_count < 1:
-                click.echo("All authentication methods cancelled, aborting.")
-                exit(-2)
-
+            while "Wait for responses":
+                auth_signature = rq.get()
+                auth_count -= 1
+                if auth_signature != "cancelled":
+                    break
+                if auth_count < 1:
+                    click.echo("All authentication methods cancelled, aborting.")
+                    exit(-2)
+                    
         click.echo('Going for aws roles', err=True)
         return _retrieve_roles_page(
             roles_page_url,
@@ -480,20 +481,27 @@ def _initiate_authentication(duo_host, duo_request_signature, roles_page_url, se
                response.text))
 
     if response.status_code != 200 or response.url is None:
-        return (None, None, None, None), False
+        return (None, None, None, None, None), False
 
     o = urlparse(response.url)
     query = parse_qs(o.query)
+    html_response = ET.fromstring(response.text, ET.HTMLParser())
 
     if 'sid' not in query:
-        return (None, None, None, None), False
+        # No need for second factor authentification, Duo directly returned the authentication cookie
+        return (None, None, None, None, _js_cookie(html_response)), True
 
     sid = query['sid']
-    html_response = ET.fromstring(response.text, ET.HTMLParser())
     preferred_factor = _preferred_factor(html_response)
     preferred_device = _preferred_device(html_response)
     u2f_supported = _u2f_supported(html_response)
-    return (sid, preferred_factor, preferred_device, u2f_supported), True
+    return (sid, preferred_factor, preferred_device, u2f_supported, None), True
+
+
+def _js_cookie(html_response):
+    js_cookie_query = './/input[@name="js_cookie"]'
+    element = html_response.find(js_cookie_query)
+    return element is not None and element.get('value') or None
 
 
 def _preferred_factor(html_response):
