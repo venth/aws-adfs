@@ -5,7 +5,8 @@ python:
   - "3.5"
   - "3.6"
   - "3.7"
-  - "3.8-dev" # 3.8 development branch
+  - "3.8"
+  - "3.9-dev" # 3.9 development branch
 before_install:
   - pip install --upgrade setuptools
   - pip install pytest
