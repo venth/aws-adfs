@@ -1,4 +1,5 @@
 # This workflow will install Python dependencies and run tests with several versions of Python
+# When successful, packages are published to test.pypi.org and pypi.org (releases only)
 # For more information see: https://help.github.com/actions/language-and-framework-guides/using-python-with-github-actions
 
 name: Build
@@ -19,18 +20,60 @@ jobs:
 
     steps:
       - uses: actions/checkout@v2
+
       - name: Set up Python ${{ matrix.python-version }}
         uses: actions/setup-python@v2
         with:
           python-version: ${{ matrix.python-version }}
+
       - name: Install libkrb5-dev
         run: sudo apt-get -y install libkrb5-dev
+
       - name: Install aws-adfs and its dependencies
         run: |
           python -m pip install --upgrade pip
           pip install poetry==1.1.10
           poetry config experimental.new-installer false # New installer does not support python 3.10 yet, see https://github.com/python-poetry/poetry/issues/4210
           poetry install
+
       - name: Test with pytest
         run: |
           poetry run pytest
+
+      - name: Build a source archive
+        run: |
+          poetry build --format sdist
+        if: matrix.python-version == 3.9 # Only build source tarball once
+
+      - name: Build a wheel archive
+        run: |
+          poetry build --format wheel
+
+      - name: Publish package to TestPyPI
+        env:
+          POETRY_PYPI_TOKEN_TESTPYPI: ${{ secrets.test_pypi_password }}
+        run: |
+          poetry config repositories.testpypi https://test.pypi.org/legacy/
+          poetry publish --repository testpypi
+
+      - name: Check Version
+        id: check-version
+        run: |
+          [[ "$(poetry version --short)" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]] \
+            || echo ::set-output name=prerelease::true
+        if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags')
+
+      - name: Create Release
+        uses: ncipollo/release-action@v1
+        with:
+          artifacts: "dist/*"
+          token: ${{ secrets.GITHUB_TOKEN }}
+          draft: false
+          prerelease: steps.check-version.outputs.prerelease == 'true'
+        if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags')
+
+      - name: Publish to PyPI
+        env:
+          POETRY_PYPI_TOKEN_PYPI: ${{ secrets.pypi_password }}
+        run: poetry publish
+        if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags')
