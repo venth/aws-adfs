@@ -1,11 +1,17 @@
 #!/usr/bin/env python
 
 import codecs
+import sys
 from os import path
 from platform import system
 
 from setuptools import setup
 
+# This is needed for versioneer to be importable when building with PEP 517.
+# See <https://github.com/python-versioneer/python-versioneer/issues/192>
+# and <https://github.com/python-versioneer/python-versioneer/issues/193>
+# and links therein for more information.
+sys.path.append(path.dirname(__file__))
 import versioneer
 
 tests_require = [

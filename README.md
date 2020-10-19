@@ -316,8 +316,10 @@ aws-adfs integrates with:
   ```
 
 * python 2.6 is not supported
+* python 2.7 is not supported
 * python 3.2 is not supported
 * python 3.3 is not supported
+* python 3.4 is not supported
 
 
 # Credits
