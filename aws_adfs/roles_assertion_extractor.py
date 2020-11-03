@@ -35,8 +35,13 @@ def extract(html):
     )
     aws_roles = [element.text.split(',') for element in raw_roles]
 
-    # Note the format of the attribute value is provider_arn, role_arn
-    principal_roles = [role for role in aws_roles if ':saml-provider/' in role[0]]
+    # Note the format of the attribute value is provider_arn, role_arn or in some cases role_arn, provider_arn
+    principal_roles = []
+    for role in aws_roles:
+        if ':saml-provider/' in role[0]:
+                principal_roles.append(role)
+        elif ':saml-provider/' in role[1]:
+                 principal_roles.append([role[1],role[0]])
 
     aws_session_duration = default_session_duration
     # Retrieve session duration
