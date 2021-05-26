@@ -42,7 +42,7 @@ def fetch_html_encoded_roles(
     # also requires tricking the server into thinking we're using IEq
     # so that it servers up a redirect to the IWA page.
     if sspi:
-        _headers['User-Agent'] = 'Mozilla/5.0 (Windows NT 6.1; WOW64; Trident/7.0; rv:11.0) like Gecko'
+        _headers['User-Agent'] = 'Mozilla/5.0 (X11; Linux x86_64) Gecko/20100101 Firefox/60.0'
 
     # Initiate session handler
     session = requests.Session()
