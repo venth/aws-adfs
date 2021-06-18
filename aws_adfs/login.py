@@ -10,9 +10,9 @@ import logging
 from platform import system
 import sys
 import json
-from aws_adfs import authenticator
-from aws_adfs import prepare
-from aws_adfs import role_chooser
+from . import authenticator
+from . import prepare
+from . import role_chooser
 
 
 @click.command()
@@ -172,7 +172,7 @@ def login(
 
     if(role_arn is not None):
         config.role_arn = role_arn
-    principal_arn, config.role_arn, custom_profile = role_chooser.choose_role_to_assume(config, principal_roles)
+    principal_arn, config.role_arn = role_chooser.choose_role_to_assume(config, principal_roles)
     if principal_arn is None or config.role_arn is None:
         click.echo('This account does not have access to any roles', err=True)
         exit(-1)
@@ -199,7 +199,6 @@ def login(
     # then the lesser value of the two attributes, SessionDuration or SessionNotOnOrAfter,
     # establishes the maximum duration of the console session.
     try:
-        config.profile = custom_profile
         session = botocore.session.get_session()
         session.set_config_variable('profile', config.profile)
         conn = session.create_client(
@@ -226,11 +225,11 @@ def login(
     if stdout:
         _emit_json(aws_session_token)
     elif printenv:
-        # _emit_summary(config, aws_session_duration)
+        _emit_summary(config, aws_session_duration)
         _print_environment_variables(aws_session_token,config)
     else:
         _store(config, aws_session_token)
-        # _emit_summary(config, aws_session_duration)
+        _emit_summary(config, aws_session_duration)
 
 
 def _emit_json(aws_session_token):
