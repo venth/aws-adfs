@@ -8,13 +8,13 @@ import click
 from . import list_profiles
 from . import login
 from . import reset
-from . import _version
+from . import __version__
 
 
 def _print_version(ctx, param, value):
     if not value or ctx.resilient_parsing:
         return
-    click.echo(_version.get_versions()['version'])
+    click.echo(__version__)
     ctx.exit()
 
 

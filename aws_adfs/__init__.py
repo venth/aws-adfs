@@ -1,4 +1,6 @@
+try:
+    import importlib.metadata as importlib_metadata
+except ImportError:
+    import importlib_metadata
 
-from ._version import get_versions
-__version__ = get_versions()['version']
-del get_versions
+__version__ = importlib_metadata.version(__name__)
