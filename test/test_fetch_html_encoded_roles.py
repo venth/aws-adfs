@@ -1,4 +1,4 @@
-import mock
+from unittest import mock
 
 from aws_adfs import html_roles_fetcher
 
