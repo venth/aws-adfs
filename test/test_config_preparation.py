@@ -24,6 +24,7 @@ class TestConfigPreparation:
         default_session_duration = 3600
         default_sspi = False
         default_u2f_trigger_default = False
+        default_username_password_command = None
 
         # when configuration is prepared for not existing profile
         adfs_config = prepare.get_prepared_config(
@@ -38,6 +39,7 @@ class TestConfigPreparation:
             default_session_duration,
             default_sspi,
             default_u2f_trigger_default,
+            default_username_password_command,
         )
 
         # then resolved config contains defaults values
@@ -49,6 +51,7 @@ class TestConfigPreparation:
         assert default_session_duration == adfs_config.session_duration
         assert default_sspi == adfs_config.sspi
         assert default_u2f_trigger_default == adfs_config.u2f_trigger_default
+        assert default_username_password_command == adfs_config.username_password_command
 
     def test_when_the_profile_exists_but_lacks_ssl_verification_use_default_value(self):
         # given profile to read the configuration exists
@@ -72,6 +75,7 @@ class TestConfigPreparation:
         irrelevant_provider_id = 'irrelevant_provider_id'
         irrelevant_s3_signature_version = 'irrelevant_s3_signature_version'
         irrelevant_session_duration = 'irrelevant_session_duration'
+        irrelevant_username_password_command = 'irrelevant_username_password_command'
         
         # when configuration is prepared for existing profile
         adfs_config = prepare.get_prepared_config(
@@ -86,6 +90,7 @@ class TestConfigPreparation:
             irrelevant_session_duration,
             default_sspi,
             default_u2f_trigger_default,
+            irrelevant_username_password_command,
         )
 
         # then resolved ssl verification holds the default value
