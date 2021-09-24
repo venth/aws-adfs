@@ -5,6 +5,7 @@ import logging
 import os.path
 import subprocess
 import sys
+import urllib
 from datetime import datetime, timezone
 from os import environ
 from platform import system
@@ -13,6 +14,7 @@ import botocore
 import botocore.exceptions
 import botocore.session
 import click
+import requests
 from botocore import client
 
 from . import authenticator, helpers, prepare, role_chooser
@@ -91,6 +93,11 @@ from . import authenticator, helpers, prepare, role_chooser
     help='Output commands to set AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, AWS_SESSION_TOKEN, AWS_DEFAULT_REGION environmental variables instead of saving them to the aws configuration file.',
 )
 @click.option(
+    '--print-console-signin-url',
+    is_flag=True,
+    help='Output a URL that lets users who sign in to your organization\'s network securely access the AWS Management Console.',
+)
+@click.option(
     '--role-arn',
     help='Predefined role arn to selects, e.g. aws-adfs login --role-arn arn:aws:iam::123456789012:role/YourSpecialRole',
 )
@@ -133,6 +140,7 @@ def login(
     authfile,
     stdout,
     printenv,
+    print_console_signin_url,
     role_arn,
     session_duration,
     no_session_cache,
@@ -259,7 +267,9 @@ def login(
         _emit_json(aws_session_token)
     elif printenv:
         _emit_summary(config, aws_session_duration)
-        _print_environment_variables(aws_session_token,config)
+        _print_environment_variables(aws_session_token, config)
+    elif print_console_signin_url:
+        _print_console_signin_url(aws_session_token, adfs_host)
     else:
         _store(config, aws_session_token)
         _emit_summary(config, aws_session_duration)
@@ -275,7 +285,7 @@ def _emit_json(aws_session_token):
     }))
 
 
-def _print_environment_variables(aws_session_token,config):
+def _print_environment_variables(aws_session_token, config):
     envcommand = "export"
     if(sys.platform=="win32"):
         envcommand="set"
@@ -287,8 +297,41 @@ def _print_environment_variables(aws_session_token,config):
     click.echo(
         u"""{} AWS_SESSION_TOKEN={}""".format(envcommand,aws_session_token['Credentials']['SessionToken']))
     click.echo(
-        u"""{} AWS_DEFAULT_REGION={}""".format(envcommand,config.region))
+        u"""{} AWS_DEFAULT_REGION={}""".format(envcommand, config.region))
 
+
+def _print_console_signin_url(aws_session_token, adfs_host):
+    # The steps below come from https://docs.aws.amazon.com/IAM/latest/UserGuide/id_roles_providers_enable-console-custom-url.html
+
+    # Step 3: Format resulting temporary credentials into JSON
+    url_credentials = {}
+    url_credentials['sessionId'] = aws_session_token['Credentials']['AccessKeyId']
+    url_credentials['sessionKey'] = aws_session_token['Credentials']['SecretAccessKey']
+    url_credentials['sessionToken'] = aws_session_token['Credentials']['SessionToken']
+    json_string_with_temp_credentials = json.dumps(url_credentials)
+
+    # Step 4. Make request to AWS federation endpoint to get sign-in token. Construct the parameter string with
+    # the sign-in action request, a 12-hour session duration, and the JSON document with temporary credentials 
+    # as parameters.
+    request_parameters = "?Action=getSigninToken"
+    request_parameters += "&SessionDuration=43200"
+    request_parameters += "&Session=" + urllib.parse.quote_plus(json_string_with_temp_credentials)
+    request_url = "https://signin.aws.amazon.com/federation" + request_parameters
+    r = requests.get(request_url)
+    # Returns a JSON document with a single element named SigninToken.
+    signin_token = json.loads(r.text)
+
+    # Step 5: Create URL where users can use the sign-in token to sign in to
+    # the console. This URL must be used within 15 minutes after the
+    # sign-in token was issued.
+    request_parameters = "?Action=login"
+    request_parameters += "&Issuer=" + urllib.parse.quote_plus("https://" + adfs_host + "/adfs/ls/IdpInitiatedSignOn.aspx?loginToRp=urn:amazon:webservices")
+    request_parameters += "&Destination=" + urllib.parse.quote_plus("https://console.aws.amazon.com/")
+    request_parameters += "&SigninToken=" + signin_token["SigninToken"]
+    request_url = "https://signin.aws.amazon.com/federation" + request_parameters
+
+    # Send final URL to stdout
+    click.echo("""\nAWS web console signin URL:\n\n{}""".format(request_url))
 
 def _emit_summary(config, session_duration):
     click.echo(
