@@ -11,6 +11,7 @@ from platform import system
 import sys
 import json
 from . import authenticator
+from . import helpers
 from . import prepare
 from . import role_chooser
 
@@ -167,7 +168,7 @@ def login(
 
         principal_roles, assertion, aws_session_duration = authenticator.authenticate(config, config.adfs_user, password)
 
-        password = '########################################'
+        helpers.memset_zero(password)
         del password
 
     if(role_arn is not None):

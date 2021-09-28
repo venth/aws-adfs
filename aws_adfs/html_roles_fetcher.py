@@ -3,6 +3,8 @@ import os
 from platform import system
 import requests
 
+from . import helpers
+
 try:
     import cookielib
 except ImportError:
@@ -129,7 +131,8 @@ def fetch_html_encoded_roles(
     del auth
     del data
     del username
-    password = '###################################################'
+    if password is not None:
+        helpers.memset_zero(password)
     del password
 
     # Decode the response
