@@ -10,6 +10,7 @@ from datetime import datetime, timezone
 from os import environ
 from platform import system
 
+import boto3
 import botocore
 import botocore.exceptions
 import botocore.session
@@ -98,6 +99,14 @@ from . import authenticator, helpers, prepare, role_chooser
     help='Output a URL that lets users who sign in to your organization\'s network securely access the AWS Management Console.',
 )
 @click.option(
+    "--console-role-arn",
+    help="Role to assume for use in conjunction with --print-console-signin-url",
+)
+@click.option(
+    "--console-external-id",
+    help="External ID to pass in assume role for use in conjunction with --print-console-signin-url",
+)
+@click.option(
     '--role-arn',
     help='Predefined role arn to selects, e.g. aws-adfs login --role-arn arn:aws:iam::123456789012:role/YourSpecialRole',
 )
@@ -141,6 +150,8 @@ def login(
     stdout,
     printenv,
     print_console_signin_url,
+    console_role_arn,
+    console_external_id,
     role_arn,
     session_duration,
     no_session_cache,
@@ -269,7 +280,9 @@ def login(
         _emit_summary(config, aws_session_duration)
         _print_environment_variables(aws_session_token, config)
     elif print_console_signin_url:
-        _print_console_signin_url(aws_session_token, adfs_host)
+        _print_console_signin_url(
+            aws_session_token, adfs_host, console_role_arn, console_external_id
+        )
     else:
         _store(config, aws_session_token)
         _emit_summary(config, aws_session_duration)
@@ -300,8 +313,42 @@ def _print_environment_variables(aws_session_token, config):
         u"""{} AWS_DEFAULT_REGION={}""".format(envcommand, config.region))
 
 
-def _print_console_signin_url(aws_session_token, adfs_host):
+def _print_console_signin_url(
+    aws_session_token, adfs_host, console_role_arn, console_external_id
+):
     # The steps below come from https://docs.aws.amazon.com/IAM/latest/UserGuide/id_roles_providers_enable-console-custom-url.html
+
+    if console_role_arn:
+        # Step 2: Using the access keys for an IAM user in your AWS account,
+        # call "AssumeRole" to get temporary access keys for the federated user
+
+        # Note: Calls to AWS STS AssumeRole must be signed using the access key ID
+        # and secret access key of an IAM user or using existing temporary credentials.
+        # The credentials can be in EC2 instance metadata, in environment variables,
+        # or in a configuration file, and will be discovered automatically by the
+        # client('sts') function. For more information, see the Python SDK docs:
+        # http://boto3.readthedocs.io/en/latest/reference/services/sts.html
+        # http://boto3.readthedocs.io/en/latest/reference/services/sts.html#STS.Client.assume_role
+
+        # FIXME: use botocore instead of boto3: https://github.com/boto/botocore/blob/1.21.49/botocore/credentials.py#L766
+        sts_connection = boto3.client(
+            "sts",
+            aws_access_key_id=aws_session_token["Credentials"]["AccessKeyId"],
+            aws_secret_access_key=aws_session_token["Credentials"]["SecretAccessKey"],
+            aws_session_token=aws_session_token["Credentials"]["SessionToken"],
+        )
+
+        if console_external_id:
+            aws_session_token = sts_connection.assume_role(
+                RoleArn=console_role_arn,
+                RoleSessionName="aws-adfs",
+                ExternalId=console_external_id,
+            )
+        else:
+            aws_session_token = sts_connection.assume_role(
+                RoleArn=console_role_arn,
+                RoleSessionName="aws-adfs",
+            )
 
     # Step 3: Format resulting temporary credentials into JSON
     url_credentials = {}
@@ -314,7 +361,11 @@ def _print_console_signin_url(aws_session_token, adfs_host):
     # the sign-in action request, a 12-hour session duration, and the JSON document with temporary credentials 
     # as parameters.
     request_parameters = "?Action=getSigninToken"
-    request_parameters += "&SessionDuration=43200"
+
+    # https://signin.aws.amazon.com/federation endpoint returns a HTTP/1.1 400 Bad Request error with AssumeRole credentials when SessionDuration is set
+    if not console_role_arn:
+        request_parameters += "&SessionDuration=43200"
+
     request_parameters += "&Session=" + urllib.parse.quote_plus(json_string_with_temp_credentials)
     request_url = "https://signin.aws.amazon.com/federation" + request_parameters
     r = requests.get(request_url)

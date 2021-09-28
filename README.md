@@ -253,6 +253,14 @@ aws-adfs integrates with:
                                       AWS_DEFAULT_REGION environmental variables
                                       instead of saving them to the aws
                                       configuration file.
+      --print-console-signin-url      Output a URL that lets users who sign in to
+                                      your organization's network securely access
+                                      the AWS Management Console.
+      --console-role-arn TEXT         Role to assume for use in conjunction with
+                                      --print-console-signin-url
+      --console-external-id TEXT      External ID to pass in assume role for use
+                                      in conjunction with --print-console-signin-
+                                      url
       --role-arn TEXT                 Predefined role arn to selects, e.g. aws-
                                       adfs login --role-arn arn:aws:iam::123456789
                                       012:role/YourSpecialRole
@@ -420,4 +428,6 @@ poetry run pytest
 * [johan1252](https://github.com/johan1252) for: Ask for authentication method if there is no default method set in Duo Security settings
 * [pdecat](https://github.com/pdecat) for: Always return the same number of values from _initiate_authentication()
 * [mikereinhold](https://github.com/mikereinhold) for: Feature credential process
-* [pdecat](https://github.com/pdecat) for: Add --username-password-command command line parameter
+* [pdecat](https://github.com/pdecat) for:
+    * Add --username-password-command command line parameter
+    * Add --print-console-signin-url, --console-role-arn and --console-external-id command line parameters
