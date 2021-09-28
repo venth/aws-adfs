@@ -1,7 +1,7 @@
 import datetime
 import json
 from aws_adfs import login
-from mock import patch
+from unittest.mock import patch
 
 
 class TestCredentialProcessJson:

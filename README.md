@@ -35,7 +35,13 @@ aws-adfs integrates with:
 
 # Installation
 
-* user local installation
+* user local installation with [pipx](https://github.com/pypa/pipx)
+
+    ```
+    pipx install aws-adfs
+    ```
+
+* user local installation with pip
 
     ```
     pip install aws-adfs
@@ -52,7 +58,7 @@ aws-adfs integrates with:
 * virtualenvs
 
     ```
-    virtualenv -p /usr/bin/python2.7 aws-adfs
+    virtualenv aws-adfs
     source aws-adfs/bin/activate
     pip install aws-adfs
     ...
@@ -273,6 +279,7 @@ aws-adfs integrates with:
     ```
 
 # Known issues
+
 * duo-security
 
     `Error: Cannot begin authentication process. The error response: {"message": "Unknown authentication method.", "stat": "FAIL"}`
@@ -315,10 +322,29 @@ aws-adfs integrates with:
   export PATH=$(brew --prefix openssl)/bin:$PATH
   ```
 
-* python 2.6 is not supported
-* python 3.2 is not supported
-* python 3.3 is not supported
+* only python >= 3.5 to <4.0 are supported:
+  - python 2.6 is not supported
+  - python 2.7 is not supported
+  - python 3.2 is not supported
+  - python 3.3 is not supported
+  - python 3.4 is not supported
 
+# Development
+
+* bump version:
+```
+poetry version [patch|minor|major|prepatch|preminor|premajor|prerelease]
+```
+
+* update dependencies:
+```
+poetry update
+```
+
+* run unit tests:
+```
+poetry run pytest
+```
 
 # Credits
 * [Brandond](https://github.com/brandond) for: Remove storage of credentials, in favor of storing ADFS session cookies

@@ -1,0 +1,46 @@
+[build-system]
+requires = ["poetry>=1.0.0"]
+build-backend = "poetry.masonry.api"
+
+[tool]
+[tool.poetry]
+name = "aws-adfs"
+version = "1.25.0-alpha.1"
+description = "AWS Cli authenticator via ADFS - small command-line tool to authenticate via ADFS and assume chosen role"
+keywords = ["aws", "adfs", "console", "tool"]
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Environment :: Console",
+    "Intended Audience :: End Users/Desktop",
+    "Intended Audience :: Developers",
+    "Intended Audience :: System Administrators",
+    "License :: OSI Approved :: Python Software Foundation License",
+    "Operating System :: MacOS :: MacOS X",
+    "Operating System :: Microsoft :: Windows",
+    "Operating System :: POSIX",
+    "Programming Language :: Python :: 3"
+]
+authors = [
+    "Venth <artur.krysiak.warszawa@gmail.com>"
+]
+readme = "README.md"
+
+[tool.poetry.scripts]
+aws-adfs = "aws_adfs.commands:cli"
+
+[tool.poetry.dependencies]
+python = "^3.5"
+botocore = ">=1.12.6"
+click = "*"
+configparser = "*"
+fido2 = "^0.8.1" # fido2 0.9.0 is a breaking release
+lxml = "*"
+requests = "*"
+requests-kerberos = "*"
+
+[tool.poetry.dev-dependencies]
+coverage = "<4"
+pytest = [
+    { version = "^6.1.2", python = "^3.5.0" },
+    { version = ">=6.2.5", python = ">=3.6" },
+]

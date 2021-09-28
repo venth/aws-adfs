@@ -1,4 +1,4 @@
-import mock
+from unittest import mock
 
 from aws_adfs import html_roles_fetcher
 
@@ -48,7 +48,7 @@ class TestFetchHtmlEncodedRoles:
 
         # then returned html is empty
         assert fetched_response == empty_response
-        cookie_jar.clear.assert_called()
+        cookie_jar.clear.assert_called_with()
 
     def test_always_use_en_on_accept_language(self):
         # given adfs host which doesn't care that ssl is enabled or not
