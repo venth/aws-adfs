@@ -40,4 +40,7 @@ requests-kerberos = "*"
 
 [tool.poetry.dev-dependencies]
 coverage = "<4"
-pytest = "*"
+pytest = [
+    { version = "^6.1.2", python = "^3.5.0" },
+    { version = ">=6.2.5", python = ">=3.6" },
+]
