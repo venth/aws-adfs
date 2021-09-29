@@ -29,6 +29,7 @@ jobs:
 
       - name: Install libkrb5-dev
         run: sudo apt-get -y install libkrb5-dev
+        if: matrix.os == 'ubuntu-latest'
 
       - name: Install aws-adfs and its dependencies
         run: |
