@@ -16,6 +16,7 @@ on:
 
 jobs:
   test-and-package-wheel-archive:
+    name: Build wheel (${{ matrix.python-version }} on ${{ matrix.os }})
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
@@ -59,6 +60,7 @@ jobs:
             dist
 
   package-source-archive:
+    name: Package source archive
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
@@ -83,6 +85,7 @@ jobs:
             dist
 
   publish:
+    name: Publish source and wheel archives
     needs:
       - test-and-package-wheel-archive
       - package-source-archive
