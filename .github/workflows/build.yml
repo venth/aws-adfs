@@ -45,7 +45,7 @@ jobs:
       - name: Build a source archive
         run: |
           poetry build --format sdist
-        if: matrix.python-version == 3.9 # Only build source tarball once
+        if: matrix.python-version == 3.9 && matrix.os == 'ubuntu-latest' # Only build source tarball once
 
       - name: Build a wheel archive
         run: |
