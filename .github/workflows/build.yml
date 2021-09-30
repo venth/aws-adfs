@@ -1,8 +1,12 @@
-# This workflow will install Python dependencies and run tests with several versions of Python
+# This workflow will install Python dependencies and run tests with several versions of Python on MacOS, Ubuntu and Windows
 # When successful, packages are published to test.pypi.org and pypi.org (releases only)
 # For more information see: https://help.github.com/actions/language-and-framework-guides/using-python-with-github-actions
 
 name: Build
+
+env:
+  PYTHON_VERSION: 3.9
+  POETRY_VERSION: 1.1.10
 
 on:
   push:
@@ -11,12 +15,20 @@ on:
     branches: [master]
 
 jobs:
-  build:
-    runs-on: ubuntu-latest
+  test-and-package-wheel-archive:
+    name: Build wheel (${{ matrix.python-version }} on ${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
       matrix:
+        os: [macos-latest, ubuntu-latest, windows-latest]
         python-version: [3.5, 3.6, 3.7, 3.8, 3.9, 3.10-dev]
+        exclude:
+          # Python 3.10-dev on Windows is excluded for now as this combination:
+          # - has no pywin32 wheel available yet, see https://github.com/mhammond/pywin32/issues/1588 and https://pypi.org/project/pywin32/301/#files
+          # - has no lxml wheel available yet, and building lxml 4.6.3 fails, even with Cython 0.29.24 installed
+          - os: windows-latest
+            python-version: 3.10-dev
 
     steps:
       - uses: actions/checkout@v2
@@ -28,26 +40,79 @@ jobs:
 
       - name: Install libkrb5-dev
         run: sudo apt-get -y install libkrb5-dev
+        if: matrix.os == 'ubuntu-latest'
+
+      - name: Install poetry ${{ env.POETRY_VERSION }}
+        run: |
+          pip install poetry==${{ env.POETRY_VERSION }}
+          poetry config experimental.new-installer false # New installer does not support python 3.10 yet, see https://github.com/python-poetry/poetry/issues/4210
 
       - name: Install aws-adfs and its dependencies
         run: |
-          python -m pip install --upgrade pip
-          pip install poetry==1.1.10
-          poetry config experimental.new-installer false # New installer does not support python 3.10 yet, see https://github.com/python-poetry/poetry/issues/4210
           poetry install
 
       - name: Test with pytest
         run: |
           poetry run pytest
 
-      - name: Build a source archive
-        run: |
-          poetry build --format sdist
-        if: matrix.python-version == 3.9 # Only build source tarball once
-
       - name: Build a wheel archive
         run: |
           poetry build --format wheel
+
+      - name: Upload wheel archive
+        uses: actions/upload-artifact@v2
+        with:
+          path: |
+            dist
+
+  package-source-archive:
+    name: Package source archive
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Set up Python ${{ env.PYTHON_VERSION }}
+        uses: actions/setup-python@v2
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Install poetry ${{ env.POETRY_VERSION }}
+        run: |
+          pip install poetry==${{ env.POETRY_VERSION }}
+
+      - name: Build a source archive
+        run: |
+          poetry build --format sdist
+
+      - name: Upload source archive
+        uses: actions/upload-artifact@v2
+        with:
+          path: |
+            dist
+
+  publish:
+    name: Publish source and wheel archives
+    needs:
+      - test-and-package-wheel-archive
+      - package-source-archive
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags') # Only publish tagged releases
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Download all workflow source and wheel archives
+        uses: actions/download-artifact@v2
+        with:
+          path: dist
+
+      - name: Set up Python ${{ env.PYTHON_VERSION }}
+        uses: actions/setup-python@v2
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Install poetry ${{ env.POETRY_VERSION }}
+        run: |
+          pip install poetry==${{ env.POETRY_VERSION }}
 
       - name: Publish package to TestPyPI
         env:
@@ -55,14 +120,12 @@ jobs:
         run: |
           poetry config repositories.testpypi https://test.pypi.org/legacy/
           poetry publish --repository testpypi
-        if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags')
 
       - name: Check Version
         id: check-version
         run: |
           [[ "$(poetry version --short)" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]] \
             || echo ::set-output name=prerelease::true
-        if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags')
 
       - name: Create Release
         uses: ncipollo/release-action@v1
@@ -71,10 +134,9 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
           draft: false
           prerelease: steps.check-version.outputs.prerelease == 'true'
-        if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags')
 
       - name: Publish to PyPI
         env:
           POETRY_PYPI_TOKEN_PYPI: ${{ secrets.pypi_password }}
         run: poetry publish
-        if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags') && steps.check-version.outputs.prerelease != 'true'
+        if: steps.check-version.outputs.prerelease != 'true' # Only publish final releases to PyPI
