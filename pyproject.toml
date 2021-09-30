@@ -36,7 +36,12 @@ configparser = "*"
 fido2 = "^0.8.1" # fido2 0.9.0 is a breaking release
 lxml = "*"
 requests = "*"
-requests-kerberos = "*"
+requests-kerberos = [
+    { version = "*", markers = "platform_system != 'Windows'" },
+]
+requests-negotiate-sspi= [
+    { version = ">=0.3.4", markers = "platform_system == 'Windows'" },
+]
 
 [tool.poetry.dev-dependencies]
 coverage = "<4"
