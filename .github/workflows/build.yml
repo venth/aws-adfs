@@ -11,8 +11,7 @@ env:
 on:
   push:
     branches: [master]
-    tags:        
-      - v.*
+    tags: ["*"]
   pull_request:
     branches: [master]
 
