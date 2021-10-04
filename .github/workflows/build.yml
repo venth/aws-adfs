@@ -11,13 +11,12 @@ env:
 on:
   push:
     branches: [master]
-    tags:        
-      - v.*
+    tags: ["*"]
   pull_request:
     branches: [master]
 
 jobs:
-  test-and-package-wheel-archive:
+  test:
     name: Build wheel (${{ matrix.python-version }} on ${{ matrix.os }})
     runs-on: ${{ matrix.os }}
     strategy:
@@ -57,55 +56,13 @@ jobs:
         run: |
           poetry run pytest
 
-      - name: Build a wheel archive
-        run: |
-          poetry build --format wheel
-
-      - name: Upload wheel archive
-        uses: actions/upload-artifact@v2
-        with:
-          path: |
-            dist
-
-  package-source-archive:
-    name: Package source archive
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v2
-
-      - name: Set up Python ${{ env.PYTHON_VERSION }}
-        uses: actions/setup-python@v2
-        with:
-          python-version: ${{ env.PYTHON_VERSION }}
-
-      - name: Install poetry ${{ env.POETRY_VERSION }}
-        run: |
-          pip install poetry==${{ env.POETRY_VERSION }}
-
-      - name: Build a source archive
-        run: |
-          poetry build --format sdist
-
-      - name: Upload source archive
-        uses: actions/upload-artifact@v2
-        with:
-          path: |
-            dist
-
   publish:
     name: Publish source and wheel archives
-    needs:
-      - test-and-package-wheel-archive
-      - package-source-archive
-    runs-on: ubuntu-latest
+    needs: test
     if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags') # Only publish tagged releases
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-
-      - name: Download all workflow source and wheel archives
-        uses: actions/download-artifact@v2
-        with:
-          path: dist
 
       - name: Set up Python ${{ env.PYTHON_VERSION }}
         uses: actions/setup-python@v2
@@ -115,6 +72,10 @@ jobs:
       - name: Install poetry ${{ env.POETRY_VERSION }}
         run: |
           pip install poetry==${{ env.POETRY_VERSION }}
+
+      - name: Build source and wheel archives
+        run: |
+          poetry build
 
       - name: Publish package to TestPyPI
         env:
