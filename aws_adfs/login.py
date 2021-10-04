@@ -1,19 +1,20 @@
 import configparser
+import copy
+import json
+import logging
+import os.path
+import sys
+from datetime import datetime, timezone
+from os import environ
+from platform import system
 
 import botocore
 import botocore.exceptions
 import botocore.session
 import click
 from botocore import client
-from os import environ
-import logging
-from platform import system
-import sys
-import json
-from . import authenticator
-from . import helpers
-from . import prepare
-from . import role_chooser
+
+from . import authenticator, helpers, prepare, role_chooser
 
 
 @click.command()
@@ -94,6 +95,11 @@ from . import role_chooser
     type=int,
 )
 @click.option(
+    '--no-session-cache',
+    is_flag=True,
+    help='Do not use AWS session cache in ~/.aws/adfs_cache/ directory.',
+)
+@click.option(
     '--assertfile',
     help='Use SAML assertion response from a local file'
 )
@@ -108,24 +114,25 @@ from . import role_chooser
     help='Whether or not to also trigger the default authentication method when U2F is available (only works with Duo for now).',
 )
 def login(
-        profile,
-        region,
-        ssl_verification,
-        adfs_ca_bundle,
-        adfs_host,
-        output_format,
-        provider_id,
-        s3_signature_version,
-        env,
-        stdin,
-        authfile,
-        stdout,
-        printenv,
-        role_arn,
-        session_duration,
-        assertfile,
-        sspi,
-        u2f_trigger_default,
+    profile,
+    region,
+    ssl_verification,
+    adfs_ca_bundle,
+    adfs_host,
+    output_format,
+    provider_id,
+    s3_signature_version,
+    env,
+    stdin,
+    authfile,
+    stdout,
+    printenv,
+    role_arn,
+    session_duration,
+    no_session_cache,
+    assertfile,
+    sspi,
+    u2f_trigger_default,
 ):
     """
     Authenticates an user with active directory credentials
@@ -146,82 +153,96 @@ def login(
 
     _verification_checks(config)
 
-    # Try re-authenticating using an existing ADFS session
-    principal_roles, assertion, aws_session_duration = authenticator.authenticate(config, assertfile=assertfile)
-
-    # If we fail to get an assertion, prompt for credentials and try again
-    if assertion is None:
-        password = None
-
-        if stdin:
-            config.adfs_user, password = _stdin_user_credentials()
-        elif env:
-            config.adfs_user, password = _env_user_credentials()
-        elif authfile:
-            config.adfs_user, password = _file_user_credentials(config.profile, authfile)
-
-        if not config.adfs_user:
-            config.adfs_user = click.prompt(text='Username', type=str, default=config.adfs_user)
-
-        if not password:
-            password = click.prompt('Password', type=str, hide_input=True)
-
-        principal_roles, assertion, aws_session_duration = authenticator.authenticate(config, config.adfs_user, password)
-
-        helpers.memset_zero(password)
-        del password
-
-    if(role_arn is not None):
-        config.role_arn = role_arn
-    principal_arn, config.role_arn = role_chooser.choose_role_to_assume(config, principal_roles)
-    if principal_arn is None or config.role_arn is None:
-        click.echo('This account does not have access to any roles', err=True)
-        exit(-1)
-
-    # Use the assertion to get an AWS STS token using Assume Role with SAML
-    # according to the documentation:
-    #   http://docs.aws.amazon.com/IAM/latest/UserGuide/id_roles_providers_create_saml_assertions.html
-    # This element contains one AttributeValue element that specifies the maximum time that the user
-    # can access the AWS Management Console before having to request new temporary credentials.
-    # The value is an integer representing the number of seconds, and can be
-    # a maximum of 43200 seconds (12 hours). If this attribute is not present,
-    # then the maximum session duration defaults to one hour
-    # (the default value of the DurationSeconds parameter of the AssumeRoleWithSAML API).
-    # To use this attribute, you must configure the SAML provider to provide single sign-on access
-    # to the AWS Management Console through the console sign-in web endpoint at
-    # https://signin.aws.amazon.com/saml.
-    # Note that this attribute extends sessions only to the AWS Management Console.
-    # It cannot extend the lifetime of other credentials.
-    # However, if it is present in an AssumeRoleWithSAML API call,
-    # it can be used to shorten the lifetime of the credentials returned by the call to less than
-    # the default of 60 minutes.
-    #
-    # Note, too, that if a SessionNotOnOrAfter attribute is also defined,
-    # then the lesser value of the two attributes, SessionDuration or SessionNotOnOrAfter,
-    # establishes the maximum duration of the console session.
-    try:
-        session = botocore.session.get_session()
-        session.set_config_variable('profile', config.profile)
-        conn = session.create_client(
-            'sts',
-            region_name=region,
-            config=client.Config(signature_version=botocore.UNSIGNED),
+    # Get session credentials from cache if not expired to avoid invoking the ADFS host uselessly
+    session_cache_dir = (
+        None
+        if no_session_cache
+        else os.path.join(
+            os.path.dirname(config.aws_credentials_location), "adfs_cache"
         )
-    except botocore.exceptions.ProfileNotFound:
-        logging.debug('Profile {} does not exist yet'.format(config.profile))
-        session = botocore.session.get_session()
-        conn = session.create_client(
-            'sts',
-            region_name=region,
-            config=client.Config(signature_version=botocore.UNSIGNED),
-        )
-
-    aws_session_token = conn.assume_role_with_saml(
-        RoleArn=config.role_arn,
-        PrincipalArn=principal_arn,
-        SAMLAssertion=assertion,
-        DurationSeconds=int(config.session_duration),
     )
+    aws_session_token = _session_cache_get(session_cache_dir, profile)
+
+    aws_session_duration = "Not known when AWS session credentials are retrieved from cache."
+    if not aws_session_token:
+        # Try re-authenticating using an existing ADFS session
+        principal_roles, assertion, aws_session_duration = authenticator.authenticate(config, assertfile=assertfile)
+
+        # If we fail to get an assertion, prompt for credentials and try again
+        if assertion is None:
+            password = None
+
+            if stdin:
+                config.adfs_user, password = _stdin_user_credentials()
+            elif env:
+                config.adfs_user, password = _env_user_credentials()
+            elif authfile:
+                config.adfs_user, password = _file_user_credentials(config.profile, authfile)
+
+            if not config.adfs_user:
+                config.adfs_user = click.prompt(text='Username', type=str, default=config.adfs_user)
+
+            if not password:
+                password = click.prompt('Password', type=str, hide_input=True)
+
+            principal_roles, assertion, aws_session_duration = authenticator.authenticate(config, config.adfs_user, password)
+
+            helpers.memset_zero(password)
+            del password
+
+        if(role_arn is not None):
+            config.role_arn = role_arn
+        principal_arn, config.role_arn = role_chooser.choose_role_to_assume(config, principal_roles)
+        if principal_arn is None or config.role_arn is None:
+            click.echo('This account does not have access to any roles', err=True)
+            exit(-1)
+
+        # Use the assertion to get an AWS STS token using Assume Role with SAML
+        # according to the documentation:
+        #   http://docs.aws.amazon.com/IAM/latest/UserGuide/id_roles_providers_create_saml_assertions.html
+        # This element contains one AttributeValue element that specifies the maximum time that the user
+        # can access the AWS Management Console before having to request new temporary credentials.
+        # The value is an integer representing the number of seconds, and can be
+        # a maximum of 43200 seconds (12 hours). If this attribute is not present,
+        # then the maximum session duration defaults to one hour
+        # (the default value of the DurationSeconds parameter of the AssumeRoleWithSAML API).
+        # To use this attribute, you must configure the SAML provider to provide single sign-on access
+        # to the AWS Management Console through the console sign-in web endpoint at
+        # https://signin.aws.amazon.com/saml.
+        # Note that this attribute extends sessions only to the AWS Management Console.
+        # It cannot extend the lifetime of other credentials.
+        # However, if it is present in an AssumeRoleWithSAML API call,
+        # it can be used to shorten the lifetime of the credentials returned by the call to less than
+        # the default of 60 minutes.
+        #
+        # Note, too, that if a SessionNotOnOrAfter attribute is also defined,
+        # then the lesser value of the two attributes, SessionDuration or SessionNotOnOrAfter,
+        # establishes the maximum duration of the console session.
+        try:
+            session = botocore.session.get_session()
+            session.set_config_variable('profile', config.profile)
+            conn = session.create_client(
+                'sts',
+                region_name=region,
+                config=client.Config(signature_version=botocore.UNSIGNED),
+            )
+        except botocore.exceptions.ProfileNotFound:
+            logging.debug('Profile {} does not exist yet'.format(config.profile))
+            session = botocore.session.get_session()
+            conn = session.create_client(
+                'sts',
+                region_name=region,
+                config=client.Config(signature_version=botocore.UNSIGNED),
+            )
+
+        aws_session_token = conn.assume_role_with_saml(
+            RoleArn=config.role_arn,
+            PrincipalArn=principal_arn,
+            SAMLAssertion=assertion,
+            DurationSeconds=int(config.session_duration),
+        )
+
+        _session_cache_set(session_cache_dir, profile, aws_session_token)
 
     if stdout:
         _emit_json(aws_session_token)
@@ -241,6 +262,7 @@ def _emit_json(aws_session_token):
         "SessionToken": aws_session_token['Credentials']['SessionToken'],
         "Expiration": aws_session_token['Credentials']['Expiration'].isoformat()
     }))
+
 
 def _print_environment_variables(aws_session_token,config):
     envcommand = "export"
@@ -392,3 +414,67 @@ def _verification_checks(config):
     if not config.adfs_host:
         click.echo('\'--adfs-host\' parameter must be supplied', err=True)
         exit(-1)
+
+
+def _session_cache_set(session_cache_dir, profile, aws_session_credentials):
+    if session_cache_dir is None:
+        return
+
+    if not os.path.exists(session_cache_dir):
+        logging.debug(
+            "Cache directory {} does not exist yet, create it.".format(
+                session_cache_dir
+            )
+        )
+        os.mkdir(session_cache_dir, 0o700)
+    cache_file = os.path.join(session_cache_dir, "{}.json".format(profile))
+
+    aws_session_credentials = copy.deepcopy(aws_session_credentials)
+    aws_session_credentials["Credentials"]["Expiration"] = aws_session_credentials[
+        "Credentials"
+    ]["Expiration"].strftime("%Y-%m-%dT%H:%M:%S%z")
+
+    try:
+        # TODO: this probably needs locking of some sort to handle concurrent writes from multiple processes
+        with os.fdopen(os.open(cache_file, os.O_CREAT | os.O_WRONLY, 0o600), "w") as f:
+            json.dump(aws_session_credentials, f)
+            logging.debug(
+                "Wrote session credentials to cache file {}.".format(cache_file)
+            )
+    except Exception as e:
+        logging.warning(
+            "Failed to write session credentials to cache file {}.".format(cache_file),
+            e,
+        )
+        # TODO: maybe delete corrupt cache file?
+
+
+def _session_cache_get(session_cache_dir, profile):
+    if session_cache_dir is None:
+        return
+
+    cache_file = os.path.join(session_cache_dir, "{}.json".format(profile))
+    if not os.path.exists(cache_file):
+        logging.debug("Cache file {} does not exist yet.".format(cache_file))
+        return
+
+    try:
+        with open(os.path.join(session_cache_dir, "{}.json".format(profile))) as f:
+            aws_session_credentials = json.load(f)
+        aws_session_credentials["Credentials"]["Expiration"] = datetime.strptime(
+            aws_session_credentials["Credentials"]["Expiration"], "%Y-%m-%dT%H:%M:%S%z"
+        )
+    except Exception as e:
+        logging.warning(
+            "Failed to read session credentials from cache file {}.\n{}".format(
+                cache_file, e
+            )
+        )
+        return
+
+    if aws_session_credentials["Credentials"]["Expiration"] < datetime.now(
+        tz=timezone.utc
+    ):
+        return
+
+    return aws_session_credentials
