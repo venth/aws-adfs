@@ -341,11 +341,6 @@ aws-adfs integrates with:
 
 # Development
 
-* bump version:
-```
-poetry version [patch|minor|major|prepatch|preminor|premajor|prerelease]
-```
-
 * update dependencies:
 ```
 poetry update
@@ -356,79 +351,18 @@ poetry update
 poetry run pytest
 ```
 
-# Credits
-* [Brandond](https://github.com/brandond) for: Remove storage of credentials, in favor of storing ADFS session cookies
-* [Brandond](https://github.com/brandond) for: Add support for legacy aws_security_token key in credentials file
-* [Brandond](https://github.com/brandond) for: Store last username in profile config; use it as default for prompt
-* [Brandond](https://github.com/brandond) for: python 3 compatibility
-* [Brandond](https://github.com/brandond) for: Add support for Kerberos SSO on Windows via requests_negotiate_sspi
-* [Brandond](https://github.com/brandond) for: ssl_verification must be a str
-* [Brandond](https://github.com/brandond) for: Move pytest-runner out of setup-requires
-* [Brandond](https://github.com/brandond) for: Improve handling of role selection
-* [Brandond](https://github.com/brandond) for: Improve handling of errors caused by excessive cookie growth
-* [Brandond](https://github.com/brandond) for: Default to 'default' profile, in line with other AWS tools
-* [kwhitlock](https://github.com/kwhitlock) for: Added extra option "--provider-id"
-* [SydOps](https://github.com/SydOps) for: add additional information in list command's output
-* [eric-nord](https://github.com/eric-nord) for: bringing topic of [duo security](https://duo.com) MFA integration
-* [roblugton](https://github.com/roblugton) for: Fix formatting in README.md
-* [cliv](https://github.com/cliv) for: pointing out the issue with missing preferred device for duo-security and providing workaround
-* [AndrewFarley](https://github.com/AndrewFarley) for: Bug in parsing Duo host and signature, backwards compatible
-* [eikenb](https://github.com/eikenb) for: Version 0.3.4 returns no roles - thanks for vigilance of [eikenb](https://github.com/eikenb) spoiled egg was identified
-* [eikenb](https://github.com/eikenb) for: add login argument to accept username/password from stdin
-* [irgeek](https://github.com/irgeek) for: Add Symantec VIP Access support
-* [Brandond](https://github.com/brandond) for: Fix Negotiate auth on non-domain-joined Windows hosts
-* [giafar](https://github.com/giafar) for: Role arn as parameter
-* [zanettibo](https://github.com/zanettibo) for: Add support for Ansible Tower/AWX workflow authentication
-* [anthoneous](https://github.com/anthoneous) and [KyleJamesWalker](https://github.com/KyleJamesWalker) for: add session duration flag
-* [KyleJamesWalker](https://github.com/KyleJamesWalker) for: Allow phone call authentication
-* [KyleJamesWalker](https://github.com/KyleJamesWalker) for: Change default profile to default
-* [kwhitlock](https://github.com/kwhitlock) for: Feature/read username and password from file
-* [avoidik](https://github.com/avoidik) for: Workaround of Symantec VIP obfuscated form
-* [leonardo-test](https://github.com/leonardo-test) for fix: The --env flag is not being called and therefore using the env parameter will not work.
-* [NotMrSteve](https://github.com/NotMrSteve) for: Add RSA SecurID MFA
-* [JLambeth](https://github.com/JLambeth) for: Added flag for disabling Kerberos SSO authentication via SSPI
-* [bghinkle](https://github.com/bghinkle) for: Fix Duo API change - follow result_url and return cookie from result
-* [jan-molak](https://github.com/jan-molak) for: Corrected the XPath expression to work with the latest version of AWS…
-* [NotMrSteve](https://github.com/NotMrSteve) for: Save duo session cookies
-* [pdecat](https://github.com/pdecat) for: Fallback on prompt if env, stdin or auth file do not provide both username and password
-* [0x91](https://github.com/0x91) for: Support for Azure MFA Server
-* [pdecat](https://github.com/pdecat) for: Fix Duo authentication initiation failure messages
-* [tommywo](https://github.com/tommywo) for: save provider_id config
-* [budzejko](https://github.com/budzejko) for: Add support for adfs-ca-bundle option
-* [rinrinne](https://github.com/rinrinne) for: Respect AWS_DEFAULT_PROFILE if defined
-* [mjernsell](https://github.com/mjernsell) for: Add support for AzureMfaAuthentication
-* [kfattig](https://github.com/kfattig) for: Handle sspi like other config options
-* [pdecat](https://github.com/pdecat) for:
-    * lxml 4.4.0 dropped support for python 3.4
-    * Add Duo U2F support
-    * Use MozillaCookieJar as LWPCookieJar has an issue on Windows when cookies have an 'expires' date too far in the future and they are converted from timestamp to datetime
-    * Fix python 2.7 compatibility
-    * Document Windows 10 and WSL usage/issues
-    * Run tests with python 3.6, 3.7 and 3.8-dev
-    * Add options to trigger or not the default authentication method when U2F is available
-    * Fix AttributeError: 'generator' object has no attribute 'append' on python3
-    * Do not print stack trace if no U2F device is available
-    * Pin fido2 dependency to < 0.8.0 as it is a breaking release
-    * U2F: fido2 v0.8.1 compatibility (U2FClient.sign timeout renamed to event)
-* [bodgit](https://github.com/bodgit) for: Kerberos support
-* [pdecat](https://github.com/pdecat) for:
-    * Duo: support U2F with no preferred factor or device configured
-    * Document new libkrb5-dev system dependency for pykerberos
-    * Drop boto3 dependency
-    * Default SSPI to True on Windows only, False otherwise
-* [rheemskerk](https://github.com/rheemskerk) for:
-    * Fix username and password disclosure
-    * Fix authentication with cookies on non-windows system.
-    * Change `AuthMethod` parameter to `FormsAuthentication`
-* [brodie11](https://github.com/brodie11) and [gregorydulin](https://github.com/gregorydulin) for: Add support for non-public AWS regions
-* [johan1252](https://github.com/johan1252) for: Ask for authentication method if there is no default method set in Duo Security settings
-* [pdecat](https://github.com/pdecat) for: Always return the same number of values from _initiate_authentication()
-* [mikereinhold](https://github.com/mikereinhold) for: Feature credential process
-* [pdecat](https://github.com/pdecat) for:
-    * Add --username-password-command command line parameter
-    * Add --print-console-signin-url, --console-role-arn and --console-external-id command line parameters
-    * Update to fido2 v0.9.3
-    * Replace U2F by WebAuthn following Duo move from the former to the latter (compatible with FIDO U2F (CTAP1) by FIDO2 (CTAP2) authenticators)
-    * Remove --u2f-trigger-default/--no-u2f-trigger-default command line parameters
-* [mattmauriello](https://github.com/mattmauriello) for: Allow switching between multiple ADFS hosts without breaking former sessions
-* [fabaff](https://github.com/fabaff) for: Switch to poetry-core
+* release:
+
+```
+poetry version patch # or minor, major, prepatch, preminor, premajor, prerelease
+export CHANGELOG_GITHUB_TOKEN=$(gopass show -o pins/Github/github-changelog-generator)
+docker run -it --rm -v "$(pwd)":/usr/local/src/your-app -e CHANGELOG_GITHUB_TOKEN githubchangeloggenerator/github-changelog-generator -u venth -p aws-adfs --future-release=$(poetry version -s)
+git add .
+git commit -m "Release $(poetry version -s)"
+git tag --annotation -m "Release $(poetry version -s)" $(poetry version -s)
+git push && git push --tags
+```
+
+# Changelog
+
+See the [CHANGELOG.md](CHANGELOG.md) file, which is generated using [github-changelog-generator](https://github.com/github-changelog-generator/github-changelog-generator) and [action-github-changelog-generator](https://github.com/heinrichreimer/action-github-changelog-generator).
