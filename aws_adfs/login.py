@@ -95,6 +95,11 @@ from . import authenticator, helpers, prepare, role_chooser
     type=int,
 )
 @click.option(
+    '--no-session-cache',
+    is_flag=True,
+    help='Do not use AWS session cache in ~/.aws/adfs_cache/ directory.',
+)
+@click.option(
     '--assertfile',
     help='Use SAML assertion response from a local file'
 )
@@ -109,24 +114,25 @@ from . import authenticator, helpers, prepare, role_chooser
     help='Whether or not to also trigger the default authentication method when U2F is available (only works with Duo for now).',
 )
 def login(
-        profile,
-        region,
-        ssl_verification,
-        adfs_ca_bundle,
-        adfs_host,
-        output_format,
-        provider_id,
-        s3_signature_version,
-        env,
-        stdin,
-        authfile,
-        stdout,
-        printenv,
-        role_arn,
-        session_duration,
-        assertfile,
-        sspi,
-        u2f_trigger_default,
+    profile,
+    region,
+    ssl_verification,
+    adfs_ca_bundle,
+    adfs_host,
+    output_format,
+    provider_id,
+    s3_signature_version,
+    env,
+    stdin,
+    authfile,
+    stdout,
+    printenv,
+    role_arn,
+    session_duration,
+    no_session_cache,
+    assertfile,
+    sspi,
+    u2f_trigger_default,
 ):
     """
     Authenticates an user with active directory credentials
@@ -148,8 +154,13 @@ def login(
     _verification_checks(config)
 
     # Get session credentials from cache if not expired to avoid invoking the ADFS host uselessly
-    # TODO: maybe add a parameter to bypass the cache
-    session_cache_dir = os.path.join(os.path.dirname(config.aws_credentials_location), 'adfs_cache')
+    session_cache_dir = (
+        None
+        if no_session_cache
+        else os.path.join(
+            os.path.dirname(config.aws_credentials_location), "adfs_cache"
+        )
+    )
     aws_session_token = _session_cache_get(session_cache_dir, profile)
 
     aws_session_duration = "Not known when AWS session credentials are retrieved from cache."
@@ -406,6 +417,9 @@ def _verification_checks(config):
 
 
 def _session_cache_set(session_cache_dir, profile, aws_session_credentials):
+    if session_cache_dir is None:
+        return
+
     if not os.path.exists(session_cache_dir):
         logging.debug(
             "Cache directory {} does not exist yet, create it.".format(
@@ -436,6 +450,9 @@ def _session_cache_set(session_cache_dir, profile, aws_session_credentials):
 
 
 def _session_cache_get(session_cache_dir, profile):
+    if session_cache_dir is None:
+        return
+
     cache_file = os.path.join(session_cache_dir, "{}.json".format(profile))
     if not os.path.exists(cache_file):
         logging.debug("Cache file {} does not exist yet.".format(cache_file))

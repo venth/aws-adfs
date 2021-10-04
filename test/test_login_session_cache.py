@@ -6,6 +6,31 @@ from aws_adfs import login
 
 
 class TestLoginSessionCache:
+    def test_session_cache_set_cache_dir_is_none(self):
+        # given dummy AWS session credentials
+        aws_session_credentials = {
+            "Credentials": {
+                "AccessKeyId": "dummyAccessKeyId",
+                "SecretAccessKey": "dummySecretAccessKey",
+                "SessionToken": "dummySessionToken",
+                "Expiration": datetime(2021, 9, 22, 9, 22, 24, tzinfo=timezone.utc),
+            }
+        }
+
+        # when written to cache with None passed as cache_dir
+        login._session_cache_set(None, "myprofile", aws_session_credentials)
+
+        # then no error should happen
+
+    def test_session_cache_get_cache_dir_is_none(self):
+        # given None passed as cache_dir
+
+        # when read from cache
+        data = login._session_cache_get(None, "myprofile")
+
+        # then the data should be None
+        assert data is None
+
     def test_session_cache_set(self, tmp_path):
         # os.path.exists and os.path.join only supports PathLike objects since 3.6
         tmp_path = str(tmp_path)

@@ -217,54 +217,71 @@ aws-adfs integrates with:
                                       After successful authentication just use:
                                       aws --profile <authenticated profile>
                                       <service> ...
+
       --region TEXT                   The default AWS region that this script will
-                                      connect
-                                      to for all API calls
+                                      connect to for all API calls
+
       --ssl-verification / --no-ssl-verification
                                       SSL certificate verification: Whether or not
-                                      strict certificate
-                                      verification is done,
+                                      strict certificate verification is done,
                                       False should only be used for dev/test
+
       --adfs-ca-bundle TEXT           Override CA bundle for SSL certificate
                                       verification for ADFS server only.
+
       --adfs-host TEXT                For the first time for a profile it has to
                                       be provided, next time for the same profile
                                       it will be loaded from the stored
                                       configuration
+
       --output-format [json|text|table]
                                       Output format used by aws cli
       --provider-id TEXT              Provider ID, e.g urn:amazon:webservices
                                       (optional)
+
       --s3-signature-version [s3v4]   s3 signature version: Identifies the version
                                       of AWS Signature to support for
                                       authenticated requests. Valid values: s3v4
+
       --env                           Read username, password from environment
                                       variables (username and password).
+
       --stdin                         Read username, password from standard input
                                       separated by a newline.
+
       --authfile TEXT                 Read username, password from a local file
                                       (optional)
+
       --stdout                        Print aws_session_token in json on stdout.
       --printenv                      Output commands to set AWS_ACCESS_KEY_ID,
                                       AWS_SECRET_ACCESS_KEY, AWS_SESSION_TOKEN,
                                       AWS_DEFAULT_REGION environmental variables
                                       instead of saving them to the aws
                                       configuration file.
+
       --role-arn TEXT                 Predefined role arn to selects, e.g. aws-
                                       adfs login --role-arn arn:aws:iam::123456789
                                       012:role/YourSpecialRole
+
       --session-duration INTEGER      Define the amount of seconds you want to
                                       establish your STS session, e.g. aws-adfs
                                       login --session-duration 3600
+
+      --no-session-cache              Do not use AWS session cache in
+                                      ~/.aws/adfs_cache/ directory.
+
       --assertfile TEXT               Use SAML assertion response from a local
                                       file
+
       --sspi / --no-sspi              Whether or not to use Kerberos SSO
                                       authentication via SSPI (Windows only,
                                       defaults to True).
+
       --u2f-trigger-default / --no-u2f-trigger-default
                                       Whether or not to also trigger the default
                                       authentication method when U2F is available
                                       (only works with Duo for now).
+
       --help                          Show this message and exit.
     ```
     ```
