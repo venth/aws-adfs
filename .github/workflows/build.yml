@@ -6,7 +6,7 @@ name: Build
 
 env:
   PYTHON_VERSION: 3.9
-  POETRY_VERSION: 1.1.10
+  POETRY_VERSION: 1.1.11
 
 on:
   push:
@@ -46,7 +46,6 @@ jobs:
       - name: Install poetry ${{ env.POETRY_VERSION }}
         run: |
           pip install poetry==${{ env.POETRY_VERSION }}
-          poetry config experimental.new-installer false # New installer does not support python 3.10 yet, see https://github.com/python-poetry/poetry/issues/4210
 
       - name: Install aws-adfs and its dependencies
         run: |
