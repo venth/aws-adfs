@@ -308,7 +308,8 @@ def _emit_summary(config, session_duration):
             config.session_duration,
             config.sspi,
             config.u2f_trigger_default,
-        )
+        ),
+        err=True
     )
 
 
