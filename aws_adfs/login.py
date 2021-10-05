@@ -225,6 +225,7 @@ def login(
     if stdout:
         _emit_json(aws_session_token)
     elif printenv:
+        _emit_summary(config, aws_session_duration)
         _print_environment_variables(aws_session_token,config)
     else:
         _store(config, aws_session_token)
@@ -284,7 +285,8 @@ def _emit_summary(config, session_duration):
             config.session_duration,
             config.sspi,
             config.u2f_trigger_default,
-        )
+        ),
+        err=True
     )
 
 
