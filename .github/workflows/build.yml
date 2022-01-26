@@ -101,4 +101,4 @@ jobs:
         env:
           POETRY_PYPI_TOKEN_PYPI: ${{ secrets.pypi_password }}
         run: poetry publish
-        if: steps.check-version.outputs.prerelease != 'true' # Only publish final releases to PyPI
+        # if: steps.check-version.outputs.prerelease != 'true' # Only publish final releases to PyPI
