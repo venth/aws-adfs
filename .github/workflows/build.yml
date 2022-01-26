@@ -6,7 +6,7 @@ name: Build
 
 env:
   PYTHON_VERSION: 3.9
-  POETRY_VERSION: 1.1.11
+  POETRY_VERSION: 1.1.12
 
 on:
   push:
@@ -23,13 +23,7 @@ jobs:
       fail-fast: false
       matrix:
         os: [macos-latest, ubuntu-latest, windows-latest]
-        python-version: [3.5, 3.6, 3.7, 3.8, 3.9, "3.10"]
-        exclude:
-          # Python 3.10 on Windows is excluded for now as this combination:
-          # - has no pywin32 wheel available yet, see https://github.com/mhammond/pywin32/issues/1588 and https://pypi.org/project/pywin32/301/#files
-          # - has no lxml wheel available yet, and building lxml 4.6.3 fails, even with Cython 0.29.24 installed
-          - os: windows-latest
-            python-version: "3.10"
+        python-version: [3.6, 3.7, 3.8, 3.9, "3.10"]
 
     steps:
       - uses: actions/checkout@v2

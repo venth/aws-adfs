@@ -29,7 +29,7 @@ readme = "README.md"
 aws-adfs = "aws_adfs.commands:cli"
 
 [tool.poetry.dependencies]
-python = "^3.5"
+python = "^3.6"
 botocore = ">=1.12.6"
 click = "*"
 configparser = "*"
@@ -45,7 +45,4 @@ requests-negotiate-sspi= [
 
 [tool.poetry.dev-dependencies]
 coverage = "<4"
-pytest = [
-    { version = "^6.1.2", python = "^3.5.0" },
-    { version = ">=6.2.5", python = ">=3.6" },
-]
+pytest = "^6.1.2"
