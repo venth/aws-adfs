@@ -339,12 +339,13 @@ aws-adfs integrates with:
   export PATH=$(brew --prefix openssl)/bin:$PATH
   ```
 
-* only python >= 3.5 to <4.0 are supported:
+* only python >= 3.6 to <4.0 are supported:
   - python 2.6 is not supported
   - python 2.7 is not supported
   - python 3.2 is not supported
   - python 3.3 is not supported
   - python 3.4 is not supported
+  - python 3.5 is not supported
 
 # Development
 
