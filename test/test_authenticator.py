@@ -298,7 +298,7 @@ class TestAuthenticator:
         self.irrelevant_config.adfs_ca_bundle = None
         self.irrelevant_config.provider_id = 'irrelevant provider identifier'
         self.irrelevant_config.sspi = True
-        self.irrelevant_config.u2f_trigger_default = True
+        self.irrelevant_config.webauthn_trigger_default = True
 
         self.http_session = type('', (), {})()
         self.http_session.post = lambda *args, **kwargs: None

@@ -33,7 +33,7 @@ python = "^3.6"
 botocore = ">=1.12.6"
 click = "*"
 configparser = "*"
-fido2 = "^0.8.1" # fido2 0.9.0 is a breaking release
+fido2 = ">=0.9.3"
 lxml = "*"
 requests = "*"
 requests-kerberos = [
