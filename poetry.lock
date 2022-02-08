@@ -21,8 +21,24 @@ tests = ["coverage[toml] (>=5.0.2)", "hypothesis", "pympler", "pytest (>=4.3.0)"
 tests_no_zope = ["coverage[toml] (>=5.0.2)", "hypothesis", "pympler", "pytest (>=4.3.0)", "six", "mypy", "pytest-mypy-plugins", "cloudpickle"]
 
 [[package]]
+name = "boto3"
+version = "1.20.50"
+description = "The AWS SDK for Python"
+category = "main"
+optional = false
+python-versions = ">= 3.6"
+
+[package.dependencies]
+botocore = ">=1.23.50,<1.24.0"
+jmespath = ">=0.7.1,<1.0.0"
+s3transfer = ">=0.5.0,<0.6.0"
+
+[package.extras]
+crt = ["botocore[crt] (>=1.21.0,<2.0a0)"]
+
+[[package]]
 name = "botocore"
-version = "1.23.43"
+version = "1.23.50"
 description = "Low-level, data-driven core of boto 3."
 category = "main"
 optional = false
@@ -401,6 +417,20 @@ requests = ">=2.0"
 dev = ["setuptools-version-command"]
 
 [[package]]
+name = "s3transfer"
+version = "0.5.1"
+description = "An Amazon S3 Transfer Manager"
+category = "main"
+optional = false
+python-versions = ">= 3.6"
+
+[package.dependencies]
+botocore = ">=1.12.36,<2.0a.0"
+
+[package.extras]
+crt = ["botocore[crt] (>=1.20.29,<2.0a.0)"]
+
+[[package]]
 name = "six"
 version = "1.16.0"
 description = "Python 2 and 3 compatibility utilities"
@@ -460,7 +490,7 @@ testing = ["pytest (>=4.6)", "pytest-checkdocs (>=2.4)", "pytest-flake8", "pytes
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.6"
-content-hash = "906b6f8e325a908416badffbe5e0b36a6e645f987b15605514a604908037e122"
+content-hash = "eefbe01ae6176c012e1ba9b159acf18611317cb7fedb7676bca876f371ffb6fa"
 
 [metadata.files]
 atomicwrites = [
@@ -471,9 +501,13 @@ attrs = [
     {file = "attrs-21.4.0-py2.py3-none-any.whl", hash = "sha256:2d27e3784d7a565d36ab851fe94887c5eccd6a463168875832a1be79c82828b4"},
     {file = "attrs-21.4.0.tar.gz", hash = "sha256:626ba8234211db98e869df76230a137c4c40a12d72445c45d5f5b716f076e2fd"},
 ]
+boto3 = [
+    {file = "boto3-1.20.50-py3-none-any.whl", hash = "sha256:87994c3753ef386189a222556eaf7cb1ef63432d516b4344c7b2899ce544ad2a"},
+    {file = "boto3-1.20.50.tar.gz", hash = "sha256:c62362e3105c918272a95c9f4881587c3a3c68aa5fedcd322313def3688c9f7b"},
+]
 botocore = [
-    {file = "botocore-1.23.43-py3-none-any.whl", hash = "sha256:22c88a653a026439f2e9b0ade154fafe0eaaaea3fee6e080102d90ec4271284e"},
-    {file = "botocore-1.23.43.tar.gz", hash = "sha256:f8c60dff90a7aea7f84908f0e4e778890d4f08c883d2da111c15c10d7c199102"},
+    {file = "botocore-1.23.50-py3-none-any.whl", hash = "sha256:aa953d9767ff99a7aa35dde770a1405c8877cef9caf280859b94104483b8368d"},
+    {file = "botocore-1.23.50.tar.gz", hash = "sha256:109d9a200f70268d5429423fd8052f6fed5e041853d6621081692ea5ad7f70c7"},
 ]
 certifi = [
     {file = "certifi-2021.10.8-py2.py3-none-any.whl", hash = "sha256:d62a0163eb4c2344ac042ab2bdf75399a71a2d8c7d47eac2e2ee91b9d6339569"},
@@ -777,6 +811,10 @@ requests-kerberos = [
 ]
 requests-negotiate-sspi = [
     {file = "requests_negotiate_sspi-0.5.2-py2.py3-none-any.whl", hash = "sha256:84ca9e81cfd3f2bd5eede5f8eddec1d5b58d957efac5e7fc078a3b323d296b77"},
+]
+s3transfer = [
+    {file = "s3transfer-0.5.1-py3-none-any.whl", hash = "sha256:25c140f5c66aa79e1ac60be50dcd45ddc59e83895f062a3aab263b870102911f"},
+    {file = "s3transfer-0.5.1.tar.gz", hash = "sha256:69d264d3e760e569b78aaa0f22c97e955891cd22e32b10c51f784eeda4d9d10a"},
 ]
 six = [
     {file = "six-1.16.0-py2.py3-none-any.whl", hash = "sha256:8abb2f1d86890a2dfb989f9a77cfcfd3e47c2a354b01111771326f8aa26e0254"},
