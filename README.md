@@ -274,10 +274,6 @@ aws-adfs integrates with:
       --sspi / --no-sspi              Whether or not to use Kerberos SSO
                                       authentication via SSPI (Windows only,
                                       defaults to True).
-      --webauthn-trigger-default / --no-webauthn-trigger-default
-                                      Whether or not to also trigger the default
-                                      authentication method when WebAuthn is
-                                      available (only works with Duo for now).
       --help                          Show this message and exit.
     ```
     ```

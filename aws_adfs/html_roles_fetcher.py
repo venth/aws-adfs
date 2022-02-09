@@ -37,7 +37,6 @@ def fetch_html_encoded_roles(
         username=None,
         password=None,
         sspi=None,
-        webauthn_trigger_default=None,
 ):
 
     # Support for Kerberos SSO on Windows via requests_negotiate_sspi
