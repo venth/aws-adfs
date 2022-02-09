@@ -29,7 +29,7 @@ As of version 0.2.0, this tool acts on the 'default' profile unless an alternate
 ### MFA integration
 
 aws-adfs integrates with:
-* [duo security](https://duo.com) MFA provider with support for FIDO U2F hardware authenticator
+* [duo security](https://duo.com) MFA provider with support for FIDO U2F (CTAP1) / FIDO2 (CTAP2) hardware authenticators
 * [Symantec VIP](https://vip.symantec.com/) MFA provider
 * [RSA SecurID](https://www.rsa.com/) MFA provider
 
@@ -274,10 +274,6 @@ aws-adfs integrates with:
       --sspi / --no-sspi              Whether or not to use Kerberos SSO
                                       authentication via SSPI (Windows only,
                                       defaults to True).
-      --u2f-trigger-default / --no-u2f-trigger-default
-                                      Whether or not to also trigger the default
-                                      authentication method when U2F is available
-                                      (only works with Duo for now).
       --help                          Show this message and exit.
     ```
     ```
@@ -299,7 +295,7 @@ aws-adfs integrates with:
 
     Please setup preferred auth method in duo-security settings (settings' -> 'My Settings & Devices').
 
-* USB FIDO U2F does not work in Windows Subsystem for Linux (WSL)
+* USB FIDO2 does not work in Windows Subsystem for Linux (WSL)
 
     `OSError: [Errno 2] No such file or directory: '/sys/class/hidraw'`
 
@@ -310,9 +306,9 @@ aws-adfs integrates with:
     export AWS_SHARED_CREDENTIALS_FILE=/mnt/c/Users/username/.aws/credentials
     ```
 
-*  FIDO U2F devices are not detected on Windows 10 build 1903 or newer
+*  FIDO2 devices are not detected on Windows 10 build 1903 or newer
 
-    Running `aws-adfs` as Administrator is required since Windows 10 build 1903 to access FIDO U2F devices, cf. https://github.com/Yubico/python-fido2/issues/55)
+    Running `aws-adfs` as Administrator is required since Windows 10 build 1903 to access FIDO2 devices, cf. https://github.com/Yubico/python-fido2/issues/55)
 
 * in cases of trouble with lxml please install
 
@@ -431,3 +427,6 @@ poetry run pytest
 * [pdecat](https://github.com/pdecat) for:
     * Add --username-password-command command line parameter
     * Add --print-console-signin-url, --console-role-arn and --console-external-id command line parameters
+    * Update to fido2 v0.9.3
+    * Replace U2F by WebAuthn following Duo move from the former to the latter (compatible with FIDO U2F (CTAP1) by FIDO2 (CTAP2) authenticators)
+    * Remove --u2f-trigger-default/--no-u2f-trigger-default command line parameters

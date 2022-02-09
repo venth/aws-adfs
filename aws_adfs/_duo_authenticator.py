@@ -1,7 +1,9 @@
+import base64
+import binascii
 import click
 import lxml.etree as ET
 
-from fido2.client import ClientData, ClientError, U2fClient
+from fido2.client import ClientData, ClientError, Fido2Client
 from fido2.hid import CtapHidDevice
 try:
     from fido2.pcsc import CtapPcscDevice
@@ -13,6 +15,8 @@ import json
 import re
 
 from threading import Event, Thread
+
+from .helpers import trace_http_request
 
 try:
     # Python 3
@@ -33,7 +37,7 @@ _headers = {
 }
 
 
-def extract(html_response, ssl_verification_enabled, u2f_trigger_default, session):
+def extract(html_response, ssl_verification_enabled, session):
     """
     this strategy is based on description from: https://duo.com/docs/duoweb
     :param response: raw http response
@@ -46,7 +50,7 @@ def extract(html_response, ssl_verification_enabled, u2f_trigger_default, sessio
     roles_page_url = _action_url_on_validation_success(html_response)
 
     click.echo("Sending request for authentication", err=True)
-    (sid, preferred_factor, preferred_device, u2f_supported, auth_signature), initiated = _initiate_authentication(
+    (sid, preferred_factor, preferred_device, webauthn_supported, auth_signature), initiated = _initiate_authentication(
         duo_host,
         duo_request_signature,
         roles_page_url,
@@ -57,54 +61,19 @@ def extract(html_response, ssl_verification_enabled, u2f_trigger_default, sessio
         if auth_signature is None:
             click.echo("Waiting for additional authentication", err=True)
 
-            rq = queue.Queue()
-            auth_count = 0
-            if u2f_supported:
-                # Trigger U2F authentication
-                auth_count += 1
-                t = Thread(
-                    target=_perform_authentication_transaction,
-                    args=(
-                        duo_host,
-                        sid,
-                        preferred_factor,
-                        preferred_device,
-                        True,
-                        session,
-                        ssl_verification_enabled,
-                        rq,
-                    )
-                )
-                t.daemon = True
-                t.start()
-
-            if u2f_trigger_default or not u2f_supported:
-                # Trigger default authentication (call or push) concurrently to U2F
-                auth_count += 1
-                t = Thread(
-                    target=_perform_authentication_transaction,
-                    args=(
-                        duo_host,
-                        sid,
-                        preferred_factor,
-                        preferred_device,
-                        False,
-                        session,
-                        ssl_verification_enabled,
-                        rq,
-                    )
-                )
-                t.daemon = True
-                t.start()
-
-            while "Wait for responses":
-                auth_signature = rq.get()
-                auth_count -= 1
-                if auth_signature != "cancelled":
-                    break
-                if auth_count < 1:
-                    click.echo("All authentication methods cancelled, aborting.")
-                    exit(-2)
+            # Trigger default authentication (call, push or WebAuthn with FIDO U2F / FIDO2 authenticator)
+            auth_signature = _perform_authentication_transaction(
+                duo_host,
+                sid,
+                preferred_factor,
+                preferred_device,
+                webauthn_supported,
+                session,
+                ssl_verification_enabled,
+            )
+            if auth_signature == "cancelled":
+                click.echo("Authentication method cancelled, aborting.")
+                exit(-2)
                     
         click.echo('Going for aws roles', err=True)
         return _retrieve_roles_page(
@@ -118,8 +87,8 @@ def extract(html_response, ssl_verification_enabled, u2f_trigger_default, sessio
     return None, None, None
 
 
-def _perform_authentication_transaction(duo_host, sid, preferred_factor, preferred_device, use_u2f, session, ssl_verification_enabled, rq):
-    if (preferred_factor is None or preferred_device is None) and not use_u2f:
+def _perform_authentication_transaction(duo_host, sid, preferred_factor, preferred_device, webauthn_supported, session, ssl_verification_enabled):
+    if (preferred_factor is None or preferred_device is None):
         click.echo("No default authentication method configured.")
         preferred_factor = click.prompt(text='Please enter your desired authentication method (Ex: Duo Push)', type=str)
 
@@ -128,7 +97,7 @@ def _perform_authentication_transaction(duo_host, sid, preferred_factor, preferr
         sid,
         preferred_factor,
         preferred_device,
-        use_u2f,
+        webauthn_supported,
         session,
         ssl_verification_enabled
     )
@@ -141,12 +110,10 @@ def _perform_authentication_transaction(duo_host, sid, preferred_factor, preferr
         ssl_verification_enabled,
     )
     if transaction_id == "cancelled":
-        rq.put("cancelled")
+        return "cancelled"
     else:
-        rq.put(
-            _authentication_result(
-                duo_host, sid, transaction_id, session, ssl_verification_enabled
-            )
+        return _authentication_result(
+            duo_host, sid, transaction_id, session, ssl_verification_enabled
         )
 
 
@@ -161,26 +128,19 @@ def _retrieve_roles_page(roles_page_url, context, session, ssl_verification_enab
     logging.debug('context: {}'.format(context))
     logging.debug('sig_response: {}'.format(signed_response))
 
+    data = {
+        'AuthMethod': 'DuoAdfsAdapter',
+        'Context': context,
+        'sig_response': signed_response,
+    }
     response = session.post(
         roles_page_url,
         verify=ssl_verification_enabled,
         headers=_headers,
         allow_redirects=True,
-        data={
-            'AuthMethod': 'DuoAdfsAdapter',
-            'Context': context,
-            'sig_response': signed_response,
-        }
+        data=data
     )
-    logging.debug(u'''Request:
-            * url: {}
-            * headers: {}
-        Response:
-            * status: {}
-            * headers: {}
-            * body: {}
-        '''.format(roles_page_url, response.request.headers, response.status_code, response.headers,
-                   response.text))
+    trace_http_request(roles_page_url, response.request.headers, data, response.status_code, response.headers, response.text)
 
     if response.status_code != 200:
         raise click.ClickException(
@@ -204,24 +164,17 @@ def _authentication_result(
         ssl_verification_enabled
 ):
     status_for_url = "https://{}/frame/status".format(duo_host)
+    data = {
+        'sid': sid,
+        'txid': duo_transaction_id
+    }
     response = session.post(
         status_for_url,
         verify=ssl_verification_enabled,
         headers=_headers,
-        data={
-            'sid': sid,
-            'txid': duo_transaction_id
-        }
+        data=data
     )
-    logging.debug(u'''Request:
-        * url: {}
-        * headers: {}
-    Response:
-        * status: {}
-        * headers: {}
-        * body: {}
-    '''.format(status_for_url, response.request.headers, response.status_code, response.headers,
-               response.text))
+    trace_http_request(status_for_url, response.request.headers, data, response.status_code, response.headers, response.text)
 
     if response.status_code != 200:
         raise click.ClickException(
@@ -260,23 +213,16 @@ def _load_duo_result_url(
         ssl_verification_enabled
 ):
     result_for_url = 'https://{}'.format(duo_host) + result_url
+    data = {
+        'sid': sid
+    }
     response = session.post(
         result_for_url,
         verify=ssl_verification_enabled,
         headers=_headers,
-        data={
-            'sid': sid
-        }
+        data=data
     )
-    logging.debug(u'''Request:
-        * url: {}
-        * headers: {}
-    Response:
-        * status: {}
-        * headers: {}
-        * body: {}
-    '''.format(result_for_url, response.request.headers, response.status_code, response.headers,
-               response.text))
+    trace_http_request(result_for_url, response.request.headers, data, response.status_code, response.headers, response.text)
 
     if response.status_code != 200:
         raise click.ClickException(
@@ -300,24 +246,17 @@ def _verify_authentication_status(duo_host, sid, duo_transaction_id, session,
     responses = []
     while len(responses) < 10:
         status_for_url = "https://{}/frame/status".format(duo_host)
+        data = {
+            'sid': sid,
+            'txid': duo_transaction_id
+        }
         response = session.post(
             status_for_url,
             verify=ssl_verification_enabled,
             headers=_headers,
-            data={
-                'sid': sid,
-                'txid': duo_transaction_id
-            }
+            data=data
         )
-        logging.debug(u'''Request:
-            * url: {}
-            * headers: {}
-        Response:
-            * status: {}
-            * headers: {}
-            * body: {}
-        '''.format(status_for_url, response.request.headers, response.status_code, response.headers,
-                response.text))
+        trace_http_request(status_for_url, response.request.headers, data, response.status_code, response.headers, response.text)
 
         if response.status_code != 200:
             raise click.ClickException(
@@ -334,7 +273,7 @@ def _verify_authentication_status(duo_host, sid, duo_transaction_id, session,
                 )
             )
 
-        if json_response['response']['status_code'] not in ['answered', 'calling', 'pushed', 'u2f_sent']:
+        if json_response['response']['status_code'] not in ['answered', 'calling', 'pushed', 'webauthn_sent']:
             raise click.ClickException(
                 u'There was an issue during second factor verification. The error response: {}'.format(
                     response.text
@@ -344,39 +283,38 @@ def _verify_authentication_status(duo_host, sid, duo_transaction_id, session,
         if json_response['response']['status_code'] in ['pushed', 'answered', 'allow']:
             return duo_transaction_id
 
-        if json_response['response']['status_code'] == 'u2f_sent' and len(json_response['response']['u2f_sign_request']) > 0:
-            u2f_sign_requests = json_response['response']['u2f_sign_request']
+        if json_response['response']['status_code'] == 'webauthn_sent' and len(json_response['response']['webauthn_credential_request_options']) > 0:
+            webauthn_credential_request_options = json_response['response']['webauthn_credential_request_options']
+            webauthn_credential_request_options["challenge"] = base64.b64decode(webauthn_credential_request_options["challenge"])
+            for cred in webauthn_credential_request_options["allowCredentials"]:
+                cred["id"] = base64.urlsafe_b64decode(cred["id"] + "==") # Add arbitrary padding characters, unnecessary ones are ignored
+                cred.pop("transports")
 
-            # appId, challenge and session is the same for all requests, get them from the first
-            u2f_app_id = u2f_sign_requests[0]['appId']
-            u2f_challenge = u2f_sign_requests[0]['challenge']
-            u2f_session_id = u2f_sign_requests[0]['sessionId']
+            webauthn_session_id = webauthn_credential_request_options.pop('sessionId')
 
             devices = list(CtapHidDevice.list_devices())
             if CtapPcscDevice:
                 devices.extend(list(CtapPcscDevice.list_devices()))
 
             if not devices:
-                click.echo("No FIDO U2F authenticator is eligible.")
+                click.echo("No FIDO U2F / FIDO2 authenticator is eligible.")
                 return "cancelled"
 
             threads = []
-            u2f_response = {
-                "sessionId": u2f_session_id
+            webauthn_response = {
+                "sessionId": webauthn_session_id
             }
             rq = queue.Queue()
             cancel = Event()
             for device in devices:
                 t = Thread(
-                    target=_u2f_sign,
+                    target=_webauthn_get_assertion,
                     args=(
                         device,
-                        u2f_app_id,
-                        u2f_challenge,
-                        u2f_sign_requests,
+                        webauthn_credential_request_options,
                         duo_host,
                         sid,
-                        u2f_response,
+                        webauthn_response,
                         session,
                         ssl_verification_enabled,
                         cancel,
@@ -399,27 +337,34 @@ def _verify_authentication_status(duo_host, sid, duo_transaction_id, session,
     )
 
 
-def _u2f_sign(device, u2f_app_id, u2f_challenge, u2f_sign_requests, duo_host, sid, u2f_response, session, ssl_verification_enabled, cancel, rq):
-    click.echo("Activate your FIDO U2F authenticator now: '{}'".format(device), err=True)
-    client = U2fClient(device, u2f_app_id)
+def _webauthn_get_assertion(device, webauthn_credential_request_options, duo_host, sid, webauthn_response, session, ssl_verification_enabled, cancel, rq):
+    click.echo("Activate your FIDO U2F / FIDO2 authenticator now: '{}'".format(device), err=True)
+    client = Fido2Client(device, webauthn_credential_request_options["extensions"]["appid"])
     try:
-        u2f_response.update(
-                client.sign(
-                u2f_app_id,
-                u2f_challenge,
-                u2f_sign_requests,
-                event=cancel
-            )
+        assertion = client.get_assertion(
+                webauthn_credential_request_options,
+                event=cancel,
         )
+        authenticator_assertion_response = assertion.get_response(0)
+        assertion_response = assertion.get_assertions()[0]
 
-        # Cancel the other U2F prompts
-        cancel.set()
+        webauthn_response["id"] = base64.urlsafe_b64encode(assertion_response.credential["id"]).decode('ascii').rstrip("=") # Strip trailing padding characters
+        webauthn_response["rawId"] = webauthn_response["id"]
+        webauthn_response["type"] = assertion_response.credential["type"]
+        webauthn_response["authenticatorData"] = base64.urlsafe_b64encode(assertion_response.auth_data).decode('ascii')
+        webauthn_response["clientDataJSON"] = base64.urlsafe_b64encode(authenticator_assertion_response["clientData"]).decode('ascii')
+        webauthn_response["signature"] = binascii.hexlify(assertion_response.signature).decode("ascii")
+        webauthn_response["extensionResults"] = authenticator_assertion_response["extensionResults"]
+        logging.debug('webauthn_response: {}'.format(webauthn_response))
         
-        click.echo("Got response from FIDO U2F authenticator: '{}'".format(device), err=True)
-        rq.put(_submit_u2f_response(duo_host, sid, u2f_response, session, ssl_verification_enabled))
+        click.echo("Got response from FIDO U2F / FIDO2 authenticator: '{}'".format(device), err=True)
+        rq.put(_submit_webauthn_response(duo_host, sid, webauthn_response, session, ssl_verification_enabled))
     except:
-        pass
+        raise
     finally:
+        # Cancel the other FIDO U2F / FIDO2 prompts
+        cancel.set()
+
         device.close()
 
 
@@ -442,6 +387,14 @@ def _app(request_signature):
 def _initiate_authentication(duo_host, duo_request_signature, roles_page_url, session,
                              ssl_verification_enabled):
     prompt_for_url = 'https://{}/frame/web/v1/auth'.format(duo_host)
+    data = {
+        'parent': roles_page_url,
+        'java_version': '',
+        'flash_version': '',
+        'screen_resolution_width': '1280',
+        'screen_resolution_height': '800',
+        'color_depth': '24',
+    }
     response = session.post(
         prompt_for_url,
         verify=ssl_verification_enabled,
@@ -461,24 +414,9 @@ def _initiate_authentication(duo_host, duo_request_signature, roles_page_url, se
             'parent': roles_page_url,
             'v': '2.3',
         },
-        data={
-            'parent': roles_page_url,
-            'java_version': '',
-            'flash_version': '',
-            'screen_resolution_width': '1280',
-            'screen_resolution_height': '800',
-            'color_depth': '24',
-        }
+        data=data
     )
-    logging.debug(u'''Request:
-        * url: {}
-        * headers: {}
-    Response:
-        * status: {}
-        * headers: {}
-        * body: {}
-    '''.format(prompt_for_url, response.request.headers, response.status_code, response.headers,
-               response.text))
+    trace_http_request(prompt_for_url, response.request.headers, data, response.status_code, response.headers, response.text)
 
     if response.status_code != 200 or response.url is None:
         return (None, None, None, None, None), False
@@ -494,8 +432,8 @@ def _initiate_authentication(duo_host, duo_request_signature, roles_page_url, se
     sid = query['sid']
     preferred_factor = _preferred_factor(html_response)
     preferred_device = _preferred_device(html_response)
-    u2f_supported = _u2f_supported(html_response)
-    return (sid, preferred_factor, preferred_device, u2f_supported, None), True
+    webauthn_supported = _webauthn_supported(html_response)
+    return (sid, preferred_factor, preferred_device, webauthn_supported, None), True
 
 
 def _js_cookie(html_response):
@@ -516,49 +454,32 @@ def _preferred_device(html_response):
     return element is not None and element.get('value') or None
 
 
-def _u2f_supported(html_response):
-    u2f_supported_query = './/input[@name="factor"][@value="U2F Token"]'
-    elements = html_response.findall(u2f_supported_query)
+def _webauthn_supported(html_response):
+    webauthn_supported_query = './/input[@name="factor"][@value="WebAuthn Credential"]'
+    elements = html_response.findall(webauthn_supported_query)
     return len(elements) > 0
 
 
-def _begin_authentication_transaction(duo_host, sid, preferred_factor, preferred_device, u2f_supported, session,
+def _begin_authentication_transaction(duo_host, sid, preferred_factor, preferred_device, webauthn_supported, session,
                                       ssl_verification_enabled):
     prompt_for_url = "https://{}/frame/prompt".format(duo_host)
-    if u2f_supported:
-        response = session.post(
-            prompt_for_url,
-            verify=ssl_verification_enabled,
-            headers=_headers,
-            data={
-                'sid': sid,
-                'factor': "U2F Token",
-                'device': 'u2f_token',
-                'post_auth_action': ''
-            }
-        )
-    else:
-        click.echo("Triggering authentication method: '{}'".format(preferred_factor), err=True)
-        response = session.post(
-            prompt_for_url,
-            verify=ssl_verification_enabled,
-            headers=_headers,
-            data={
-                'sid': sid,
-                'factor': preferred_factor,
-                'device': preferred_device,
-                'out_of_date': ''
-            }
-        )
-    logging.debug(u'''Request:
-        * url: {}
-        * headers: {}
-    Response:
-        * status: {}
-        * headers: {}
-        * body: {}
-    '''.format(prompt_for_url, response.request.headers, response.status_code, response.headers,
-               response.text))
+    if webauthn_supported and preferred_factor == preferred_device:
+        preferred_factor = 'WebAuthn Credential'
+    click.echo("Triggering authentication method: '{}' with '{}".format(preferred_factor, preferred_device), err=True)
+    data = {
+        'sid': sid,
+        'factor': preferred_factor,
+        'device': preferred_device,
+        'post_auth_action': '',
+        'out_of_date': '',
+    }
+    response = session.post(
+        prompt_for_url,
+        verify=ssl_verification_enabled,
+        headers=_headers,
+        data=data
+    )
+    trace_http_request(prompt_for_url, response.request.headers, data, response.status_code, response.headers, response.text)
 
     if response.status_code != 200:
         raise click.ClickException(
@@ -576,32 +497,25 @@ def _begin_authentication_transaction(duo_host, sid, preferred_factor, preferred
     return json_response['response']['txid']
 
 
-def _submit_u2f_response(duo_host, sid, u2f_response, session, ssl_verification_enabled):
+def _submit_webauthn_response(duo_host, sid, webauthn_response, session, ssl_verification_enabled):
     prompt_for_url = "https://{}/frame/prompt".format(duo_host)
+    data = {
+        'sid': sid,
+        'device': 'webauthn_credential',
+        'factor': "webauthn_finish",
+        'response_data': json.dumps(webauthn_response),
+    }
     response = session.post(
         prompt_for_url,
         verify=ssl_verification_enabled,
         headers=_headers,
-        data={
-            'sid': sid,
-            'device': 'u2f_token',
-            'factor': "u2f_finish",
-            'response_data': json.dumps(u2f_response),
-        }
+        data=data
     )
-    logging.debug(u'''Request:
-        * url: {}
-        * headers: {}
-    Response:
-        * status: {}
-        * headers: {}
-        * body: {}
-    '''.format(prompt_for_url, response.request.headers, response.status_code, response.headers,
-               response.text))
+    trace_http_request(prompt_for_url, response.request.headers, data, response.status_code, response.headers, response.text)
 
     if response.status_code != 200:
         raise click.ClickException(
-            u'Issues during submitting U2F response for the authentication process. The error response {}'.format(
+            u'Issues during submitting WebAuthn response for the authentication process. The error response {}'.format(
                 response
             )
         )

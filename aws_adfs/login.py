@@ -129,11 +129,6 @@ from . import authenticator, helpers, prepare, role_chooser
     default=system() == 'Windows',
     help='Whether or not to use Kerberos SSO authentication via SSPI (Windows only, defaults to True).',
 )
-@click.option(
-    '--u2f-trigger-default/--no-u2f-trigger-default',
-    default=None,
-    help='Whether or not to also trigger the default authentication method when U2F is available (only works with Duo for now).',
-)
 def login(
     profile,
     region,
@@ -157,7 +152,6 @@ def login(
     no_session_cache,
     assertfile,
     sspi,
-    u2f_trigger_default,
 ):
     """
     Authenticates an user with active directory credentials
@@ -173,7 +167,6 @@ def login(
         s3_signature_version,
         session_duration,
         sspi,
-        u2f_trigger_default,
         username_password_command,
     )
 
@@ -399,7 +392,6 @@ def _emit_summary(config, session_duration):
             * S3 Signature Version              : '{}'
             * STS Session Duration in seconds   : '{}'
             * SSPI:                             : '{}'
-            * U2F and default method            : '{}'
         """.format(
             config.profile,
             config.region,
@@ -412,7 +404,6 @@ def _emit_summary(config, session_duration):
             config.s3_signature_version,
             config.session_duration,
             config.sspi,
-            config.u2f_trigger_default,
         ),
         err=True
     )
@@ -540,7 +531,6 @@ def _store(config, aws_session_token):
         config_file.set(profile, 'adfs_config.session_duration', config.session_duration)
         config_file.set(profile, 'adfs_config.provider_id', config.provider_id)
         config_file.set(profile, 'adfs_config.sspi', config.sspi)
-        config_file.set(profile, 'adfs_config.u2f_trigger_default', config.u2f_trigger_default)
 
     store_config(config.profile, config.aws_credentials_location, credentials_storer)
     if config.profile == 'default':
