@@ -19,7 +19,7 @@ try:
         from requests_negotiate_sspi import HttpNegotiateAuth
         _auth_provider = HttpNegotiateAuth
     else:
-        from requests_kerberos import HTTPKerberosAuth, OPTIONAL
+        from requests_gssapi import HTTPKerberosAuth, OPTIONAL
         _auth_provider = HTTPKerberosAuth
 except ImportError:
     pass

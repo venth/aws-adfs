@@ -145,14 +145,6 @@ ssh = ["bcrypt (>=3.1.5)"]
 test = ["pytest (>=6.2.0)", "pytest-cov", "pytest-subtests", "pytest-xdist", "pretend", "iso8601", "pytz", "hypothesis (>=1.11.4,!=3.79.2)"]
 
 [[package]]
-name = "dataclasses"
-version = "0.8"
-description = "A backport of the dataclasses module for Python 3.6"
-category = "main"
-optional = false
-python-versions = ">=3.6, <3.7"
-
-[[package]]
 name = "decorator"
 version = "5.1.1"
 description = "Decorators for Humans"
@@ -226,14 +218,6 @@ description = "JSON Matching Expressions"
 category = "main"
 optional = false
 python-versions = ">=2.6, !=3.0.*, !=3.1.*, !=3.2.*"
-
-[[package]]
-name = "krb5"
-version = "0.2.0"
-description = "Kerberos API bindings for Python"
-category = "main"
-optional = false
-python-versions = ">=3.6"
 
 [[package]]
 name = "lxml"
@@ -314,24 +298,6 @@ python-versions = "*"
 pywin32 = ">=223"
 
 [[package]]
-name = "pyspnego"
-version = "0.3.1"
-description = "Windows Negotiate Authentication Client and Server"
-category = "main"
-optional = false
-python-versions = ">=3.6"
-
-[package.dependencies]
-cryptography = "*"
-dataclasses = {version = "*", markers = "python_version < \"3.7\""}
-gssapi = {version = ">=1.5.0", optional = true, markers = "sys_platform != \"win32\" and extra == \"kerberos\""}
-krb5 = {version = "*", optional = true, markers = "sys_platform != \"win32\" and extra == \"kerberos\""}
-
-[package.extras]
-kerberos = ["gssapi (>=1.5.0)", "krb5"]
-yaml = ["ruamel.yaml"]
-
-[[package]]
 name = "pytest"
 version = "7.0.0"
 description = "pytest: simple powerful testing with Python"
@@ -391,16 +357,15 @@ socks = ["PySocks (>=1.5.6,!=1.5.7)", "win-inet-pton"]
 use_chardet_on_py3 = ["chardet (>=3.0.2,<5)"]
 
 [[package]]
-name = "requests-kerberos"
-version = "0.14.0"
-description = "A Kerberos authentication handler for python-requests"
+name = "requests-gssapi"
+version = "1.2.3"
+description = "A GSSAPI authentication handler for python-requests"
 category = "main"
 optional = false
-python-versions = ">=3.6"
+python-versions = "*"
 
 [package.dependencies]
-cryptography = ">=1.3"
-pyspnego = {version = "*", extras = ["kerberos"]}
+gssapi = "*"
 requests = ">=1.1.0"
 
 [[package]]
@@ -492,7 +457,7 @@ testing = ["pytest (>=4.6)", "pytest-checkdocs (>=2.4)", "pytest-flake8", "pytes
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.6"
-content-hash = "76905eaf85143f59ff6124f5b1dd56cff9d17a83d2cfe0b1a014fcf52ae86a18"
+content-hash = "e870ce01507e6b81424357263c7dc7c1845544e835ec94e7bffa5dbad28b871d"
 
 [metadata.files]
 atomicwrites = [
@@ -654,10 +619,6 @@ cryptography = [
     {file = "cryptography-36.0.1-pp38-pypy38_pp73-win_amd64.whl", hash = "sha256:39bdf8e70eee6b1c7b289ec6e5d84d49a6bfa11f8b8646b5b3dfe41219153316"},
     {file = "cryptography-36.0.1.tar.gz", hash = "sha256:53e5c1dc3d7a953de055d77bef2ff607ceef7a2aac0353b5d630ab67f7423638"},
 ]
-dataclasses = [
-    {file = "dataclasses-0.8-py3-none-any.whl", hash = "sha256:0201d89fa866f68c8ebd9d08ee6ff50c0b255f8ec63a71c16fda7af82bb887bf"},
-    {file = "dataclasses-0.8.tar.gz", hash = "sha256:8479067f342acf957dc82ec415d355ab5edb7e7646b90dc6e2fd1d96ad084c97"},
-]
 decorator = [
     {file = "decorator-5.1.1-py3-none-any.whl", hash = "sha256:b8c3f85900b9dc423225913c5aace94729fe1fa9763b38939a95226f02d37186"},
     {file = "decorator-5.1.1.tar.gz", hash = "sha256:637996211036b6385ef91435e4fae22989472f9d571faba8927ba8253acbc330"},
@@ -701,17 +662,6 @@ iniconfig = [
 jmespath = [
     {file = "jmespath-0.10.0-py2.py3-none-any.whl", hash = "sha256:cdf6525904cc597730141d61b36f2e4b8ecc257c420fa2f4549bac2c2d0cb72f"},
     {file = "jmespath-0.10.0.tar.gz", hash = "sha256:b85d0567b8666149a93172712e68920734333c0ce7e89b78b3e987f71e5ed4f9"},
-]
-krb5 = [
-    {file = "krb5-0.2.0-cp310-cp310-macosx_10_9_x86_64.whl", hash = "sha256:21e40bd3f05db9d66aaa0e23556889f47cdb9ee5f32a48bd4103ba5c1b9f5db2"},
-    {file = "krb5-0.2.0-cp310-cp310-macosx_11_0_arm64.whl", hash = "sha256:61a9c8aa2d71c12a26fd4110967e6a31002627ef20fc8199406281f8c833f196"},
-    {file = "krb5-0.2.0-cp36-cp36m-macosx_10_9_x86_64.whl", hash = "sha256:6aadccabfd7bd2bfcd02afba67586fb34f09dc761adb706e313d2a1c4f17e7c0"},
-    {file = "krb5-0.2.0-cp37-cp37m-macosx_10_9_x86_64.whl", hash = "sha256:0930bcc03dff6f87342f15214dfd971e3af3e1c7013e2b26858b9064cd869491"},
-    {file = "krb5-0.2.0-cp38-cp38-macosx_10_9_x86_64.whl", hash = "sha256:86d0ae09c4239cbe14a7da5ac46020eee3a9f9d9f54f11fc126f2e9a19bb3584"},
-    {file = "krb5-0.2.0-cp38-cp38-macosx_11_0_arm64.whl", hash = "sha256:c99f9d78fa23b6ece55697be201fdffeb932d14a8302c1d4af0bd48553675d2e"},
-    {file = "krb5-0.2.0-cp39-cp39-macosx_10_9_x86_64.whl", hash = "sha256:a4e97e118d57ebae10cfaff11ece2b9f453c9c0406db9e18b9966c126014aad5"},
-    {file = "krb5-0.2.0-cp39-cp39-macosx_11_0_arm64.whl", hash = "sha256:7873197ac130607000c70d5b6c6b2232c69c76d6b88142d7417dfb5bde2269d1"},
-    {file = "krb5-0.2.0.tar.gz", hash = "sha256:67df5e0f974ea97d4bfb4ef8f8cc4a2172894b6cdba01f3315f33abcfb2cc41b"},
 ]
 lxml = [
     {file = "lxml-4.7.1-cp27-cp27m-macosx_10_14_x86_64.whl", hash = "sha256:d546431636edb1d6a608b348dd58cc9841b81f4116745857b6cb9f8dadb2725f"},
@@ -799,20 +749,6 @@ pypiwin32 = [
     {file = "pypiwin32-223-py3-none-any.whl", hash = "sha256:67adf399debc1d5d14dffc1ab5acacb800da569754fafdc576b2a039485aa775"},
     {file = "pypiwin32-223.tar.gz", hash = "sha256:71be40c1fbd28594214ecaecb58e7aa8b708eabfa0125c8a109ebd51edbd776a"},
 ]
-pyspnego = [
-    {file = "pyspnego-0.3.1-cp310-cp310-win32.whl", hash = "sha256:b02c9b61f85c96f969c78f492b35915a590dddabf987687eb1256ef2fd8fbdcb"},
-    {file = "pyspnego-0.3.1-cp310-cp310-win_amd64.whl", hash = "sha256:6387b4631120205240d1be25aff7a78d41db9b99bb5803b3ac6b7b6ed80b8920"},
-    {file = "pyspnego-0.3.1-cp36-cp36m-win32.whl", hash = "sha256:19da2de9d55d73d05b2798d4e5bd7ee5980e573ae50dc2f2bc460df5eaffe5ea"},
-    {file = "pyspnego-0.3.1-cp36-cp36m-win_amd64.whl", hash = "sha256:37c4d80a0c90bd2b670c583b2efbd210c26f54b1f7661c0cbc684a954b88c1c3"},
-    {file = "pyspnego-0.3.1-cp37-cp37m-win32.whl", hash = "sha256:9235a3159a4e1648d6bb4d170b8d68ecf5b1f55fa2f3157335ce74df5c192468"},
-    {file = "pyspnego-0.3.1-cp37-cp37m-win_amd64.whl", hash = "sha256:e15d16b205fbc5e945244b974312e9796467913f69736fdad262edee0c3c105f"},
-    {file = "pyspnego-0.3.1-cp38-cp38-win32.whl", hash = "sha256:f4a00cc3796d34212b391caecb3fd636cdefea798cb4ac231f893bdade674f01"},
-    {file = "pyspnego-0.3.1-cp38-cp38-win_amd64.whl", hash = "sha256:27dd07b6b918c289d2820c685b346a198498354cf3a1bfe9ec19cff9fa8fce2f"},
-    {file = "pyspnego-0.3.1-cp39-cp39-win32.whl", hash = "sha256:a0d41d43657cd4d4456ca734ec00b6e24c95a144499cfc429371a310c4b10d7a"},
-    {file = "pyspnego-0.3.1-cp39-cp39-win_amd64.whl", hash = "sha256:6df4b5233ec28358992adadfef5be76807ca1424e7c0fbf430424759edc85f8b"},
-    {file = "pyspnego-0.3.1-py2.py3-none-any.whl", hash = "sha256:75a0d4be4236f6b7c2ded0b43fd03e942c48cdbe91c2856f45f22884b7e92ddc"},
-    {file = "pyspnego-0.3.1.tar.gz", hash = "sha256:ccb8d9cea310f1715d5ed3d2d092db9bf50ff2762cf94a0dd9dfab7774a727fe"},
-]
 pytest = [
     {file = "pytest-7.0.0-py3-none-any.whl", hash = "sha256:42901e6bd4bd4a0e533358a86e848427a49005a3256f657c5c8f8dd35ef137a9"},
     {file = "pytest-7.0.0.tar.gz", hash = "sha256:dad48ffda394e5ad9aa3b7d7ddf339ed502e5e365b1350e0af65f4a602344b11"},
@@ -839,9 +775,8 @@ requests = [
     {file = "requests-2.27.1-py2.py3-none-any.whl", hash = "sha256:f22fa1e554c9ddfd16e6e41ac79759e17be9e492b3587efa038054674760e72d"},
     {file = "requests-2.27.1.tar.gz", hash = "sha256:68d7c56fd5a8999887728ef304a6d12edc7be74f1cfa47714fc8b414525c9a61"},
 ]
-requests-kerberos = [
-    {file = "requests-kerberos-0.14.0.tar.gz", hash = "sha256:cda9d1240ae5392e081869881c8742d0e171fd6a893a7ac0875db2748e966fd1"},
-    {file = "requests_kerberos-0.14.0-py2.py3-none-any.whl", hash = "sha256:da74ea478ccd8584de88092bdcd17a7c29d494374a340d1d8677189903c9ac6a"},
+requests-gssapi = [
+    {file = "requests-gssapi-1.2.3.tar.gz", hash = "sha256:20784508981401f7153c933eed095338933a40818da65a259dbf2d80dccb150e"},
 ]
 requests-negotiate-sspi = [
     {file = "requests_negotiate_sspi-0.5.2-py2.py3-none-any.whl", hash = "sha256:84ca9e81cfd3f2bd5eede5f8eddec1d5b58d957efac5e7fc078a3b323d296b77"},

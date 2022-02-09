@@ -34,10 +34,13 @@ botocore = ">=1.12.6"
 click = "*"
 configparser = "*"
 fido2 = ">=0.9.3"
+gssapi = [
+    { version = ">=1.7.0", markers = "platform_system != 'Windows'" },
+]
 lxml = "*"
 requests = "*"
-requests-kerberos = [
-    { version = "*", markers = "platform_system != 'Windows'" },
+requests-gssapi = [
+    { version = "^1.2.3", markers = "platform_system != 'Windows'" },
 ]
 requests-negotiate-sspi= [
     { version = ">=0.3.4", markers = "platform_system == 'Windows'" },
