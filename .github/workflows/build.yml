@@ -90,7 +90,7 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
           draft: false
           generateReleaseNotes: true
-          prerelease: steps.check-version.outputs.prerelease == 'true'
+          prerelease: ${{ steps.check-version.outputs.prerelease == 'true' }}
 
       - name: Publish to PyPI
         env:
