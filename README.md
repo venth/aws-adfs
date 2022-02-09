@@ -274,10 +274,6 @@ aws-adfs integrates with:
       --sspi / --no-sspi              Whether or not to use Kerberos SSO
                                       authentication via SSPI (Windows only,
                                       defaults to True).
-      --webauthn-trigger-default / --no-webauthn-trigger-default
-                                      Whether or not to also trigger the default
-                                      authentication method when WebAuthn is
-                                      available (only works with Duo for now).
       --help                          Show this message and exit.
     ```
     ```
@@ -433,3 +429,4 @@ poetry run pytest
     * Add --print-console-signin-url, --console-role-arn and --console-external-id command line parameters
     * Update to fido2 v0.9.3
     * Replace U2F by WebAuthn following Duo move from the former to the latter (compatible with FIDO U2F (CTAP1) by FIDO2 (CTAP2) authenticators)
+    * Remove --u2f-trigger-default/--no-u2f-trigger-default command line parameters

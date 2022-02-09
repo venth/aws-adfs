@@ -37,7 +37,7 @@ _headers = {
 }
 
 
-def extract(html_response, ssl_verification_enabled, webauthn_trigger_default, session):
+def extract(html_response, ssl_verification_enabled, session):
     """
     this strategy is based on description from: https://duo.com/docs/duoweb
     :param response: raw http response
@@ -61,54 +61,19 @@ def extract(html_response, ssl_verification_enabled, webauthn_trigger_default, s
         if auth_signature is None:
             click.echo("Waiting for additional authentication", err=True)
 
-            rq = queue.Queue()
-            auth_count = 0
-            if webauthn_supported:
-                # Trigger FIDO U2F / FIDO2 authentication
-                auth_count += 1
-                t = Thread(
-                    target=_perform_authentication_transaction,
-                    args=(
-                        duo_host,
-                        sid,
-                        preferred_factor,
-                        preferred_device,
-                        True,
-                        session,
-                        ssl_verification_enabled,
-                        rq,
-                    )
-                )
-                t.daemon = True
-                t.start()
-
-            if webauthn_trigger_default or not webauthn_supported:
-                # Trigger default authentication (call or push) concurrently to FIDO U2F / FIDO2
-                auth_count += 1
-                t = Thread(
-                    target=_perform_authentication_transaction,
-                    args=(
-                        duo_host,
-                        sid,
-                        preferred_factor,
-                        preferred_device,
-                        False,
-                        session,
-                        ssl_verification_enabled,
-                        rq,
-                    )
-                )
-                t.daemon = True
-                t.start()
-
-            while "Wait for responses":
-                auth_signature = rq.get()
-                auth_count -= 1
-                if auth_signature != "cancelled":
-                    break
-                if auth_count < 1:
-                    click.echo("All authentication methods cancelled, aborting.")
-                    exit(-2)
+            # Trigger default authentication (call, push or WebAuthn with FIDO U2F / FIDO2 authenticator)
+            auth_signature = _perform_authentication_transaction(
+                duo_host,
+                sid,
+                preferred_factor,
+                preferred_device,
+                webauthn_supported,
+                session,
+                ssl_verification_enabled,
+            )
+            if auth_signature == "cancelled":
+                click.echo("Authentication method cancelled, aborting.")
+                exit(-2)
                     
         click.echo('Going for aws roles', err=True)
         return _retrieve_roles_page(
@@ -122,8 +87,8 @@ def extract(html_response, ssl_verification_enabled, webauthn_trigger_default, s
     return None, None, None
 
 
-def _perform_authentication_transaction(duo_host, sid, preferred_factor, preferred_device, use_webauthn, session, ssl_verification_enabled, rq):
-    if (preferred_factor is None or preferred_device is None) and not use_webauthn:
+def _perform_authentication_transaction(duo_host, sid, preferred_factor, preferred_device, webauthn_supported, session, ssl_verification_enabled):
+    if (preferred_factor is None or preferred_device is None):
         click.echo("No default authentication method configured.")
         preferred_factor = click.prompt(text='Please enter your desired authentication method (Ex: Duo Push)', type=str)
 
@@ -132,7 +97,7 @@ def _perform_authentication_transaction(duo_host, sid, preferred_factor, preferr
         sid,
         preferred_factor,
         preferred_device,
-        use_webauthn,
+        webauthn_supported,
         session,
         ssl_verification_enabled
     )
@@ -145,12 +110,10 @@ def _perform_authentication_transaction(duo_host, sid, preferred_factor, preferr
         ssl_verification_enabled,
     )
     if transaction_id == "cancelled":
-        rq.put("cancelled")
+        return "cancelled"
     else:
-        rq.put(
-            _authentication_result(
-                duo_host, sid, transaction_id, session, ssl_verification_enabled
-            )
+        return _authentication_result(
+            duo_host, sid, transaction_id, session, ssl_verification_enabled
         )
 
 

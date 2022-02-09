@@ -18,7 +18,6 @@ def get_prepared_config(
         s3_signature_version,
         session_duration,
         sspi,
-        webauthn_trigger_default,
         username_password_command,
 ):
     """
@@ -41,7 +40,6 @@ def get_prepared_config(
     :param s3_signature_version: s3 signature version
     :param session_duration: AWS STS session duration (default 1 hour)
     :param sspi: Whether SSPI is enabled
-    :param webauthn_trigger_default: Whether to also trigger the default authentication method when WebAuthn is available
     :param username_password_command: The command used to retrieve username and password information
     """
     def default_if_none(value, default):
@@ -65,7 +63,6 @@ def get_prepared_config(
     )
     adfs_config.session_duration = default_if_none(session_duration, adfs_config.session_duration)
     adfs_config.sspi = default_if_none(sspi, adfs_config.sspi)
-    adfs_config.webauthn_trigger_default = default_if_none(webauthn_trigger_default, adfs_config.webauthn_trigger_default)
     adfs_config.username_password_command = default_if_none(username_password_command, adfs_config.username_password_command)
 
     return adfs_config
@@ -122,9 +119,6 @@ def create_adfs_default_config(profile):
 
     # Whether SSPI is enabled
     config.sspi = system() == "Windows"
-
-    # Whether to also trigger the default authentication method when WebAuthn is available
-    config.webauthn_trigger_default = True
 
     # The command used to retrieve username and password information
     config.username_password_command = None
@@ -194,9 +188,6 @@ def _load_adfs_config_from_stored_profile(adfs_config, profile):
         adfs_config.sspi = ast.literal_eval(config.get_or(
             profile, 'adfs_config.sspi',
             str(adfs_config.sspi)))
-        adfs_config.webauthn_trigger_default = ast.literal_eval(config.get_or(
-            profile, 'adfs_config.webauthn_trigger_default',
-            str(adfs_config.webauthn_trigger_default)))
         adfs_config.username_password_command = config.get_or(profile, 'adfs_config.username_password_command', adfs_config.username_password_command)
 
     if profile == 'default':
