@@ -45,5 +45,5 @@ requests-negotiate-sspi= [
 boto3 = "^1.20.50"
 
 [tool.poetry.dev-dependencies]
-coverage = "<4"
+coverage = "<7"
 pytest = "^6.1.2"
