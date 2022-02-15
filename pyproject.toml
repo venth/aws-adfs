@@ -46,5 +46,5 @@ boto3 = "^1.20.50"
 
 [tool.poetry.dev-dependencies]
 coverage = "<7"
-pytest = "^7.0.0"
+pytest = "^7.0.1"
 toml = "^0.10.2"
