@@ -2,6 +2,7 @@ import logging
 import os
 from platform import system
 import requests
+import hashlib
 
 from . import helpers
 
@@ -52,7 +53,10 @@ def fetch_html_encoded_roles(
     # MozillaCookieJar works because it does not convert the timestamps.
     # Duo uses 253402300799 for its cookies which translates into 9999-12-31T23:59:59Z.
     # Windows 64bit maximum date is 3000-12-31T23:59:59Z, and 32bit is 2038-01-18T23:59:59Z.
-    session.cookies = cookielib.MozillaCookieJar(filename=adfs_cookie_location)
+    # 
+    # using the same cookiejar across multiple ADFS hosts causes issues, so use a unique jar per host
+    cookiejar_filename = u'{}_{}'.format( adfs_cookie_location, hashlib.md5(adfs_host.encode('utf-8')).hexdigest() )
+    session.cookies = cookielib.MozillaCookieJar(filename=cookiejar_filename)
 
     try:
         have_creds = (username and password) or (_auth_provider and sspi)
