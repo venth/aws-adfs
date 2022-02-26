@@ -55,7 +55,7 @@ def fetch_html_encoded_roles(
     # Windows 64bit maximum date is 3000-12-31T23:59:59Z, and 32bit is 2038-01-18T23:59:59Z.
     # 
     # using the same cookiejar across multiple ADFS hosts causes issues, so use a unique jar per host
-    cookiejar_filename = '{}_{}'.format( adfs_cookie_location, hashlib.md5(adfs_host.encode('utf-8')).hexdigest() )
+    cookiejar_filename = '{}_{}'.format(adfs_cookie_location, hashlib.md5(adfs_host.encode('utf-8')).hexdigest())
     session.cookies = cookielib.MozillaCookieJar(filename=cookiejar_filename)
 
     try:
