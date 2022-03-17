@@ -35,6 +35,11 @@ aws-adfs integrates with:
 
 # Installation
 
+* prerequisites
+    ```
+    python-gssapi
+    ```    
+
 * user local installation with [pipx](https://github.com/pypa/pipx)
 
     ```
