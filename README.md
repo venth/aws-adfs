@@ -431,3 +431,4 @@ poetry run pytest
     * Replace U2F by WebAuthn following Duo move from the former to the latter (compatible with FIDO U2F (CTAP1) by FIDO2 (CTAP2) authenticators)
     * Remove --u2f-trigger-default/--no-u2f-trigger-default command line parameters
 * [mattmauriello](https://github.com/mattmauriello) for: Allow switching between multiple ADFS hosts without breaking former sessions
+* [fabaff](https://github.com/fabaff) for: Switch to poetry-core
