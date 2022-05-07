@@ -22,7 +22,7 @@ def extract(html_response, ssl_verification_enabled, session):
 
     roles_page_url = _action_url_on_validation_success(html_response)
 
-    rsa_securid_code = click.prompt(text='Enter your RSA SecurID token', type=str)
+    rsa_securid_code = click.prompt(text='Enter your RSA SecurID token', type=str, hide_input=True)
 
     click.echo('Going for aws roles', err=True)
     return _retrieve_roles_page(
