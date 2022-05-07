@@ -3,28 +3,15 @@
 [![Travis build](https://api.travis-ci.org/venth/aws-adfs.svg?branch=master)](https://api.travis-ci.org/venth/aws-adfs.svg?branch=master)
 ![Build Status](https://github.com/venth/aws-adfs/workflows/Build/badge.svg?branch=master)
 
-The project provides command line tool - `aws-adfs` to ease aws cli authentication against ADFS (multi factor authentication with active directory) and
+The project provides command line tool - `aws-adfs` to ease AWS cli authentication against ADFS (multi factor authentication with active directory).
 
 ## `aws-adfs` command line tool
-Thanks to [Brandond](https://github.com/brandond) contribution - "Remove storage of credentials, in favor of storing ADFS session cookies"
-aws-adfs:
 
-> allows you to re-login to STS without
-> entering credentials for an extended period of time, without having to store the user's actual credentials.
-> It also lets an organization control the period in which a user can re-login to STS without entering credentials,
-> by altering the ADFS session lifetime.
+* allows you to re-login to STS without entering credentials for an extended period of time, without having to store the user's actual credentials. It also lets an organization control the period in which a user can re-login to STS without entering credentials, by altering the ADFS session lifetime.
 
-Thanks to [Brandond](https://github.com/brandond) contribution - "Add support for legacy aws_security_token key in credentials file"
-aws-adfs supports ansible by providing two keys with security token:
-* AWS_SESSION_TOKEN and
-* AWS_SECURITY_TOKEN
+* supports automation tools like ansible by providing security token in `AWS_SESSION_TOKEN`/`AWS_SECURITY_TOKEN` environment variables.
 
-Thanks to [Brandond](https://github.com/brandond) contribution - "Add support for Kerberos SSO on Windows via requests_negotiate_sspi"
-* on windows os will be used Security Support Provider Interface
-
-### Compatibility
-
-As of version 0.2.0, this tool acts on the 'default' profile unless an alternate profile name has been specified on the command line or in your environment. Previous versions acted on the 'adfs' profile by default.
+* supports using Security Support Provider Interface (SSPI) on Windows OS.
 
 ### MFA integration
 
