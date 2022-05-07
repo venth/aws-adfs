@@ -346,10 +346,10 @@ export CHANGELOG_GITHUB_TOKEN=$(gopass show -o pins/Github/github-changelog-gene
 docker run -it --rm -v "$(pwd)":/usr/local/src/your-app -e CHANGELOG_GITHUB_TOKEN githubchangeloggenerator/github-changelog-generator -u venth -p aws-adfs --future-release=$(poetry version -s)
 git add .
 git commit -m "Release $(poetry version -s)"
-git tag --annotation -m "Release $(poetry version -s)" $(poetry version -s)
+git tag --annotate -m "Release $(poetry version -s)" $(poetry version -s)
 git push && git push --tags
 ```
 
 # Changelog
 
-See the [CHANGELOG.md](CHANGELOG.md) file, which is generated using [github-changelog-generator](https://github.com/github-changelog-generator/github-changelog-generator) and [action-github-changelog-generator](https://github.com/heinrichreimer/action-github-changelog-generator).
+See the [CHANGELOG.md](CHANGELOG.md) file, which is generated using [github-changelog-generator](https://github.com/github-changelog-generator/github-changelog-generator).
