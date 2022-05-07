@@ -1,11 +1,12 @@
 # Changelog
 
-## [Unreleased](https://github.com/venth/aws-adfs/tree/HEAD)
+## [2.0.3](https://github.com/venth/aws-adfs/tree/2.0.3) (2022-05-07)
 
-[Full Changelog](https://github.com/venth/aws-adfs/compare/2.0.2...HEAD)
+[Full Changelog](https://github.com/venth/aws-adfs/compare/2.0.2...2.0.3)
 
 **Merged pull requests:**
 
+- feat\(doc\): use github-changelog-generator for generating CHANGELOG.md [\#233](https://github.com/venth/aws-adfs/pull/233) ([pdecat](https://github.com/pdecat))
 - Hide RSA token [\#231](https://github.com/venth/aws-adfs/pull/231) ([gchambert](https://github.com/gchambert))
 
 ## [2.0.2](https://github.com/venth/aws-adfs/tree/2.0.2) (2022-04-27)
