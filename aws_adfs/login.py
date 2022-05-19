@@ -565,7 +565,7 @@ def _session_cache_set(session_cache_dir, profile, aws_session_credentials):
 
     try:
         # TODO: this probably needs locking of some sort to handle concurrent writes from multiple processes
-        with os.fdopen(os.open(cache_file, os.O_CREAT | os.O_WRONLY, 0o600), "w") as f:
+        with os.fdopen(os.open(cache_file, os.O_CREAT | os.O_WRONLY | os.O_TRUNC, 0o600), "w") as f:
             json.dump(aws_session_credentials, f)
             logging.debug(
                 "Wrote session credentials to cache file {}.".format(cache_file)
