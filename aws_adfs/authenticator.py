@@ -161,7 +161,7 @@ def _is_duo_authentication(html_response):
     duo_auth_method = './/input[@id="authMethod"]'
     element = html_response.find(duo_auth_method)
     duo = element is not None
-    duo = duo and element.get('value') == 'DuoAdfsAdapter'
+    duo = duo and element.get("value") == "DuoAdfsAdapter"
     return duo
 
 def _is_symantec_vip_authentication(html_response):
