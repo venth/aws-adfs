@@ -347,7 +347,7 @@ docker run -it --rm -v "$(pwd)":/usr/local/src/your-app -e CHANGELOG_GITHUB_TOKE
 git add .
 git commit -m "Release $(poetry version -s)"
 git tag --annotate -m "Release $(poetry version -s)" $(poetry version -s)
-git push && git push --tags
+git push
 ```
 
 # Changelog
