@@ -1,5 +1,13 @@
 # Changelog
 
+## [2.0.4](https://github.com/venth/aws-adfs/tree/2.0.4) (2022-06-01)
+
+[Full Changelog](https://github.com/venth/aws-adfs/compare/2.0.3...2.0.4)
+
+**Merged pull requests:**
+
+- Adding truncate flag when opening the credential cache file. [\#235](https://github.com/venth/aws-adfs/pull/235) ([mattmauriello](https://github.com/mattmauriello))
+
 ## [2.0.3](https://github.com/venth/aws-adfs/tree/2.0.3) (2022-05-07)
 
 [Full Changelog](https://github.com/venth/aws-adfs/compare/2.0.2...2.0.3)
