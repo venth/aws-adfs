@@ -21,7 +21,7 @@ def get_prepared_config(
         username_password_command,
 ):
     """
-    Prepares ADF configuration for login task.
+    Prepares ADFS configuration for login task.
     The task comprises steps as follows:
         - default configuration preparation,
         - creating aws cli configuration files, if needed
