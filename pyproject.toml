@@ -49,6 +49,5 @@ pytest = "^7.0.1"
 toml = "^0.10.2"
 
 [tool.black]
-# Make sure to match flake8's max-line-length in tox.ini.
 line-length = 130          # black's default is 88
 target-version = ['py310']
