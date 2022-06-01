@@ -12,7 +12,7 @@ def extract(html):
 
     # Check to see if login returned an error
     # Since we're screen-scraping the login form, we need to pull it out of a label
-    for element in html.findall('.//form[@id="loginForm"]//label[@id="errorText"]'):
+    for element in html.findall('.//form[@id="hiddenform"]//label[@id="errorText"]'):
         if element.text is not None:
             click.echo('Login error: {}'.format(element.text), err=True)
             exit(-1)
