@@ -10,6 +10,7 @@ import logging
 import time
 
 from . import roles_assertion_extractor
+from .helpers import trace_http_request
 
 
 def extract(html_response, ssl_verification_enabled, session):
@@ -50,16 +51,7 @@ def _retrieve_roles_page(roles_page_url, context, session, ssl_verification_enab
                 'Context': context,
             }
         )
-
-        logging.debug(u'''Request:
-                * url: {}
-                * headers: {}
-            Response:
-                * status: {}
-                * headers: {}
-                * body: {}
-            '''.format(roles_page_url, response.request.headers, response.status_code, response.headers,
-                       response.text))
+        trace_http_request(response)
 
         if response.status_code != 200:
             raise click.ClickException(
