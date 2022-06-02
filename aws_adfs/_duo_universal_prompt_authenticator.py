@@ -174,15 +174,7 @@ def _retrieve_roles_page(roles_page_url, context, session, ssl_verification_enab
     response = session.post(
         adfs_url,
         verify=ssl_verification_enabled,
-        headers={
-            "User-Agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/75.0.3770.100 Safari/537.36",
-            "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
-            "Accept-Language": "en-US,en;q=0.5",
-            "Accept-Encoding": "gzip, deflate, br",
-            "DNT": "1",
-            "Upgrade-Insecure-Requests": "1",
-            "Content-Type": "application/x-www-form-urlencoded",
-        },
+        headers=_headers,
         allow_redirects=True,
         data=data,
     )
@@ -412,15 +404,7 @@ def _initiate_authentication(
     response = session.post(
         duo_url,
         verify=ssl_verification_enabled,
-        headers={
-            "User-Agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/75.0.3770.100 Safari/537.36",
-            "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
-            "Accept-Language": "en-US,en;q=0.5",
-            "Accept-Encoding": "gzip, deflate, br",
-            "DNT": "1",
-            "Upgrade-Insecure-Requests": "1",
-            "Content-Type": "application/x-www-form-urlencoded",
-        },
+        headers=_headers,
         allow_redirects=True,
         data=data,
     )
@@ -465,15 +449,7 @@ def _initiate_authentication(
     response = session.post(
         duo_url,
         verify=ssl_verification_enabled,
-        headers={
-            "User-Agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/75.0.3770.100 Safari/537.36",
-            "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
-            "Accept-Language": "en-US,en;q=0.5",
-            "Accept-Encoding": "gzip, deflate, br",
-            "DNT": "1",
-            "Upgrade-Insecure-Requests": "1",
-            "Content-Type": "application/x-www-form-urlencoded",
-        },
+        headers=_headers,
         allow_redirects=True,
         data=data,
     )
