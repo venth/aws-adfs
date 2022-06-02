@@ -1,5 +1,25 @@
 # Changelog
 
+## [2.1.0](https://github.com/venth/aws-adfs/tree/2.1.0) (2022-06-02)
+
+[Full Changelog](https://github.com/venth/aws-adfs/compare/2.1.0-alpha.2...2.1.0)
+
+**Closed issues:**
+
+- Duo Universal Prompt breaks aws-adfs compatibility [\#236](https://github.com/venth/aws-adfs/issues/236)
+
+**Merged pull requests:**
+
+- Support Duo Universal Prompt [\#238](https://github.com/venth/aws-adfs/pull/238) ([pdecat](https://github.com/pdecat))
+
+## [2.1.0-alpha.2](https://github.com/venth/aws-adfs/tree/2.1.0-alpha.2) (2022-06-02)
+
+[Full Changelog](https://github.com/venth/aws-adfs/compare/2.1.0-alpha.1...2.1.0-alpha.2)
+
+## [2.1.0-alpha.1](https://github.com/venth/aws-adfs/tree/2.1.0-alpha.1) (2022-06-02)
+
+[Full Changelog](https://github.com/venth/aws-adfs/compare/2.0.5...2.1.0-alpha.1)
+
 ## [2.0.5](https://github.com/venth/aws-adfs/tree/2.0.5) (2022-06-01)
 
 [Full Changelog](https://github.com/venth/aws-adfs/compare/2.0.4...2.0.5)
