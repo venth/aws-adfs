@@ -12,7 +12,9 @@ def _aws_account_without_alias(account_no):
 def _account_page_response_text(response_text):
     response = type('', (), {})()
     response.request = type('', (), {})()
+    response.request.body = ""
     response.request.headers = {}
+    response.request.url = {}
     response.status_code = 'irrelevant'
     response.headers = {}
     response.text = response_text

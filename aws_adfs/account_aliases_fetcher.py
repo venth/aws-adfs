@@ -3,13 +3,15 @@ import re
 
 import lxml.etree as ET
 
+from .helpers import trace_http_request
+
 
 _account_alias_pattern = re.compile("Account: *([^(]+) *\(([0-9]+)\)")
 _account_without_alias_pattern = re.compile("Account: *\(?([0-9]+)\)?")
 
 
 def account_aliases(session, username, password, auth_method, saml_response, config):
-    alias_response = session.post(
+    response = session.post(
         'https://signin.aws.amazon.com/saml',
         verify=config.ssl_verification,
         headers={
@@ -23,21 +25,9 @@ def account_aliases(session, username, password, auth_method, saml_response, con
             'SAMLResponse': saml_response,
         }
     )
+    trace_http_request(response)
 
-    logging.debug(u'''Request:
-        * url: {}
-        * headers: {}
-    Response:
-        * status: {}
-        * headers: {}
-        * body: {}
-    '''.format('https://signin.aws.amazon.com/saml',
-               alias_response.request.headers,
-               alias_response.status_code,
-               alias_response.headers,
-               alias_response.text))
-
-    html_response = ET.fromstring(alias_response.text, ET.HTMLParser())
+    html_response = ET.fromstring(response.text, ET.HTMLParser())
 
     accounts = {}
     account_element_query = './/div[@class="saml-account-name"]'

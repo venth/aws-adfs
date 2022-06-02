@@ -3,6 +3,7 @@ import lxml.etree as ET
 
 from . import account_aliases_fetcher
 from . import _duo_authenticator as duo_auth
+from . import _duo_universal_prompt_authenticator as duo_universal_prompt_auth
 from . import _rsa_authenticator as rsa_auth
 from . import _symantec_vip_access as symantec_vip_access
 from . import _azure_mfa_authenticator as azure_mfa_auth
@@ -113,6 +114,12 @@ def _strategy(response, config, session, assertfile=None):
             return duo_auth.extract(html_response, config.ssl_verification, session)
         return extract
 
+    def _duo_universal_prompt_extractor():
+        def extract():
+            return duo_universal_prompt_auth.extract(html_response, config.ssl_verification, session)
+
+        return extract
+
     def _symantec_vip_extractor():
         def extract():
             return symantec_vip_access.extract(html_response, config.ssl_verification, session)
@@ -145,6 +152,8 @@ def _strategy(response, config, session, assertfile=None):
 
     if _is_duo_authentication(html_response):
         chosen_strategy = _duo_extractor
+    elif _is_duo_universal_prompt_authentication(html_response):
+        chosen_strategy = _duo_universal_prompt_extractor
     elif _is_symantec_vip_authentication(html_response):
         chosen_strategy = _symantec_vip_extractor
     elif _is_rsa_authentication(html_response):
@@ -161,8 +170,17 @@ def _is_duo_authentication(html_response):
     duo_auth_method = './/input[@id="authMethod"]'
     element = html_response.find(duo_auth_method)
     duo = element is not None
-    duo = duo and element.get('value') == 'DuoAdfsAdapter'
+    duo = duo and element.get("value") == "DuoAdfsAdapter"
     return duo
+
+
+def _is_duo_universal_prompt_authentication(html_response):
+    duo_auth_method = './/form[@id="adfs_form"]/input[@name="adfs_auth_method"]'
+    element = html_response.find(duo_auth_method)
+    duo = element is not None
+    duo = duo and element.get("value") == "DuoAdfsAdapter"
+    return duo
+
 
 def _is_symantec_vip_authentication(html_response):
     auth_method = './/input[@id="authMethod"]'

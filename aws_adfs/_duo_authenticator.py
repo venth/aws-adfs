@@ -140,7 +140,7 @@ def _retrieve_roles_page(roles_page_url, context, session, ssl_verification_enab
         allow_redirects=True,
         data=data
     )
-    trace_http_request(roles_page_url, response.request.headers, data, response.status_code, response.headers, response.text)
+    trace_http_request(response)
 
     if response.status_code != 200:
         raise click.ClickException(
@@ -174,7 +174,7 @@ def _authentication_result(
         headers=_headers,
         data=data
     )
-    trace_http_request(status_for_url, response.request.headers, data, response.status_code, response.headers, response.text)
+    trace_http_request(response)
 
     if response.status_code != 200:
         raise click.ClickException(
@@ -222,7 +222,7 @@ def _load_duo_result_url(
         headers=_headers,
         data=data
     )
-    trace_http_request(result_for_url, response.request.headers, data, response.status_code, response.headers, response.text)
+    trace_http_request(response)
 
     if response.status_code != 200:
         raise click.ClickException(
@@ -256,7 +256,7 @@ def _verify_authentication_status(duo_host, sid, duo_transaction_id, session,
             headers=_headers,
             data=data
         )
-        trace_http_request(status_for_url, response.request.headers, data, response.status_code, response.headers, response.text)
+        trace_http_request(response)
 
         if response.status_code != 200:
             raise click.ClickException(
@@ -416,7 +416,7 @@ def _initiate_authentication(duo_host, duo_request_signature, roles_page_url, se
         },
         data=data
     )
-    trace_http_request(prompt_for_url, response.request.headers, data, response.status_code, response.headers, response.text)
+    trace_http_request(response)
 
     if response.status_code != 200 or response.url is None:
         return (None, None, None, None, None), False
@@ -479,7 +479,7 @@ def _begin_authentication_transaction(duo_host, sid, preferred_factor, preferred
         headers=_headers,
         data=data
     )
-    trace_http_request(prompt_for_url, response.request.headers, data, response.status_code, response.headers, response.text)
+    trace_http_request(response)
 
     if response.status_code != 200:
         raise click.ClickException(
@@ -511,7 +511,7 @@ def _submit_webauthn_response(duo_host, sid, webauthn_response, session, ssl_ver
         headers=_headers,
         data=data
     )
-    trace_http_request(prompt_for_url, response.request.headers, data, response.status_code, response.headers, response.text)
+    trace_http_request(response)
 
     if response.status_code != 200:
         raise click.ClickException(

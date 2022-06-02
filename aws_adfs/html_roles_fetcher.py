@@ -5,6 +5,7 @@ import requests
 import hashlib
 
 from . import helpers
+from .helpers import trace_http_request
 
 try:
     import cookielib
@@ -106,21 +107,7 @@ def fetch_html_encoded_roles(
         auth=auth,
         data=data
     )
-
-    logging.debug(u'''Request:
-        * url: {}
-        * headers: {}
-    Response:
-        * status: {}
-        * headers: {}
-        * body: {}
-    '''.format(
-            authentication_url,
-            response.request.headers,
-            response.status_code,
-            response.headers,
-            response.text
-       ))
+    trace_http_request(response)
 
     if response.status_code >= 400:
         session.cookies.clear()
