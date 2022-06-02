@@ -1,5 +1,9 @@
 # Changelog
 
+## [2.1.0-alpha.1](https://github.com/venth/aws-adfs/tree/2.1.0-alpha.1) (2022-06-02)
+
+[Full Changelog](https://github.com/venth/aws-adfs/compare/2.0.5...2.1.0-alpha.1)
+
 ## [2.0.5](https://github.com/venth/aws-adfs/tree/2.0.5) (2022-06-01)
 
 [Full Changelog](https://github.com/venth/aws-adfs/compare/2.0.4...2.0.5)
