@@ -10,6 +10,7 @@ from . import _azure_mfa_authenticator as azure_mfa_auth
 from . import _azure_cloud_mfa_authenticator as azure_cloud_mfa_auth
 from . import html_roles_fetcher
 from . import roles_assertion_extractor
+from .helpers import trace_http_request
 
 
 def authenticate(config, username=None, password=None, assertfile=None):
@@ -23,6 +24,7 @@ def authenticate(config, username=None, password=None, assertfile=None):
         password=password,
         sspi=config.sspi,
     )
+    trace_http_request(response)
 
     assertion = None
     aws_session_duration = None
@@ -34,21 +36,7 @@ def authenticate(config, username=None, password=None, assertfile=None):
         principal_roles, assertion, aws_session_duration = extract_strategy()
 
         if assertion is None:
-            logging.debug(u'''Cannot extract saml assertion from request's response. Re-authentication needed?:
-                * url: {}
-                * headers: {}
-            Response:
-                * status: {}
-                * headers: {}
-                * body: {}
-            '''.format(
-                response.url,
-                response.request.headers,
-                response.status_code,
-                response.headers,
-                response.text
-            ))
-            logging.error(u'Cannot extract saml assertion. Re-authentication needed?')
+            logging.error("Cannot extract saml assertion from request's response. Re-authentication needed?")
         else:
             aggregated_principal_roles = _aggregate_roles_by_account_alias(session,
                                                                            config,
@@ -58,20 +46,6 @@ def authenticate(config, username=None, password=None, assertfile=None):
                                                                            principal_roles)
 
     else:
-        logging.debug(u'''Cannot extract roles from request's response:
-                * url: {}
-                * headers: {}
-            Response:
-                * status: {}
-                * headers: {}
-                * body: {}
-            '''.format(
-            response.url,
-            response.request.headers,
-            response.status_code,
-            response.headers,
-            response.text
-        ))
         logging.error(u'Cannot extract roles from response')
 
     logging.debug(u'Roles along with principals found after authentication: {}'.format(aggregated_principal_roles))
@@ -116,7 +90,9 @@ def _strategy(response, config, session, assertfile=None):
 
     def _duo_universal_prompt_extractor():
         def extract():
-            return duo_universal_prompt_auth.extract(html_response, config.ssl_verification, session)
+            return duo_universal_prompt_auth.extract(
+                html_response, config.ssl_verification, session, config.duo_factor, config.duo_device
+            )
 
         return extract
 

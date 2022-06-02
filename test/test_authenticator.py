@@ -280,11 +280,14 @@ class TestAuthenticator:
 
     def _http_response(self):
         response = type('', (), {})()
-        response.url = u'irrelevant_url'
         response.request = type('', (), {})()
+        response.request.body = ""
         response.request.headers = {}
+        response.request.url = {}
+        response.status_code = "irrelevant"
         response.headers = {}
-        response.text = u'irrelevant response body'
+        response.text = "irrelevant response body"
+        response.url = "irrelevant_url"
         return response
 
     def setup_method(self, method):
@@ -298,6 +301,8 @@ class TestAuthenticator:
         self.irrelevant_config.adfs_ca_bundle = None
         self.irrelevant_config.provider_id = 'irrelevant provider identifier'
         self.irrelevant_config.sspi = True
+        self.irrelevant_config.duo_factor = None
+        self.irrelevant_config.duo_device = None
 
         self.http_session = type('', (), {})()
         self.http_session.post = lambda *args, **kwargs: None

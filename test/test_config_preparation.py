@@ -24,6 +24,8 @@ class TestConfigPreparation:
         default_session_duration = 3600
         default_sspi = False
         default_username_password_command = None
+        default_duo_factor = None
+        default_duo_device = None
 
         # when configuration is prepared for not existing profile
         adfs_config = prepare.get_prepared_config(
@@ -38,6 +40,8 @@ class TestConfigPreparation:
             default_session_duration,
             default_sspi,
             default_username_password_command,
+            default_duo_factor,
+            default_duo_device,
         )
 
         # then resolved config contains defaults values
@@ -49,6 +53,8 @@ class TestConfigPreparation:
         assert default_session_duration == adfs_config.session_duration
         assert default_sspi == adfs_config.sspi
         assert default_username_password_command == adfs_config.username_password_command
+        assert default_duo_factor == adfs_config.duo_factor
+        assert default_duo_device == adfs_config.duo_device
 
     def test_when_the_profile_exists_but_lacks_ssl_verification_use_default_value(self):
         # given profile to read the configuration exists
@@ -65,14 +71,16 @@ class TestConfigPreparation:
         default_ssl_config = True
         default_adfs_ca_bundle = None
         default_sspi = True
-        irrelevant_region = 'irrelevant_region'
-        irrelevant_adfs_host = 'irrelevant_adfs_host'
-        irrelevant_output_format = 'irrelevant_output_format'
-        irrelevant_provider_id = 'irrelevant_provider_id'
-        irrelevant_s3_signature_version = 'irrelevant_s3_signature_version'
-        irrelevant_session_duration = 'irrelevant_session_duration'
-        irrelevant_username_password_command = 'irrelevant_username_password_command'
-        
+        irrelevant_region = "irrelevant_region"
+        irrelevant_adfs_host = "irrelevant_adfs_host"
+        irrelevant_output_format = "irrelevant_output_format"
+        irrelevant_provider_id = "irrelevant_provider_id"
+        irrelevant_s3_signature_version = "irrelevant_s3_signature_version"
+        irrelevant_session_duration = "irrelevant_session_duration"
+        irrelevant_username_password_command = "irrelevant_username_password_command"
+        irrelevant_duo_factor = "irrelevant_duo_factor"
+        irrelevant_duo_device = "irrelevant_duo_device"
+
         # when configuration is prepared for existing profile
         adfs_config = prepare.get_prepared_config(
             empty_profile,
@@ -86,6 +94,8 @@ class TestConfigPreparation:
             irrelevant_session_duration,
             default_sspi,
             irrelevant_username_password_command,
+            irrelevant_duo_factor,
+            irrelevant_duo_device,
         )
 
         # then resolved ssl verification holds the default value

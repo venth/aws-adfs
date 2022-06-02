@@ -38,7 +38,7 @@ _headers = {
 }
 
 
-def extract(html_response, ssl_verification_enabled, session):
+def extract(html_response, ssl_verification_enabled, session, duo_factor, duo_device):
     """
     this strategy is based on description from: https://guide.duo.com/universal-prompt
     :param response: raw http response
@@ -72,13 +72,23 @@ def extract(html_response, ssl_verification_enabled, session):
         if auth_signature is None:
             click.echo("Waiting for additional authentication", err=True)
 
+            if preferred_factor is None or preferred_device is None:
+                click.echo("No default authentication method configured.")
+                preferred_factor = click.prompt(
+                    text="Please enter your desired authentication method (Ex: Duo Push)",
+                    type=str,
+                )
+
+            if webauthn_supported and preferred_factor == preferred_device:
+                preferred_factor = "WebAuthn Security Key"
+
             # Trigger default authentication (call, push or WebAuthn with FIDO U2F / FIDO2 authenticator)
             signed_response = _perform_authentication_transaction(
                 duo_url,
                 sid,
                 xsrf,
-                preferred_factor,
-                preferred_device,
+                duo_factor if duo_factor else preferred_factor,
+                duo_device if duo_device else preferred_device,
                 webauthn_supported,
                 session,
                 ssl_verification_enabled,
@@ -103,22 +113,12 @@ def _perform_authentication_transaction(
     duo_url,
     sid,
     xsrf,
-    preferred_factor,
-    preferred_device,
+    factor,
+    device,
     webauthn_supported,
     session,
     ssl_verification_enabled,
 ):
-    if preferred_factor is None or preferred_device is None:
-        click.echo("No default authentication method configured.")
-        preferred_factor = click.prompt(
-            text="Please enter your desired authentication method (Ex: Duo Push)",
-            type=str,
-        )
-
-    if webauthn_supported and preferred_factor == preferred_device:
-        preferred_factor = "WebAuthn Security Key"
-
     duo_host = re.sub(
         r"/frame/frameless/v4/auth.*",
         "",
@@ -128,8 +128,8 @@ def _perform_authentication_transaction(
     txid = _begin_authentication_transaction(
         duo_host,
         sid,
-        preferred_factor,
-        preferred_device,
+        factor,
+        device,
         webauthn_supported,
         session,
         ssl_verification_enabled,
@@ -145,7 +145,7 @@ def _perform_authentication_transaction(
     if txid == "cancelled":
         return "cancelled"
     else:
-        return _authentication_result(duo_host, sid, txid, preferred_factor, xsrf, session, ssl_verification_enabled)
+        return _authentication_result(duo_host, sid, txid, factor, xsrf, session, ssl_verification_enabled)
 
 
 def _context(html_response):

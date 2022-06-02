@@ -118,16 +118,21 @@ from . import authenticator, helpers, prepare, role_chooser
 @click.option(
     '--no-session-cache',
     is_flag=True,
-    help='Do not use AWS session cache in ~/.aws/adfs_cache/ directory.',
+    help="Do not use AWS session cache in ~/.aws/adfs_cache/ directory.",
+)
+@click.option("--assertfile", help="Use SAML assertion response from a local file")
+@click.option(
+    "--sspi/--no-sspi",
+    default=system() == "Windows",
+    help="Whether or not to use Kerberos SSO authentication via SSPI (Windows only, defaults to True).",
 )
 @click.option(
-    '--assertfile',
-    help='Use SAML assertion response from a local file'
+    "--duo-factor",
+    help="Use a specific Duo factor, overriding the default one configured server side. Known Duo factors that can be used with aws-adfs are `Duo Push`, `WebAuthn Security Key`, and `Phone Call`.",
 )
 @click.option(
-    '--sspi/--no-sspi',
-    default=system() == 'Windows',
-    help='Whether or not to use Kerberos SSO authentication via SSPI (Windows only, defaults to True).',
+    "--duo-device",
+    help="Use a specific Duo device, overriding the default one configured server side. Depends heavily on the Duo factor used. Known Duo devices that can be used with aws-adfs are `phone1` for `Duo Push` and `Phone Call` factors, and the security key ID for `WebAuthn Security Key` factor.",
 )
 def login(
     profile,
@@ -152,6 +157,8 @@ def login(
     no_session_cache,
     assertfile,
     sspi,
+    duo_factor,
+    duo_device,
 ):
     """
     Authenticates an user with active directory credentials
@@ -168,6 +175,8 @@ def login(
         session_duration,
         sspi,
         username_password_command,
+        duo_factor,
+        duo_device,
     )
 
     _verification_checks(config)
@@ -527,10 +536,12 @@ def _store(config, aws_session_token):
         if config.adfs_user:
             config_file.set(profile, 'adfs_config.adfs_user', config.adfs_user)
         if config.s3_signature_version:
-            config_file.set(profile, 's3', '\nsignature_version = {}'.format(config.s3_signature_version))
-        config_file.set(profile, 'adfs_config.session_duration', config.session_duration)
-        config_file.set(profile, 'adfs_config.provider_id', config.provider_id)
-        config_file.set(profile, 'adfs_config.sspi', config.sspi)
+            config_file.set(profile, "s3", "\nsignature_version = {}".format(config.s3_signature_version))
+        config_file.set(profile, "adfs_config.session_duration", config.session_duration)
+        config_file.set(profile, "adfs_config.provider_id", config.provider_id)
+        config_file.set(profile, "adfs_config.sspi", config.sspi)
+        config_file.set(profile, "adfs_config.duo_factor", config.duo_factor)
+        config_file.set(profile, "adfs_config.duo_device", config.duo_device)
 
     store_config(config.profile, config.aws_credentials_location, credentials_storer)
     if config.profile == 'default':
