@@ -261,6 +261,18 @@ aws-adfs integrates with:
       --sspi / --no-sspi              Whether or not to use Kerberos SSO
                                       authentication via SSPI (Windows only,
                                       defaults to True).
+      --duo-factor TEXT               Use a specific Duo factor, overriding the
+                                      default one configured server side. Known
+                                      Duo factors that can be used with aws-adfs
+                                      are `Duo Push`, `WebAuthn Security Key`, and
+                                      `Phone Call`.
+      --duo-device TEXT               Use a specific Duo device, overriding the
+                                      default one configured server side. Depends
+                                      heavily on the Duo factor used. Known Duo
+                                      devices that can be used with aws-adfs are
+                                      `phone1` for `Duo Push` and `Phone Call`
+                                      factors, and the security key ID for
+                                      `WebAuthn Security Key` factor.
       --help                          Show this message and exit.
     ```
     ```

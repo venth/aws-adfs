@@ -8,17 +8,19 @@ from types import MethodType
 
 
 def get_prepared_config(
-        profile,
-        region,
-        ssl_verification,
-        adfs_ca_bundle,
-        adfs_host,
-        output_format,
-        provider_id,
-        s3_signature_version,
-        session_duration,
-        sspi,
-        username_password_command,
+    profile,
+    region,
+    ssl_verification,
+    adfs_ca_bundle,
+    adfs_host,
+    output_format,
+    provider_id,
+    s3_signature_version,
+    session_duration,
+    sspi,
+    username_password_command,
+    duo_factor,
+    duo_device,
 ):
     """
     Prepares ADFS configuration for login task.
@@ -41,6 +43,8 @@ def get_prepared_config(
     :param session_duration: AWS STS session duration (default 1 hour)
     :param sspi: Whether SSPI is enabled
     :param username_password_command: The command used to retrieve username and password information
+    :param duo_factor: The specific Duo factor to use
+    :param duo_device: The specific Duo device to use
     """
     def default_if_none(value, default):
         return value if value is not None else default
@@ -64,6 +68,8 @@ def get_prepared_config(
     adfs_config.session_duration = default_if_none(session_duration, adfs_config.session_duration)
     adfs_config.sspi = default_if_none(sspi, adfs_config.sspi)
     adfs_config.username_password_command = default_if_none(username_password_command, adfs_config.username_password_command)
+    adfs_config.duo_factor = default_if_none(duo_factor, adfs_config.duo_factor)
+    adfs_config.duo_device = default_if_none(duo_device, adfs_config.duo_device)
 
     return adfs_config
 
@@ -122,6 +128,10 @@ def create_adfs_default_config(profile):
 
     # The command used to retrieve username and password information
     config.username_password_command = None
+
+    # The specific Duo factor and device to use
+    config.duo_factor = None
+    config.duo_device = None
 
     return config
 
@@ -189,6 +199,9 @@ def _load_adfs_config_from_stored_profile(adfs_config, profile):
             profile, 'adfs_config.sspi',
             str(adfs_config.sspi)))
         adfs_config.username_password_command = config.get_or(profile, 'adfs_config.username_password_command', adfs_config.username_password_command)
+
+        adfs_config.duo_factor = config.get_or(profile, "adfs_config.duo_factor", adfs_config.duo_factor)
+        adfs_config.duo_device = config.get_or(profile, "adfs_config.duo_device", adfs_config.duo_device)
 
     if profile == 'default':
         load_from_config(adfs_config.aws_config_location, profile, load_config)
