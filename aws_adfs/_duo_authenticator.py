@@ -359,8 +359,10 @@ def _webauthn_get_assertion(device, webauthn_credential_request_options, duo_hos
         
         click.echo("Got response from FIDO U2F / FIDO2 authenticator: '{}'".format(device), err=True)
         rq.put(_submit_webauthn_response(duo_host, sid, webauthn_response, session, ssl_verification_enabled))
-    except:
-        raise
+    except Exception as e:
+        logging.debug("Got an exception while waiting for {}: {}".format(device, e))
+        if not cancel.is_set():
+            raise
     finally:
         # Cancel the other FIDO U2F / FIDO2 prompts
         cancel.set()
