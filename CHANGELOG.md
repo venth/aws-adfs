@@ -1,5 +1,13 @@
 # Changelog
 
+## [2.2.0](https://github.com/venth/aws-adfs/tree/2.2.0) (2022-06-03)
+
+[Full Changelog](https://github.com/venth/aws-adfs/compare/2.1.0...2.2.0)
+
+**Merged pull requests:**
+
+- Allow overriding the Duo factor and device to use [\#240](https://github.com/venth/aws-adfs/pull/240) ([pdecat](https://github.com/pdecat))
+
 ## [2.1.0](https://github.com/venth/aws-adfs/tree/2.1.0) (2022-06-02)
 
 [Full Changelog](https://github.com/venth/aws-adfs/compare/2.1.0-alpha.2...2.1.0)
