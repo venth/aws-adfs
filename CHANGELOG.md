@@ -1,5 +1,18 @@
 # Changelog
 
+## [2.2.1](https://github.com/venth/aws-adfs/tree/2.2.1) (2022-06-03)
+
+[Full Changelog](https://github.com/venth/aws-adfs/compare/2.2.0...2.2.1)
+
+**Closed issues:**
+
+- cache file truncation [\#234](https://github.com/venth/aws-adfs/issues/234)
+
+**Merged pull requests:**
+
+- Avoid exception when multiple FIDO authenticators are present [\#242](https://github.com/venth/aws-adfs/pull/242) ([pdecat](https://github.com/pdecat))
+- Bump lxml from 4.8.0 to 4.9.0 [\#237](https://github.com/venth/aws-adfs/pull/237) ([dependabot[bot]](https://github.com/apps/dependabot))
+
 ## [2.2.0](https://github.com/venth/aws-adfs/tree/2.2.0) (2022-06-03)
 
 [Full Changelog](https://github.com/venth/aws-adfs/compare/2.1.0...2.2.0)
