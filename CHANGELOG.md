@@ -1,5 +1,13 @@
 # Changelog
 
+## [2.2.2](https://github.com/venth/aws-adfs/tree/2.2.2) (2022-06-08)
+
+[Full Changelog](https://github.com/venth/aws-adfs/compare/2.2.1...2.2.2)
+
+**Merged pull requests:**
+
+- Pin fido2 to below 1.0.0 [\#244](https://github.com/venth/aws-adfs/pull/244) ([erpel](https://github.com/erpel))
+
 ## [2.2.1](https://github.com/venth/aws-adfs/tree/2.2.1) (2022-06-03)
 
 [Full Changelog](https://github.com/venth/aws-adfs/compare/2.2.0...2.2.1)
