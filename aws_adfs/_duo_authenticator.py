@@ -3,7 +3,7 @@ import binascii
 import click
 import lxml.etree as ET
 
-from fido2.client import ClientData, ClientError, Fido2Client
+from fido2.client import CollectedClientData, ClientError, Fido2Client
 from fido2.hid import CtapHidDevice
 try:
     from fido2.pcsc import CtapPcscDevice
