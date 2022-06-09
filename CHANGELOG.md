@@ -1,5 +1,13 @@
 # Changelog
 
+## [2.3.1](https://github.com/venth/aws-adfs/tree/2.3.1) (2022-06-09)
+
+[Full Changelog](https://github.com/venth/aws-adfs/compare/2.3.0...2.3.1)
+
+**Merged pull requests:**
+
+- Hotfix python 3.10 version in .github/workflows/build.yml :facepalm: [\#248](https://github.com/venth/aws-adfs/pull/248) ([pdecat](https://github.com/pdecat))
+
 ## [2.3.0](https://github.com/venth/aws-adfs/tree/2.3.0) (2022-06-09)
 
 [Full Changelog](https://github.com/venth/aws-adfs/compare/2.2.2...2.3.0)
