@@ -1,5 +1,17 @@
 # Changelog
 
+## [2.3.0](https://github.com/venth/aws-adfs/tree/2.3.0) (2022-06-09)
+
+[Full Changelog](https://github.com/venth/aws-adfs/compare/2.2.2...2.3.0)
+
+**Fixed bugs:**
+
+- fido2 1.0.0 breaks aws-adfs [\#243](https://github.com/venth/aws-adfs/issues/243)
+
+**Merged pull requests:**
+
+- Drop support for python 3.6 and update dependencies \(and define better constraints as pip does not honor poetry.lock\) [\#245](https://github.com/venth/aws-adfs/pull/245) ([pdecat](https://github.com/pdecat))
+
 ## [2.2.2](https://github.com/venth/aws-adfs/tree/2.2.2) (2022-06-08)
 
 [Full Changelog](https://github.com/venth/aws-adfs/compare/2.2.1...2.2.2)
@@ -52,10 +64,6 @@
 ## [2.0.5](https://github.com/venth/aws-adfs/tree/2.0.5) (2022-06-01)
 
 [Full Changelog](https://github.com/venth/aws-adfs/compare/2.0.4...2.0.5)
-
-**Fixed bugs:**
-
-- `login --role-arn "?"` not working on an existing profile [\#227](https://github.com/venth/aws-adfs/issues/227)
 
 **Merged pull requests:**
 
