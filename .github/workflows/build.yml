@@ -5,8 +5,8 @@
 name: Build
 
 env:
-  PYTHON_VERSION: 3.9
-  POETRY_VERSION: 1.1.12
+  PYTHON_VERSION: 3.10
+  POETRY_VERSION: 1.1.13
 
 on:
   push:
@@ -23,7 +23,7 @@ jobs:
       fail-fast: false
       matrix:
         os: [macos-latest, ubuntu-latest, windows-latest]
-        python-version: [3.6, 3.7, 3.8, 3.9, "3.10"]
+        python-version: [3.7, 3.8, 3.9, "3.10"]
 
     steps:
       - uses: actions/checkout@v3
