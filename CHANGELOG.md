@@ -1,5 +1,18 @@
 # Changelog
 
+## [2.3.2](https://github.com/venth/aws-adfs/tree/2.3.2) (2022-06-10)
+
+[Full Changelog](https://github.com/venth/aws-adfs/compare/2.3.1...2.3.2)
+
+**Fixed bugs:**
+
+- `login --role-arn "?"` not working on an existing profile [\#227](https://github.com/venth/aws-adfs/issues/227)
+
+**Merged pull requests:**
+
+- Add pre-commit hooks [\#249](https://github.com/venth/aws-adfs/pull/249) ([pdecat](https://github.com/pdecat))
+- Disable cache when role\_arn is '?' [\#247](https://github.com/venth/aws-adfs/pull/247) ([pdecat](https://github.com/pdecat))
+
 ## [2.3.1](https://github.com/venth/aws-adfs/tree/2.3.1) (2022-06-09)
 
 [Full Changelog](https://github.com/venth/aws-adfs/compare/2.3.0...2.3.1)
