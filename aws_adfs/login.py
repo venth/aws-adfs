@@ -184,7 +184,7 @@ def login(
     # Get session credentials from cache if not expired to avoid invoking the ADFS host uselessly
     session_cache_dir = (
         None
-        if no_session_cache or role_arn is None
+        if no_session_cache or role_arn is None or role_arn == "?"
         else os.path.join(
             os.path.dirname(config.aws_credentials_location), "adfs_cache"
         )
