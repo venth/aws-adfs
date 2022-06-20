@@ -279,7 +279,7 @@ def _verify_authentication_status(duo_host, sid, txid, session, ssl_verification
                 cred["id"] = base64.urlsafe_b64decode(
                     cred["id"] + "=="
                 )  # Add arbitrary padding characters, unnecessary ones are ignored
-                cred.pop("transports")
+                cred.pop("transports", None)
 
             webauthn_session_id = webauthn_credential_request_options.pop("sessionId")
 
