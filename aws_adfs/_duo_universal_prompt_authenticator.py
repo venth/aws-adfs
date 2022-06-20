@@ -2,7 +2,7 @@ import binascii
 import click
 import lxml.etree as ET
 
-from fido2.client import CollectedClientData, ClientError, Fido2Client
+from fido2.client import ClientError, Fido2Client
 from fido2.hid import CtapHidDevice
 from fido2.utils import websafe_decode, websafe_encode
 
