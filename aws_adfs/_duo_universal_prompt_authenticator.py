@@ -507,7 +507,7 @@ def _begin_authentication_transaction(
     duo_url = duo_host + "/frame/v4/prompt"
 
     click.echo(
-        "Triggering authentication method: '{}' with '{}".format(preferred_factor, preferred_device),
+        "Triggering authentication method: '{}' with '{}'".format(preferred_factor, preferred_device),
         err=True,
     )
 

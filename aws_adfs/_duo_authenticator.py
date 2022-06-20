@@ -74,7 +74,7 @@ def extract(html_response, ssl_verification_enabled, session):
             if auth_signature == "cancelled":
                 click.echo("Authentication method cancelled, aborting.")
                 exit(-2)
-                    
+
         click.echo('Going for aws roles', err=True)
         return _retrieve_roles_page(
             roles_page_url,
@@ -356,7 +356,7 @@ def _webauthn_get_assertion(device, webauthn_credential_request_options, duo_hos
         webauthn_response["signature"] = binascii.hexlify(assertion_response.signature).decode("ascii")
         webauthn_response["extensionResults"] = authenticator_assertion_response["extensionResults"]
         logging.debug('webauthn_response: {}'.format(webauthn_response))
-        
+
         click.echo("Got response from FIDO U2F / FIDO2 authenticator: '{}'".format(device), err=True)
         rq.put(_submit_webauthn_response(duo_host, sid, webauthn_response, session, ssl_verification_enabled))
     except Exception as e:
@@ -467,7 +467,7 @@ def _begin_authentication_transaction(duo_host, sid, preferred_factor, preferred
     prompt_for_url = "https://{}/frame/prompt".format(duo_host)
     if webauthn_supported and preferred_factor == preferred_device:
         preferred_factor = 'WebAuthn Credential'
-    click.echo("Triggering authentication method: '{}' with '{}".format(preferred_factor, preferred_device), err=True)
+    click.echo("Triggering authentication method: '{}' with '{}'".format(preferred_factor, preferred_device), err=True)
     data = {
         'sid': sid,
         'factor': preferred_factor,
