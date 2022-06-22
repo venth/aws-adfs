@@ -350,7 +350,9 @@ def _webauthn_get_assertion(
         webauthn_response["authenticatorData"] = websafe_encode(assertion_response.auth_data)
         webauthn_response["clientDataJSON"] = websafe_encode(authenticator_assertion_response["clientData"])
         webauthn_response["signature"] = binascii.hexlify(assertion_response.signature).decode("ascii")
-        webauthn_response["extensionResults"] = authenticator_assertion_response["extensionResults"]
+        extension_results = authenticator_assertion_response["extensionResults"]
+        if extension_results:
+            webauthn_response["extensionResults"] = extension_results
         logging.debug("webauthn_response: {}".format(webauthn_response))
 
         click.echo(
