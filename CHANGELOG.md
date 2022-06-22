@@ -1,5 +1,15 @@
 # Changelog
 
+## [2.4.0](https://github.com/venth/aws-adfs/tree/2.4.0) (2022-06-22)
+
+[Full Changelog](https://github.com/venth/aws-adfs/compare/2.3.3...2.4.0)
+
+**Merged pull requests:**
+
+- Improve factor and device selection with Duo Universal Prompt [\#264](https://github.com/venth/aws-adfs/pull/264) ([pdecat](https://github.com/pdecat))
+- Bump boto3 from 1.24.11 to 1.24.13 [\#263](https://github.com/venth/aws-adfs/pull/263) ([dependabot[bot]](https://github.com/apps/dependabot))
+- Bump botocore from 1.27.13 to 1.27.14 [\#262](https://github.com/venth/aws-adfs/pull/262) ([dependabot[bot]](https://github.com/apps/dependabot))
+
 ## [2.3.3](https://github.com/venth/aws-adfs/tree/2.3.3) (2022-06-22)
 
 [Full Changelog](https://github.com/venth/aws-adfs/compare/2.3.2...2.3.3)
