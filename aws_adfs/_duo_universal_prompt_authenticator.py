@@ -1,10 +1,10 @@
-import base64
 import binascii
 import click
 import lxml.etree as ET
 
-from fido2.client import CollectedClientData, ClientError, Fido2Client
+from fido2.client import ClientError, Fido2Client
 from fido2.hid import CtapHidDevice
+from fido2.utils import websafe_decode, websafe_encode
 
 try:
     from fido2.pcsc import CtapPcscDevice
@@ -274,12 +274,10 @@ def _verify_authentication_status(duo_host, sid, txid, session, ssl_verification
             and len(json_response["response"]["webauthn_credential_request_options"]) > 0
         ):
             webauthn_credential_request_options = json_response["response"]["webauthn_credential_request_options"]
-            webauthn_credential_request_options["challenge"] = base64.b64decode(webauthn_credential_request_options["challenge"])
+            webauthn_credential_request_options["challenge"] = websafe_decode(webauthn_credential_request_options["challenge"])
             for cred in webauthn_credential_request_options["allowCredentials"]:
-                cred["id"] = base64.urlsafe_b64decode(
-                    cred["id"] + "=="
-                )  # Add arbitrary padding characters, unnecessary ones are ignored
-                cred.pop("transports")
+                cred["id"] = websafe_decode(cred["id"])
+                cred.pop("transports", None)
 
             webauthn_session_id = webauthn_credential_request_options.pop("sessionId")
 
@@ -346,17 +344,15 @@ def _webauthn_get_assertion(
         authenticator_assertion_response = assertion.get_response(0)
         assertion_response = assertion.get_assertions()[0]
 
-        webauthn_response["id"] = (
-            base64.urlsafe_b64encode(assertion_response.credential["id"]).decode("ascii").rstrip("=")
-        )  # Strip trailing padding characters
+        webauthn_response["id"] = websafe_encode(assertion_response.credential["id"])
         webauthn_response["rawId"] = webauthn_response["id"]
         webauthn_response["type"] = assertion_response.credential["type"]
-        webauthn_response["authenticatorData"] = base64.urlsafe_b64encode(assertion_response.auth_data).decode("ascii")
-        webauthn_response["clientDataJSON"] = base64.urlsafe_b64encode(authenticator_assertion_response["clientData"]).decode(
-            "ascii"
-        )
+        webauthn_response["authenticatorData"] = websafe_encode(assertion_response.auth_data)
+        webauthn_response["clientDataJSON"] = websafe_encode(authenticator_assertion_response["clientData"])
         webauthn_response["signature"] = binascii.hexlify(assertion_response.signature).decode("ascii")
-        webauthn_response["extensionResults"] = authenticator_assertion_response["extensionResults"]
+        extension_results = authenticator_assertion_response["extensionResults"]
+        if extension_results:
+            webauthn_response["extensionResults"] = extension_results
         logging.debug("webauthn_response: {}".format(webauthn_response))
 
         click.echo(
@@ -507,7 +503,7 @@ def _begin_authentication_transaction(
     duo_url = duo_host + "/frame/v4/prompt"
 
     click.echo(
-        "Triggering authentication method: '{}' with '{}".format(preferred_factor, preferred_device),
+        "Triggering authentication method: '{}' with '{}'".format(preferred_factor, preferred_device),
         err=True,
     )
 
