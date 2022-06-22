@@ -1,5 +1,19 @@
 # Changelog
 
+## [2.3.3](https://github.com/venth/aws-adfs/tree/2.3.3) (2022-06-22)
+
+[Full Changelog](https://github.com/venth/aws-adfs/compare/2.3.2...2.3.3)
+
+**Merged pull requests:**
+
+- Bump botocore from 1.27.11 to 1.27.13 [\#261](https://github.com/venth/aws-adfs/pull/261) ([dependabot[bot]](https://github.com/apps/dependabot))
+- Tolerate missing 'transports' key from WebAuthn challenge, and fix regression with CTAP1 device since fido2 1.0.0 [\#260](https://github.com/venth/aws-adfs/pull/260) ([pdecat](https://github.com/pdecat))
+- Bump boto3 from 1.24.5 to 1.24.11 [\#259](https://github.com/venth/aws-adfs/pull/259) ([dependabot[bot]](https://github.com/apps/dependabot))
+- Bump botocore from 1.27.7 to 1.27.11 [\#257](https://github.com/venth/aws-adfs/pull/257) ([dependabot[bot]](https://github.com/apps/dependabot))
+- Bump botocore from 1.27.5 to 1.27.7 [\#252](https://github.com/venth/aws-adfs/pull/252) ([dependabot[bot]](https://github.com/apps/dependabot))
+- Bump requests from 2.27.1 to 2.28.0 [\#251](https://github.com/venth/aws-adfs/pull/251) ([dependabot[bot]](https://github.com/apps/dependabot))
+- Bump actions/setup-python from 3 to 4 [\#246](https://github.com/venth/aws-adfs/pull/246) ([dependabot[bot]](https://github.com/apps/dependabot))
+
 ## [2.3.2](https://github.com/venth/aws-adfs/tree/2.3.2) (2022-06-10)
 
 [Full Changelog](https://github.com/venth/aws-adfs/compare/2.3.1...2.3.2)
