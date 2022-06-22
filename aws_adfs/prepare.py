@@ -201,7 +201,11 @@ def _load_adfs_config_from_stored_profile(adfs_config, profile):
         adfs_config.username_password_command = config.get_or(profile, 'adfs_config.username_password_command', adfs_config.username_password_command)
 
         adfs_config.duo_factor = config.get_or(profile, "adfs_config.duo_factor", adfs_config.duo_factor)
+        if adfs_config.duo_factor == "None":
+            adfs_config.duo_factor = None
         adfs_config.duo_device = config.get_or(profile, "adfs_config.duo_device", adfs_config.duo_device)
+        if adfs_config.duo_device == "None":
+            adfs_config.duo_device = None
 
     if profile == 'default':
         load_from_config(adfs_config.aws_config_location, profile, load_config)
