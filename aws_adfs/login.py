@@ -19,6 +19,11 @@ import requests
 from botocore import client
 
 from . import authenticator, helpers, prepare, role_chooser
+from .consts import (
+    DUO_UNIVERSAL_PROMPT_FACTOR_DUO_PUSH,
+    DUO_UNIVERSAL_PROMPT_FACTOR_PHONE_CALL,
+    DUO_UNIVERSAL_PROMPT_FACTOR_WEBAUTHN,
+)
 
 
 @click.command()
@@ -128,11 +133,11 @@ from . import authenticator, helpers, prepare, role_chooser
 )
 @click.option(
     "--duo-factor",
-    help="Use a specific Duo factor, overriding the default one configured server side. Known Duo factors that can be used with aws-adfs are `Duo Push`, `WebAuthn Security Key`, and `Phone Call`.",
+    help=f'Use a specific Duo factor, overriding the default one configured server side. Known Duo factors that can be used with aws-adfs are "{DUO_UNIVERSAL_PROMPT_FACTOR_DUO_PUSH}", "{DUO_UNIVERSAL_PROMPT_FACTOR_PHONE_CALL}", and "{DUO_UNIVERSAL_PROMPT_FACTOR_WEBAUTHN}".',
 )
 @click.option(
     "--duo-device",
-    help="Use a specific Duo device, overriding the default one configured server side. Depends heavily on the Duo factor used. Known Duo devices that can be used with aws-adfs are `phone1` for `Duo Push` and `Phone Call` factors, and the security key ID for `WebAuthn Security Key` factor.",
+    help=f'Use a specific Duo device, overriding the default one configured server side. Depends heavily on the Duo factor used. Known Duo devices that can be used with aws-adfs are "phone1" for "{DUO_UNIVERSAL_PROMPT_FACTOR_DUO_PUSH}" and "{DUO_UNIVERSAL_PROMPT_FACTOR_PHONE_CALL}" factors. For "{DUO_UNIVERSAL_PROMPT_FACTOR_WEBAUTHN}" factor, it is always "None".',
 )
 def login(
     profile,
@@ -360,7 +365,7 @@ def _print_console_signin_url(
     json_string_with_temp_credentials = json.dumps(url_credentials)
 
     # Step 4. Make request to AWS federation endpoint to get sign-in token. Construct the parameter string with
-    # the sign-in action request, a 12-hour session duration, and the JSON document with temporary credentials 
+    # the sign-in action request, a 12-hour session duration, and the JSON document with temporary credentials
     # as parameters.
     request_parameters = "?Action=getSigninToken"
 

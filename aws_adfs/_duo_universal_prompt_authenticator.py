@@ -17,6 +17,11 @@ import re
 
 from threading import Event, Thread
 
+from .consts import (
+    DUO_UNIVERSAL_PROMPT_FACTOR_DUO_PUSH,
+    DUO_UNIVERSAL_PROMPT_FACTOR_PHONE_CALL,
+    DUO_UNIVERSAL_PROMPT_FACTOR_WEBAUTHN,
+)
 from .helpers import trace_http_request
 
 try:
@@ -72,23 +77,40 @@ def extract(html_response, ssl_verification_enabled, session, duo_factor, duo_de
         if auth_signature is None:
             click.echo("Waiting for additional authentication", err=True)
 
-            if preferred_factor is None or preferred_device is None:
+            # Override preferred factor value if it the same as the device, which means WebAuthn
+            if webauthn_supported and preferred_factor == preferred_device:
+                preferred_factor = DUO_UNIVERSAL_PROMPT_FACTOR_WEBAUTHN
+
+            # Prioritize configuration or command-line parameters factor and device over server-side preferred ones
+            if duo_factor:
+                preferred_factor = duo_factor
+            if duo_device:
+                preferred_device = duo_device
+
+            # In case of WebAuthn, the device must be "None"
+            if preferred_factor == DUO_UNIVERSAL_PROMPT_FACTOR_WEBAUTHN:
+                preferred_device = "None"
+
+            if preferred_factor is None:
                 click.echo("No default authentication method configured.")
                 preferred_factor = click.prompt(
-                    text="Please enter your desired authentication method (Ex: Duo Push)",
+                    text=f'Please enter your desired authentication method (e.g. "{DUO_UNIVERSAL_PROMPT_FACTOR_DUO_PUSH}", "{DUO_UNIVERSAL_PROMPT_FACTOR_PHONE_CALL}", or "{DUO_UNIVERSAL_PROMPT_FACTOR_WEBAUTHN}")',
                     type=str,
                 )
-
-            if webauthn_supported and preferred_factor == preferred_device:
-                preferred_factor = "WebAuthn Security Key"
+            if preferred_device is None and preferred_factor != DUO_UNIVERSAL_PROMPT_FACTOR_WEBAUTHN:
+                click.echo("No default authentication device configured.")
+                preferred_device = click.prompt(
+                    text=f'Please enter your desired authentication device (e.g. "phone1" with "{DUO_UNIVERSAL_PROMPT_FACTOR_DUO_PUSH}" or "{DUO_UNIVERSAL_PROMPT_FACTOR_PHONE_CALL}"), or "None" with "{DUO_UNIVERSAL_PROMPT_FACTOR_WEBAUTHN}"',
+                    type=str,
+                )
 
             # Trigger default authentication (call, push or WebAuthn with FIDO U2F / FIDO2 authenticator)
             signed_response = _perform_authentication_transaction(
                 duo_url,
                 sid,
                 xsrf,
-                duo_factor if duo_factor else preferred_factor,
-                duo_device if duo_device else preferred_device,
+                preferred_factor,
+                preferred_device,
                 webauthn_supported,
                 session,
                 ssl_verification_enabled,
@@ -480,7 +502,7 @@ def _preferred_device(html_response):
 
 
 def _webauthn_supported(html_response):
-    webauthn_supported_query = './/input[@name="factor"][@value="WebAuthn Credential"]'
+    webauthn_supported_query = './/option[@name="webauthn"]'
     elements = html_response.findall(webauthn_supported_query)
     return len(elements) > 0
 
