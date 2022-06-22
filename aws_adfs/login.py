@@ -133,11 +133,11 @@ from .consts import (
 )
 @click.option(
     "--duo-factor",
-    help=f'Use a specific Duo factor, overriding the default one configured server side. Known Duo factors that can be used with aws-adfs are "{DUO_UNIVERSAL_PROMPT_FACTOR_DUO_PUSH}", "{DUO_UNIVERSAL_PROMPT_FACTOR_PHONE_CALL}", and "{DUO_UNIVERSAL_PROMPT_FACTOR_WEBAUTHN}".',
+    help=f'Use a specific Duo factor, overriding the default one configured server side. Known Duo factors that can be used with aws-adfs are "{DUO_UNIVERSAL_PROMPT_FACTOR_DUO_PUSH}", "{DUO_UNIVERSAL_PROMPT_FACTOR_PHONE_CALL}", and "{DUO_UNIVERSAL_PROMPT_FACTOR_WEBAUTHN}". Only supported with Duo Universal Prompt.',
 )
 @click.option(
     "--duo-device",
-    help=f'Use a specific Duo device, overriding the default one configured server side. Depends heavily on the Duo factor used. Known Duo devices that can be used with aws-adfs are "phone1" for "{DUO_UNIVERSAL_PROMPT_FACTOR_DUO_PUSH}" and "{DUO_UNIVERSAL_PROMPT_FACTOR_PHONE_CALL}" factors. For "{DUO_UNIVERSAL_PROMPT_FACTOR_WEBAUTHN}" factor, it is always "None".',
+    help=f'Use a specific Duo device, overriding the default one configured server side. Depends heavily on the Duo factor used. Known Duo devices that can be used with aws-adfs are "phone1" for "{DUO_UNIVERSAL_PROMPT_FACTOR_DUO_PUSH}" and "{DUO_UNIVERSAL_PROMPT_FACTOR_PHONE_CALL}" factors. For "{DUO_UNIVERSAL_PROMPT_FACTOR_WEBAUTHN}" factor, it is always "None". Only supported with Duo Universal Prompt.',
 )
 def login(
     profile,

@@ -265,14 +265,16 @@ aws-adfs integrates with:
                                       default one configured server side. Known
                                       Duo factors that can be used with aws-adfs
                                       are "Duo Push", "Phone Call", and "WebAuthn
-                                      Security Key".
+                                      Security Key". Only supported with Duo
+                                      Universal Prompt.
       --duo-device TEXT               Use a specific Duo device, overriding the
                                       default one configured server side. Depends
                                       heavily on the Duo factor used. Known Duo
                                       devices that can be used with aws-adfs are
                                       "phone1" for "Duo Push" and "Phone Call"
                                       factors. For "WebAuthn Security Key" factor,
-                                      it is always "None".
+                                      it is always "None". Only supported with Duo
+                                      Universal Prompt.
       --help                          Show this message and exit.
     ```
     ```
