@@ -20,7 +20,15 @@ aws-adfs integrates with:
 * [Symantec VIP](https://vip.symantec.com/) MFA provider
 * [RSA SecurID](https://www.rsa.com/) MFA provider
 
-# Installation
+## Setup Dependencies
+
+- `build-essential` (provides C/C++ compilers)
+- `python3` `>= 3.7 <4.0`
+- `python3-dev`
+- `libkrb5-dev`
+- `libxml2-dev`
+
+## Installation
 
 * user local installation with [pipx](https://github.com/pypa/pipx)
 
@@ -31,7 +39,7 @@ aws-adfs integrates with:
 * user local installation with pip
 
     ```
-    pip install aws-adfs
+    pip3 install --user aws-adfs
     ```
 
     Please note, that you need to add $HOME/.local/bin to your PATH
@@ -39,7 +47,7 @@ aws-adfs integrates with:
 * system wide installation
 
     ```
-    sudo pip install aws-adfs
+    sudo pip3 install aws-adfs
     ```
 
 * virtualenvs
@@ -79,9 +87,9 @@ aws-adfs integrates with:
       & 'C:\Program Files\aws-adfs\Scripts\aws-adfs' login --adfs-host=your-adfs-hostname
       ```
 
-# Examples of usage
+## Examples of usage
 
-## `aws-adfs`
+### `aws-adfs`
 * login to your adfs host with disabled ssl verification on aws cli profile: adfs
 
     ```
@@ -288,7 +296,7 @@ aws-adfs integrates with:
       --help          Show this message and exit.
     ```
 
-# Known issues
+## Known issues
 
 * duo-security
 
@@ -314,13 +322,13 @@ aws-adfs integrates with:
 * in cases of trouble with lxml please install
 
   ```
-  sudo apt-get install python-dev libxml2-dev libxslt1-dev zlib1g-dev
+  sudo apt-get install python3-dev libxml2-dev libxslt1-dev zlib1g-dev
   ```
 
 * in cases of trouble with pykerberos please install
 
   ```
-  sudo apt-get install python-dev libkrb5-dev
+  sudo apt-get install python3-dev libkrb5-dev
   ```
 
 * in cases of trouble with OSX Sierra (obsolete OpenSSL), upgrade OpenSSL. Example:
@@ -341,7 +349,7 @@ aws-adfs integrates with:
   - python 3.5 is not supported
   - python 3.6 is not supported
 
-# Development
+## Development
 
 * update dependencies:
 ```
@@ -365,6 +373,6 @@ git tag --annotate -m "Release $(poetry version -s)" $(poetry version -s)
 git push
 ```
 
-# Changelog
+## Changelog
 
 See the [CHANGELOG.md](CHANGELOG.md) file, which is generated using [github-changelog-generator](https://github.com/github-changelog-generator/github-changelog-generator).
