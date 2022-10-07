@@ -1,3 +1,4 @@
+from copy import deepcopy
 from aws_adfs import role_chooser
 from aws_adfs.role_chooser import click
 
@@ -23,7 +24,7 @@ class TestRoleChooser:
         # given role already chosen by an user
         already_chosen_role_arn = 'already_chosen_role_arn'
 
-        config_with_already_chosen_role = type('', (), {})()
+        config_with_already_chosen_role = deepcopy(self.irrelevant_config)
         config_with_already_chosen_role.role_arn = already_chosen_role_arn
 
         # and roles collection for the user still contains already chosen role
@@ -107,7 +108,7 @@ class TestRoleChooser:
         }
 
         # and there wasn't any previously used role
-        config_without_previously_used_role = type('', (), {})()
+        config_without_previously_used_role = deepcopy(self.irrelevant_config)
         config_without_previously_used_role.role_arn = None
 
         # and the user chosen second role
@@ -126,7 +127,7 @@ class TestRoleChooser:
         # given role already chosen by an user
         already_chosen_role_arn = 'already_chosen_role_arn'
 
-        config_with_already_chosen_role = type('', (), {})()
+        config_with_already_chosen_role = deepcopy(self.irrelevant_config)
         config_with_already_chosen_role.role_arn = already_chosen_role_arn
 
         # and roles collection for the user contains two roles without already chosen by the user
@@ -157,7 +158,7 @@ class TestRoleChooser:
 
     def test_asks_user_to_choose_a_role(self):
         # given the role is assumed for the first time
-        config = type('', (), {})()
+        config = deepcopy(self.irrelevant_config)
         config.role_arn = None
 
         # and the user chosen second role
