@@ -1,6 +1,5 @@
 import collections
 import logging
-import sys
 import click
 
 
@@ -32,7 +31,8 @@ def choose_role_to_assume(config, principal_roles):
         return chosen_principal_arn, chosen_role_arn
     else:
         if config.enforce_role_arn:
-            sys.exit(-3)
+            click.echo('Not allowed to assume role {} and role_arn is enforced'.format(config.role_arn), err=True)
+            exit(-3)
 
     if len(role_collection) == 1:
         logging.debug(u'There is only one role to choose')
