@@ -139,6 +139,13 @@ from .consts import (
     "--duo-device",
     help=f'Use a specific Duo device, overriding the default one configured server side. Depends heavily on the Duo factor used. Known Duo devices that can be used with aws-adfs are "phone1" for "{DUO_UNIVERSAL_PROMPT_FACTOR_DUO_PUSH}" and "{DUO_UNIVERSAL_PROMPT_FACTOR_PHONE_CALL}" factors. For "{DUO_UNIVERSAL_PROMPT_FACTOR_WEBAUTHN}" factor, it is always "None". Only supported with Duo Universal Prompt.',
 )
+@click.option(
+    "--enforce-role-arn",
+    help=f'Only allow the role passed in by --role-arn.',
+    type=bool,
+    is_flag=True,
+    default=False,
+)
 def login(
     profile,
     region,
@@ -164,6 +171,7 @@ def login(
     sspi,
     duo_factor,
     duo_device,
+    enforce_role_arn,
 ):
     """
     Authenticates an user with active directory credentials
@@ -182,6 +190,7 @@ def login(
         username_password_command,
         duo_factor,
         duo_device,
+        enforce_role_arn,
     )
 
     _verification_checks(config)
