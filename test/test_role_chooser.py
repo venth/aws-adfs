@@ -1,6 +1,7 @@
 from copy import deepcopy
 from aws_adfs import role_chooser
 from aws_adfs.role_chooser import click
+import pytest
 
 
 class TestRoleChooser:
@@ -174,9 +175,25 @@ class TestRoleChooser:
         assert chosen_principal_arn is not None
         assert chosen_role_arn is not None
 
+    def test_fail_if_config_role_is_not_present_and_enforce_role_arn_is_true(self):
+        # given the role is set in config are assumed previously
+        config = deepcopy(self.irrelevant_config)
+        config.role_arn = 'arn_that_is_not_available_to_user'
+        # AND enforce_role_arn is True
+        config.enforce_role_arn = True
+
+        with pytest.raises(SystemExit) as se:
+            role_chooser.choose_role_to_assume(
+                config=config,
+                principal_roles=self._two_roles_grouped_in_one_account()
+            )
+        assert se.value.code == -3
+
     def _two_roles_grouped_in_one_account(self):
         return {'COMPANY': {'arn:aws:iam::AWSACCOUNT:role/CORP-SuperAdmin': {'principal_arn': 'arn:aws:iam::AWSACCOUNT:saml-provider/ADFS', 'name': 'CORP-SuperAdmin'}, 'arn:aws:iam::AWSACCOUNT:role/CORP-DataScience': {'principal_arn': 'arn:aws:iam::AWSACCOUNT:saml-provider/ADFS', 'name': 'CORP-DataScience'}}}
 
     def setup_method(self, method):
         self.irrelevant_config = type('', (), {})()
         self.irrelevant_config.role_arn = 'irrelevant_role'
+        # Default value enforce_role_arn
+        self.irrelevant_config.enforce_role_arn = False

@@ -26,6 +26,7 @@ class TestConfigPreparation:
         default_username_password_command = None
         default_duo_factor = None
         default_duo_device = None
+        default_enforce_role_arn = False
 
         # when configuration is prepared for not existing profile
         adfs_config = prepare.get_prepared_config(
@@ -55,6 +56,7 @@ class TestConfigPreparation:
         assert default_username_password_command == adfs_config.username_password_command
         assert default_duo_factor == adfs_config.duo_factor
         assert default_duo_device == adfs_config.duo_device
+        assert default_enforce_role_arn == adfs_config.enforce_role_arn
 
     def test_when_the_profile_exists_but_lacks_ssl_verification_use_default_value(self):
         # given profile to read the configuration exists
