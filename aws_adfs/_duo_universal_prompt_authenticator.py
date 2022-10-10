@@ -292,7 +292,7 @@ def _verify_authentication_status(duo_host, sid, txid, session, ssl_verification
             verification_code = json_response["response"].get("risk_based_factor_selection_data", {}).get("step_up_code")
             if verification_code:
                 click.echo(
-                    f"Duo Verified Push MFA code: {verification_code}",
+                    f"Verified Duo Push MFA code: {verification_code}",
                     err=True,
                 )
 
