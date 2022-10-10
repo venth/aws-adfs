@@ -1,5 +1,25 @@
 # Changelog
 
+## [2.5.0](https://github.com/venth/aws-adfs/tree/2.5.0) (2022-10-10)
+
+[Full Changelog](https://github.com/venth/aws-adfs/compare/2.4.0...2.5.0)
+
+**Implemented enhancements:**
+
+- feature: Allow enforcing config role\_arn [\#342](https://github.com/venth/aws-adfs/issues/342)
+- Add support for Duo Verified Push MFA [\#346](https://github.com/venth/aws-adfs/pull/346) ([pdecat](https://github.com/pdecat))
+- feature: Allow enforcement role\_arn config variable [\#343](https://github.com/venth/aws-adfs/pull/343) ([pvbouwel](https://github.com/pvbouwel))
+
+**Merged pull requests:**
+
+- Bump botocore from 1.27.14 to 1.27.89 [\#347](https://github.com/venth/aws-adfs/pull/347) ([dependabot[bot]](https://github.com/apps/dependabot))
+- Bump black from 22.3.0 to 22.10.0 [\#344](https://github.com/venth/aws-adfs/pull/344) ([dependabot[bot]](https://github.com/apps/dependabot))
+- Improve README [\#326](https://github.com/venth/aws-adfs/pull/326) ([Shr3ps](https://github.com/Shr3ps))
+- Bump lxml from 4.9.0 to 4.9.1 [\#276](https://github.com/venth/aws-adfs/pull/276) ([dependabot[bot]](https://github.com/apps/dependabot))
+- Bump requests from 2.28.0 to 2.28.1 [\#273](https://github.com/venth/aws-adfs/pull/273) ([dependabot[bot]](https://github.com/apps/dependabot))
+- Bump boto3 from 1.24.13 to 1.24.14 [\#266](https://github.com/venth/aws-adfs/pull/266) ([dependabot[bot]](https://github.com/apps/dependabot))
+- Add note that overriding preferred server-side Duo factor and device is only supported with Duo Universal Prompt [\#265](https://github.com/venth/aws-adfs/pull/265) ([pdecat](https://github.com/pdecat))
+
 ## [2.4.0](https://github.com/venth/aws-adfs/tree/2.4.0) (2022-06-22)
 
 [Full Changelog](https://github.com/venth/aws-adfs/compare/2.3.3...2.4.0)
