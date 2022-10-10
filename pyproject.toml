@@ -44,7 +44,7 @@ requests-negotiate-sspi = [
 
 [tool.poetry.dev-dependencies]
 black = "^22.10"
-coverage = "^6.4"
+coverage = "^6.5"
 pytest = "^7.0"
 toml = "^0.10"
 
