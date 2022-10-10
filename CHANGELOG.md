@@ -1,5 +1,15 @@
 # Changelog
 
+## [2.5.1](https://github.com/venth/aws-adfs/tree/2.5.1) (2022-10-10)
+
+[Full Changelog](https://github.com/venth/aws-adfs/compare/2.5.0...2.5.1)
+
+**Merged pull requests:**
+
+- Bump configparser from 5.2.0 to 5.3.0 [\#350](https://github.com/venth/aws-adfs/pull/350) ([dependabot[bot]](https://github.com/apps/dependabot))
+- Bump pytest from 7.1.2 to 7.1.3 [\#349](https://github.com/venth/aws-adfs/pull/349) ([dependabot[bot]](https://github.com/apps/dependabot))
+- Bump coverage from 6.4.1 to 6.5.0 [\#348](https://github.com/venth/aws-adfs/pull/348) ([dependabot[bot]](https://github.com/apps/dependabot))
+
 ## [2.5.0](https://github.com/venth/aws-adfs/tree/2.5.0) (2022-10-10)
 
 [Full Changelog](https://github.com/venth/aws-adfs/compare/2.4.0...2.5.0)
@@ -7,7 +17,7 @@
 **Implemented enhancements:**
 
 - feature: Allow enforcing config role\_arn [\#342](https://github.com/venth/aws-adfs/issues/342)
-- Add support for Duo Verified Push MFA [\#346](https://github.com/venth/aws-adfs/pull/346) ([pdecat](https://github.com/pdecat))
+- Add support for Verified Duo Push MFA [\#346](https://github.com/venth/aws-adfs/pull/346) ([pdecat](https://github.com/pdecat))
 - feature: Allow enforcement role\_arn config variable [\#343](https://github.com/venth/aws-adfs/pull/343) ([pvbouwel](https://github.com/pvbouwel))
 
 **Merged pull requests:**
