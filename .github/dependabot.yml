@@ -12,3 +12,11 @@ updates:
     directory: "/"
     schedule:
       interval: "daily"
+    # Ignore all botocore and boto3 patch updates which are too frequent (but not security updates)
+    ignore:
+      - dependency-name: "botocore"
+        update-types: ["version-update:semver-patch"]
+      - dependency-name: "boto3"
+        update-types: ["version-update:semver-patch"]
+    # Allow up to 10 open pull requests for pip dependencies
+    open-pull-requests-limit: 10
