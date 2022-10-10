@@ -181,12 +181,14 @@ aws-adfs integrates with:
     Usage: aws-adfs [OPTIONS] COMMAND [ARGS]...
 
     Options:
-      --version  Show current tool version
-      --help  Show this message and exit.
+      --version      Show current tool version
+      -v, --verbose  Enables debug information on stdout. By default log level is
+                    set on ERROR
+      --help         Show this message and exit.
 
     Commands:
       list   lists available profiles
-      login  Authenticates an user with active directory...
+      login  Authenticates an user with active directory credentials
       reset  removes stored profile
     ```
 
@@ -197,7 +199,6 @@ aws-adfs integrates with:
       lists available profiles
 
     Options:
-      --version  Show current tool version
       --help  Show this message and exit.
     ```
 
@@ -283,10 +284,12 @@ aws-adfs integrates with:
                                       factors. For "WebAuthn Security Key" factor,
                                       it is always "None". Only supported with Duo
                                       Universal Prompt.
+      --enforce-role-arn              Only allow the role passed in by --role-arn.
       --help                          Show this message and exit.
     ```
+
     ```
-    $ aws-adfs reset --help                                                                                                                                              13:39
+    $ aws-adfs reset --help
     Usage: aws-adfs reset [OPTIONS]
 
       removes stored profile
