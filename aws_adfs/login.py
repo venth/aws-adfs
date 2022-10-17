@@ -23,6 +23,7 @@ from .consts import (
     DUO_UNIVERSAL_PROMPT_FACTOR_DUO_PUSH,
     DUO_UNIVERSAL_PROMPT_FACTOR_PHONE_CALL,
     DUO_UNIVERSAL_PROMPT_FACTOR_WEBAUTHN,
+    DUO_UNIVERSAL_PROMPT_FACTOR_PASSCODE,
 )
 
 
@@ -133,7 +134,7 @@ from .consts import (
 )
 @click.option(
     "--duo-factor",
-    help=f'Use a specific Duo factor, overriding the default one configured server side. Known Duo factors that can be used with aws-adfs are "{DUO_UNIVERSAL_PROMPT_FACTOR_DUO_PUSH}", "{DUO_UNIVERSAL_PROMPT_FACTOR_PHONE_CALL}", and "{DUO_UNIVERSAL_PROMPT_FACTOR_WEBAUTHN}". Only supported with Duo Universal Prompt.',
+    help=f'Use a specific Duo factor, overriding the default one configured server side. Known Duo factors that can be used with aws-adfs are "{DUO_UNIVERSAL_PROMPT_FACTOR_DUO_PUSH}", "{DUO_UNIVERSAL_PROMPT_FACTOR_PHONE_CALL}", "{DUO_UNIVERSAL_PROMPT_FACTOR_WEBAUTHN}" and "{DUO_UNIVERSAL_PROMPT_FACTOR_PASSCODE}". Only supported with Duo Universal Prompt.',
 )
 @click.option(
     "--duo-device",
