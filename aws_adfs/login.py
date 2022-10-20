@@ -298,7 +298,7 @@ def login(
         _print_environment_variables(aws_session_token, config)
     elif print_console_signin_url:
         _print_console_signin_url(
-            aws_session_token, adfs_host, console_role_arn, console_external_id
+            aws_session_token, adfs_host or config.adfs_host, console_role_arn, console_external_id
         )
     else:
         _store(config, aws_session_token)

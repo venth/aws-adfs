@@ -98,6 +98,7 @@ def extract(html_response, ssl_verification_enabled, session, duo_factor, duo_de
                     text=f'Please enter your desired authentication method (e.g. "{DUO_UNIVERSAL_PROMPT_FACTOR_DUO_PUSH}", "{DUO_UNIVERSAL_PROMPT_FACTOR_PHONE_CALL}", or "{DUO_UNIVERSAL_PROMPT_FACTOR_WEBAUTHN}")',
                     type=str,
                 )
+
             if preferred_device is None and preferred_factor != DUO_UNIVERSAL_PROMPT_FACTOR_WEBAUTHN:
                 click.echo("No default authentication device configured.")
                 preferred_device = click.prompt(
@@ -284,6 +285,7 @@ def _verify_authentication_status(duo_host, sid, txid, session, ssl_verification
             "calling",
             "pushed",
             "webauthn_sent",
+            "allow"
         ]:
             raise click.ClickException(
                 "There was an issue during second factor verification. The error response: {}".format(response.text)
@@ -543,6 +545,15 @@ def _begin_authentication_transaction(
         "factor": preferred_factor,
         "device": preferred_device,
     }
+
+    # Prompt for a passcode?
+    if preferred_factor == DUO_UNIVERSAL_PROMPT_FACTOR_PASSCODE:
+        passcode = None
+        while not passcode or not re.match(r'^[0-9]{6}$', passcode):
+            passcode = click.prompt('Enter passcode (6-digit number)', hide_input=True)
+        data['passcode'] = passcode
+        data['device'] = 'None'
+
     response = session.post(duo_url, verify=ssl_verification_enabled, headers=_headers, data=data)
     trace_http_request(response)
 
