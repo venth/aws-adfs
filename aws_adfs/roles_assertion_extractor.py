@@ -37,8 +37,17 @@ def extract(html):
     )
     aws_roles = [element.text.split(',') for element in raw_roles]
 
-    # Note the format of the attribute value is provider_arn, role_arn
-    principal_roles = [role for role in aws_roles if ':saml-provider/' in role[0]]
+    # Note the format of the attribute value is provider_arn, role_arn *OR* role_arn, provider_arn
+    # AWS accepts either, and uses role_arn, provider_arn in examples at https://docs.aws.amazon.com/IAM/latest/UserGuide/id_roles_providers_create_saml_assertions.html
+    # but provider_arn, role_arn in the commonly referenced blog post at https://aws.amazon.com/blogs/security/aws-federated-authentication-with-active-directory-federation-services-ad-fs/
+    # Since aws-adfs originally assumed provider_arn, role_arn and the rest of the code expects that we'll normalise everything to that order here
+    principal_roles = []
+    for role in aws_roles:
+        if len(role) == 2:
+            if ':saml-provider/' in role[0] and ':role/' in role[1]:
+                principal_roles.append( role )
+            elif ':saml-provider/' in role[1] and 'role' in role[0]:
+                principal_roles.append( role[::-1] )
 
     aws_session_duration = default_session_duration
     # Retrieve session duration
