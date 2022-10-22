@@ -88,10 +88,6 @@ def extract(html_response, ssl_verification_enabled, session, duo_factor, duo_de
             if duo_device:
                 preferred_device = duo_device
 
-            # In case of WebAuthn, the device must be "None"
-            if preferred_factor == DUO_UNIVERSAL_PROMPT_FACTOR_WEBAUTHN:
-                preferred_device = "None"
-
             if preferred_factor is None:
                 click.echo("No default authentication method configured.")
                 preferred_factor = click.prompt(
@@ -99,10 +95,15 @@ def extract(html_response, ssl_verification_enabled, session, duo_factor, duo_de
                     type=str,
                 )
 
-            if preferred_device is None and preferred_factor != DUO_UNIVERSAL_PROMPT_FACTOR_WEBAUTHN:
+            # In case of WebAuthn, the device must be "None"
+            # In the case of Passcode the device is unimportant
+            if preferred_factor in (DUO_UNIVERSAL_PROMPT_FACTOR_WEBAUTHN, DUO_UNIVERSAL_PROMPT_FACTOR_PASSCODE):
+                preferred_device = "None"
+
+            if preferred_device is None and preferred_factor not in (DUO_UNIVERSAL_PROMPT_FACTOR_WEBAUTHN, DUO_UNIVERSAL_PROMPT_FACTOR_PASSCODE):
                 click.echo("No default authentication device configured.")
                 preferred_device = click.prompt(
-                    text=f'Please enter your desired authentication device (e.g. "phone1" with "{DUO_UNIVERSAL_PROMPT_FACTOR_DUO_PUSH}" or "{DUO_UNIVERSAL_PROMPT_FACTOR_PHONE_CALL}"), or "None" with "{DUO_UNIVERSAL_PROMPT_FACTOR_WEBAUTHN}"',
+                    text=f'Please enter your desired authentication device (e.g. "phone1" with "{DUO_UNIVERSAL_PROMPT_FACTOR_DUO_PUSH}" or "{DUO_UNIVERSAL_PROMPT_FACTOR_PHONE_CALL}"), or "None" with "{DUO_UNIVERSAL_PROMPT_FACTOR_WEBAUTHN}" or "{DUO_UNIVERSAL_PROMPT_FACTOR_PASSCODE}"',
                     type=str,
                 )
 
@@ -549,8 +550,8 @@ def _begin_authentication_transaction(
     # Prompt for a passcode?
     if preferred_factor == DUO_UNIVERSAL_PROMPT_FACTOR_PASSCODE:
         passcode = None
-        while not passcode or not re.match(r'^[0-9]{6}$', passcode):
-            passcode = click.prompt('Enter passcode (6-digit number)', hide_input=True)
+        while not passcode or not re.match(r'^[0-9]{6,}$', passcode):
+            passcode = click.prompt('Enter passcode (6+ digit number)', hide_input=True)
         data['passcode'] = passcode
         data['device'] = 'None'
 

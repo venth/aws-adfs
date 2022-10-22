@@ -74,8 +74,8 @@ def extract(html_response, ssl_verification_enabled, session, duo_factor, duo_de
             if duo_device:
                 preferred_device = duo_device
 
-            if preferred_factor == 'Passcode' and preferred_device is None:
-                preferred_device = 'token'
+            if preferred_factor in (DUO_UNIVERSAL_PROMPT_FACTOR_WEBAUTHN, DUO_UNIVERSAL_PROMPT_FACTOR_PASSCODE):
+                preferred_device = 'None'
 
             # Trigger default authentication (call, push or WebAuthn with FIDO U2F / FIDO2 authenticator)
             auth_signature = _perform_authentication_transaction(
@@ -495,8 +495,8 @@ def _begin_authentication_transaction(duo_host, sid, preferred_factor, preferred
     # Prompt for a passcode?
     if preferred_factor == DUO_UNIVERSAL_PROMPT_FACTOR_PASSCODE:
         passcode = None
-        while not passcode or not re.match(r'^[0-9]{6}$', passcode):
-            passcode = click.prompt('Enter passcode (6-digit number)', hide_input=True)
+        while not passcode or not re.match(r'^[0-9]{6,}$', passcode):
+            passcode = click.prompt('Enter passcode (6+ digit number)', hide_input=True)
         data['passcode'] = passcode
         data['device'] = 'token'
 

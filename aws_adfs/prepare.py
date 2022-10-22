@@ -1,3 +1,4 @@
+import logging
 import ast
 import configparser
 import os
@@ -5,6 +6,7 @@ import botocore.session
 import botocore.exceptions
 from platform import system
 from types import MethodType
+from . import consts
 
 
 def get_prepared_config(
@@ -50,6 +52,18 @@ def get_prepared_config(
     """
     def default_if_none(value, default):
         return value if value is not None else default
+
+    # Normalise duo_factor if specified and we can find a single match
+    if duo_factor:
+        duo_known_factors = [ value for const, value in vars(consts).items() if const.startswith('DUO_UNIVERSAL_PROMPT_FACTOR_') ]
+        duo_factor_matches = []
+        for factor in duo_known_factors:
+            if duo_factor.lower() in factor.lower().split():
+                duo_factor_matches.append(factor)
+
+        if len(duo_factor_matches) == 1:
+            logging.debug(u'Normalising duo-factor from "{}" to "{}"'.format(duo_factor, duo_factor_matches[0]))
+            duo_factor = duo_factor_matches[0]
 
     adfs_config = create_adfs_default_config(profile='default')
 
