@@ -1,5 +1,15 @@
 # Changelog
 
+## [2.6.0](https://github.com/venth/aws-adfs/tree/2.6.0) (2022-10-26)
+
+[Full Changelog](https://github.com/venth/aws-adfs/compare/2.5.1...2.6.0)
+
+**Implemented enhancements:**
+
+- Support for Passcode [\#162](https://github.com/venth/aws-adfs/issues/162)
+- Add Duo Passcode support for both traditional and universal prompt [\#353](https://github.com/venth/aws-adfs/pull/353) ([trav-c](https://github.com/trav-c))
+- Add support for role,provider ordering of SAML Role attribute [\#352](https://github.com/venth/aws-adfs/pull/352) ([trav-c](https://github.com/trav-c))
+
 ## [2.5.1](https://github.com/venth/aws-adfs/tree/2.5.1) (2022-10-10)
 
 [Full Changelog](https://github.com/venth/aws-adfs/compare/2.5.0...2.5.1)
