@@ -21,9 +21,9 @@ from botocore import client
 from . import authenticator, helpers, prepare, role_chooser
 from .consts import (
     DUO_UNIVERSAL_PROMPT_FACTOR_DUO_PUSH,
+    DUO_UNIVERSAL_PROMPT_FACTOR_PASSCODE,
     DUO_UNIVERSAL_PROMPT_FACTOR_PHONE_CALL,
     DUO_UNIVERSAL_PROMPT_FACTOR_WEBAUTHN,
-    DUO_UNIVERSAL_PROMPT_FACTOR_PASSCODE,
 )
 
 
