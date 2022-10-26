@@ -297,6 +297,10 @@ aws-adfs integrates with:
       --help          Show this message and exit.
     ```
 
+## Supported Devices
+
+* RSA Tokens are supported by duo security using the `Passcode` authentication method
+
 ## Known issues
 
 * duo-security
