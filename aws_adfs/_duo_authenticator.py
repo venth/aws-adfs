@@ -16,6 +16,13 @@ import re
 
 from threading import Event, Thread
 
+from .consts import (
+    DUO_UNIVERSAL_PROMPT_FACTOR_DUO_PUSH,
+    DUO_UNIVERSAL_PROMPT_FACTOR_PASSCODE,
+    DUO_UNIVERSAL_PROMPT_FACTOR_PHONE_CALL,
+    DUO_UNIVERSAL_PROMPT_FACTOR_WEBAUTHN,
+)
+
 from .helpers import trace_http_request
 
 try:
@@ -37,7 +44,7 @@ _headers = {
 }
 
 
-def extract(html_response, ssl_verification_enabled, session):
+def extract(html_response, ssl_verification_enabled, session, duo_factor, duo_device):
     """
     this strategy is based on description from: https://duo.com/docs/duoweb
     :param response: raw http response
@@ -60,6 +67,15 @@ def extract(html_response, ssl_verification_enabled, session):
     if initiated:
         if auth_signature is None:
             click.echo("Waiting for additional authentication", err=True)
+
+            # Prioritize configuration or command-line parameters factor and device over server-side preferred ones
+            if duo_factor:
+                preferred_factor = duo_factor
+            if duo_device:
+                preferred_device = duo_device
+
+            if preferred_factor in (DUO_UNIVERSAL_PROMPT_FACTOR_WEBAUTHN, DUO_UNIVERSAL_PROMPT_FACTOR_PASSCODE):
+                preferred_device = 'None'
 
             # Trigger default authentication (call, push or WebAuthn with FIDO U2F / FIDO2 authenticator)
             auth_signature = _perform_authentication_transaction(
@@ -266,14 +282,14 @@ def _verify_authentication_status(duo_host, sid, duo_transaction_id, session,
             )
 
         json_response = response.json()
-        if json_response['stat'] != 'OK':
+        if json_response['stat'] not in ['OK', 'SUCCESS']:
             raise click.ClickException(
                 u'There was an issue during second factor verification. The error response: {}'.format(
                     response.text
                 )
             )
 
-        if json_response['response']['status_code'] not in ['answered', 'calling', 'pushed', 'webauthn_sent']:
+        if json_response['response']['status_code'] not in ['answered', 'calling', 'pushed', 'webauthn_sent', 'allow']:
             raise click.ClickException(
                 u'There was an issue during second factor verification. The error response: {}'.format(
                     response.text
@@ -475,6 +491,15 @@ def _begin_authentication_transaction(duo_host, sid, preferred_factor, preferred
         'post_auth_action': '',
         'out_of_date': '',
     }
+
+    # Prompt for a passcode?
+    if preferred_factor == DUO_UNIVERSAL_PROMPT_FACTOR_PASSCODE:
+        passcode = None
+        while not passcode or not re.match(r'^[0-9]{6,}$', passcode):
+            passcode = click.prompt('Enter passcode (6+ digit number)', hide_input=True)
+        data['passcode'] = passcode
+        data['device'] = 'token'
+
     response = session.post(
         prompt_for_url,
         verify=ssl_verification_enabled,

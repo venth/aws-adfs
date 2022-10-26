@@ -85,7 +85,9 @@ def _strategy(response, config, session, assertfile=None):
 
     def _duo_extractor():
         def extract():
-            return duo_auth.extract(html_response, config.ssl_verification, session)
+            return duo_auth.extract(
+                html_response, config.ssl_verification, session, config.duo_factor, config.duo_device
+            )
         return extract
 
     def _duo_universal_prompt_extractor():

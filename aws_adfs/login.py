@@ -21,6 +21,7 @@ from botocore import client
 from . import authenticator, helpers, prepare, role_chooser
 from .consts import (
     DUO_UNIVERSAL_PROMPT_FACTOR_DUO_PUSH,
+    DUO_UNIVERSAL_PROMPT_FACTOR_PASSCODE,
     DUO_UNIVERSAL_PROMPT_FACTOR_PHONE_CALL,
     DUO_UNIVERSAL_PROMPT_FACTOR_WEBAUTHN,
 )
@@ -133,11 +134,11 @@ from .consts import (
 )
 @click.option(
     "--duo-factor",
-    help=f'Use a specific Duo factor, overriding the default one configured server side. Known Duo factors that can be used with aws-adfs are "{DUO_UNIVERSAL_PROMPT_FACTOR_DUO_PUSH}", "{DUO_UNIVERSAL_PROMPT_FACTOR_PHONE_CALL}", and "{DUO_UNIVERSAL_PROMPT_FACTOR_WEBAUTHN}". Only supported with Duo Universal Prompt.',
+    help=f'Use a specific Duo factor, overriding the default one configured server side. Known Duo factors that can be used with aws-adfs are "{DUO_UNIVERSAL_PROMPT_FACTOR_DUO_PUSH}", "{DUO_UNIVERSAL_PROMPT_FACTOR_PHONE_CALL}", "{DUO_UNIVERSAL_PROMPT_FACTOR_WEBAUTHN}" and "{DUO_UNIVERSAL_PROMPT_FACTOR_PASSCODE}".',
 )
 @click.option(
     "--duo-device",
-    help=f'Use a specific Duo device, overriding the default one configured server side. Depends heavily on the Duo factor used. Known Duo devices that can be used with aws-adfs are "phone1" for "{DUO_UNIVERSAL_PROMPT_FACTOR_DUO_PUSH}" and "{DUO_UNIVERSAL_PROMPT_FACTOR_PHONE_CALL}" factors. For "{DUO_UNIVERSAL_PROMPT_FACTOR_WEBAUTHN}" factor, it is always "None". Only supported with Duo Universal Prompt.',
+    help=f'Use a specific Duo device, overriding the default one configured server side. Depends heavily on the Duo factor used. Known Duo devices that can be used with aws-adfs are "phone1" for "{DUO_UNIVERSAL_PROMPT_FACTOR_DUO_PUSH}" and "{DUO_UNIVERSAL_PROMPT_FACTOR_PHONE_CALL}" factors. For "{DUO_UNIVERSAL_PROMPT_FACTOR_WEBAUTHN}" factor, it is always "None".',
 )
 @click.option(
     "--enforce-role-arn",
@@ -297,7 +298,7 @@ def login(
         _print_environment_variables(aws_session_token, config)
     elif print_console_signin_url:
         _print_console_signin_url(
-            aws_session_token, adfs_host, console_role_arn, console_external_id
+            aws_session_token, adfs_host or config.adfs_host, console_role_arn, console_external_id
         )
     else:
         _store(config, aws_session_token)
