@@ -91,7 +91,7 @@ def extract(html_response, ssl_verification_enabled, session, duo_factor, duo_de
             if preferred_factor is None:
                 click.echo("No default authentication method configured.")
                 preferred_factor = click.prompt(
-                    text=f'Please enter your desired authentication method (e.g. "{DUO_UNIVERSAL_PROMPT_FACTOR_DUO_PUSH}", "{DUO_UNIVERSAL_PROMPT_FACTOR_PHONE_CALL}", "{DUO_UNIVERSAL_PROMPT_FACTOR_WEBAUTHN}" or "{DUO_UNIVERSAL_PROMPT_FACTOR_PASSCODE}")',
+                    text=f'Please enter your desired authentication method (e.g. "{DUO_UNIVERSAL_PROMPT_FACTOR_DUO_PUSH}", "{DUO_UNIVERSAL_PROMPT_FACTOR_PASSCODE}", "{DUO_UNIVERSAL_PROMPT_FACTOR_PHONE_CALL}", or "{DUO_UNIVERSAL_PROMPT_FACTOR_WEBAUTHN}")',
                     type=str,
                 )
 
