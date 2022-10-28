@@ -42,9 +42,10 @@ requests-negotiate-sspi = [
     { version = "^0.5", markers = "platform_system == 'Windows'" },
 ]
 
-[tool.poetry.dev-dependencies]
+[tool.poetry.group.dev.dependencies]
 black = "^22.10"
 coverage = "^6.5"
+pre-commit = "^2.20.0"
 pytest = "^7.2"
 toml = "^0.10"
 

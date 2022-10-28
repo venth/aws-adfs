@@ -6,7 +6,7 @@ name: Build
 
 env:
   PYTHON_VERSION: "3.10"
-  POETRY_VERSION: 1.1.13
+  POETRY_VERSION: "1.2.2"
 
 on:
   push:
@@ -17,7 +17,7 @@ on:
 
 jobs:
   test:
-    name: Build wheel (${{ matrix.python-version }} on ${{ matrix.os }})
+    name: Run tests (${{ matrix.python-version }} on ${{ matrix.os }})
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
@@ -44,6 +44,11 @@ jobs:
       - name: Install aws-adfs and its dependencies
         run: |
           poetry install
+
+      - name: Run all pre-commit checks
+        if: matrix.os == 'ubuntu-latest'
+        run: |
+          poetry run pre-commit run --all
 
       - name: Test with pytest
         run: |
