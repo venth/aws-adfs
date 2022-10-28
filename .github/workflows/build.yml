@@ -17,7 +17,7 @@ on:
 
 jobs:
   test:
-    name: Build wheel (${{ matrix.python-version }} on ${{ matrix.os }})
+    name: Run tests (${{ matrix.python-version }} on ${{ matrix.os }})
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
@@ -46,6 +46,7 @@ jobs:
           poetry install
 
       - name: Run all pre-commit checks
+        if: matrix.os == 'ubuntu-latest'
         run: |
           poetry run pre-commit run --all
 
