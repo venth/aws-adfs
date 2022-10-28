@@ -1,5 +1,13 @@
 # Changelog
 
+## [2.6.2](https://github.com/venth/aws-adfs/tree/2.6.2) (2022-10-28)
+
+[Full Changelog](https://github.com/venth/aws-adfs/compare/2.6.1...2.6.2)
+
+**Implemented enhancements:**
+
+- Automatically update help messages in README, and run pre-commit hooks in CI [\#358](https://github.com/venth/aws-adfs/pull/358) ([pdecat](https://github.com/pdecat))
+
 ## [2.6.1](https://github.com/venth/aws-adfs/tree/2.6.1) (2022-10-28)
 
 [Full Changelog](https://github.com/venth/aws-adfs/compare/2.6.0...2.6.1)
