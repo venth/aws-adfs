@@ -282,15 +282,15 @@ aws-adfs integrates with:
       --duo-factor TEXT               Use a specific Duo factor, overriding the
                                       default one configured server side. Known
                                       Duo factors that can be used with aws-adfs
-                                      are "Duo Push", "Phone Call", "WebAuthn
-                                      Security Key" and "Passcode".
+                                      are "Duo Push", "Passcode", "Phone Call" and
+                                      "WebAuthn Security Key".
       --duo-device TEXT               Use a specific Duo device, overriding the
                                       default one configured server side. Depends
                                       heavily on the Duo factor used. Known Duo
                                       devices that can be used with aws-adfs are
                                       "phone1" for "Duo Push" and "Phone Call"
-                                      factors. For "WebAuthn Security Key" factor,
-                                      it is always "None".
+                                      factors. For "Passcode" and "WebAuthn
+                                      Security Key" factors, it is always "None".
       --enforce-role-arn              Only allow the role passed in by --role-arn.
       --help                          Show this message and exit.
     ```
