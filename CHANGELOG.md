@@ -1,5 +1,16 @@
 # Changelog
 
+## [2.6.1](https://github.com/venth/aws-adfs/tree/2.6.1) (2022-10-28)
+
+[Full Changelog](https://github.com/venth/aws-adfs/compare/2.6.0...2.6.1)
+
+**Merged pull requests:**
+
+- Document supported Duo authentication methods better [\#357](https://github.com/venth/aws-adfs/pull/357) ([pdecat](https://github.com/pdecat))
+- Update duo auth method prompt to explicitly show Passcode as an option [\#356](https://github.com/venth/aws-adfs/pull/356) ([lefju](https://github.com/lefju))
+- Bump pytest from 7.1.3 to 7.2.0 [\#354](https://github.com/venth/aws-adfs/pull/354) ([dependabot[bot]](https://github.com/apps/dependabot))
+- Bump fido2 from 1.0.0 to 1.1.0 [\#351](https://github.com/venth/aws-adfs/pull/351) ([dependabot[bot]](https://github.com/apps/dependabot))
+
 ## [2.6.0](https://github.com/venth/aws-adfs/tree/2.6.0) (2022-10-26)
 
 [Full Changelog](https://github.com/venth/aws-adfs/compare/2.5.1...2.6.0)
