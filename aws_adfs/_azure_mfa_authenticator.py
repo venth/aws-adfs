@@ -27,7 +27,7 @@ def extract(html_response, ssl_verification_enabled, session):
         ssl_verification_enabled
     )
 
-    
+
 def _retrieve_roles_page(roles_page_url, context, session, ssl_verification_enabled):
     response = session.post(
         roles_page_url,

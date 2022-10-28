@@ -44,7 +44,7 @@ def _failed_account_page_response():
 
 
 class TestAccountAliasesFetcher:
-    
+
     def test_returns_empty_account_dictionary_when_no_account_are_named(self):
         # given user with no aws accounts
         self.authenticated_session.post = lambda *args, **kwargs: _account_page_response([])
@@ -274,13 +274,13 @@ class TestAccountAliasesFetcher:
               <div class="saml-account-name">Account: zefr (123456789012)</div>
               </div>
               <hr style="border: 1px solid #ddd;">
-              <div id="0" class="saml-account" >  
+              <div id="0" class="saml-account" >
                 <div class="saml-role" onClick="checkRadio(this);">
                     <input type="radio" name="roleIndex" value="arn:aws:iam::123456789012:role/CORP-ROLE1" class="saml-radio" id="arn:aws:iam::123456789012:role/CORP-ROLE1" />
                     <label for="arn:aws:iam::123456789012:role/CORP-ROLE1" class="saml-role-description">CORP-ROLE1</label>
                     <span style="clear: both;"></span>
                 </div>
-                
+
                 <div class="saml-role" onClick="checkRadio(this);">
                     <input type="radio" name="roleIndex" value="arn:aws:iam::123456789012:role/CORP-ROLE2" class="saml-radio" id="arn:aws:iam::123456789012:role/CORP-ROLE2" />
                     <label for="arn:aws:iam::123456789012:role/CORP-ROLE2" class="saml-role-description">CORP-ROLE2</label>

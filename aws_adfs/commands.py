@@ -53,4 +53,3 @@ def cli(verbose):
 cli.add_command(list_profiles.list_profiles)
 cli.add_command(login.login)
 cli.add_command(reset.reset)
-
