@@ -19,4 +19,4 @@ repos:
         name: Update README help
         entry: ./scripts/update-readme-help.sh
         language: script
-        always_run: true
+        files: ^(README.md|aws_adfs/(commands|list_profiles|login|reset).py)$
