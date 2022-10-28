@@ -6,7 +6,7 @@ name: Build
 
 env:
   PYTHON_VERSION: "3.10"
-  POETRY_VERSION: 1.1.13
+  POETRY_VERSION: "1.2.2"
 
 on:
   push:
@@ -44,6 +44,10 @@ jobs:
       - name: Install aws-adfs and its dependencies
         run: |
           poetry install
+
+      - name: Run all pre-commit checks
+        run: |
+          poetry run pre-commit run --all
 
       - name: Test with pytest
         run: |

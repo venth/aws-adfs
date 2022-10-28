@@ -180,6 +180,7 @@ aws-adfs integrates with:
     Warning: see [AWS documentation](https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-sourcing-external.html) about security considerations to take when sourcing credentials with an external process.
 
 * help, help, help?
+    <!-- AWS_HELP_START -->
     ```
     $ aws-adfs --help
     Usage: aws-adfs [OPTIONS] COMMAND [ARGS]...
@@ -187,7 +188,7 @@ aws-adfs integrates with:
     Options:
       --version      Show current tool version
       -v, --verbose  Enables debug information on stdout. By default log level is
-                    set on ERROR
+                     set on ERROR
       --help         Show this message and exit.
 
     Commands:
@@ -195,7 +196,9 @@ aws-adfs integrates with:
       login  Authenticates an user with active directory credentials
       reset  removes stored profile
     ```
+    <!-- AWS_HELP_END -->
 
+    <!-- AWS_LIST_HELP_START -->
     ```
     $ aws-adfs list --help
     Usage: aws-adfs list [OPTIONS]
@@ -205,7 +208,9 @@ aws-adfs integrates with:
     Options:
       --help  Show this message and exit.
     ```
+    <!-- AWS_LIST_HELP_END -->
 
+    <!-- AWS_LOGIN_HELP_START -->
     ```
     $ aws-adfs login --help
     Usage: aws-adfs login [OPTIONS]
@@ -289,7 +294,9 @@ aws-adfs integrates with:
       --enforce-role-arn              Only allow the role passed in by --role-arn.
       --help                          Show this message and exit.
     ```
+    <!-- AWS_LOGIN_HELP_END -->
 
+    <!-- AWS_RESET_HELP_START -->
     ```
     $ aws-adfs reset --help
     Usage: aws-adfs reset [OPTIONS]
@@ -300,6 +307,7 @@ aws-adfs integrates with:
       --profile TEXT  AWS cli profile that will be removed
       --help          Show this message and exit.
     ```
+    <!-- AWS_RESET_HELP_END -->
 
 ## Known issues
 
