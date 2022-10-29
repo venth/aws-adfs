@@ -80,7 +80,7 @@ jobs:
           POETRY_PYPI_TOKEN_TESTPYPI: ${{ secrets.test_pypi_password }}
         run: |
           poetry config repositories.testpypi https://test.pypi.org/legacy/
-          poetry publish --repository testpypi
+          poetry publish --skip-existing --repository testpypi
 
       - name: Check Version
         id: check-version
