@@ -377,13 +377,8 @@ poetry run pytest
 * release:
 
 ```
-poetry version patch # or minor, major, prepatch, preminor, premajor, prerelease
 export CHANGELOG_GITHUB_TOKEN=$(gopass show -o pins/Github/github-changelog-generator)
-docker run -it --rm -v "$(pwd)":/usr/local/src/your-app -e CHANGELOG_GITHUB_TOKEN githubchangeloggenerator/github-changelog-generator -u venth -p aws-adfs --future-release=$(poetry version -s)
-git add .
-git commit -m "Release $(poetry version -s)"
-git tag --annotate -m "Release $(poetry version -s)" $(poetry version -s)
-git push
+./script/release.sh patch # or minor, major, prepatch, preminor, premajor, prerelease, or a valid semver string
 ```
 
 ## Changelog
