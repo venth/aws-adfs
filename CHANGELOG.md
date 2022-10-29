@@ -1,5 +1,14 @@
 # Changelog
 
+## [2.6.3](https://github.com/venth/aws-adfs/tree/2.6.3) (2022-10-29)
+
+[Full Changelog](https://github.com/venth/aws-adfs/compare/2.6.2...2.6.3)
+
+**Merged pull requests:**
+
+- Move release instructions to a script [\#360](https://github.com/venth/aws-adfs/pull/360) ([pdecat](https://github.com/pdecat))
+- Do not error if release already exists in test.pypi.org [\#359](https://github.com/venth/aws-adfs/pull/359) ([pdecat](https://github.com/pdecat))
+
 ## [2.6.2](https://github.com/venth/aws-adfs/tree/2.6.2) (2022-10-28)
 
 [Full Changelog](https://github.com/venth/aws-adfs/compare/2.6.1...2.6.2)
