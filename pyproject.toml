@@ -43,7 +43,7 @@ requests-negotiate-sspi = [
 ]
 
 [tool.poetry.group.dev.dependencies]
-black = "^22.10"
+black = "^22.12"
 coverage = "^6.5"
 pre-commit = "^2.20.0"
 pytest = "^7.2"
