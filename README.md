@@ -23,6 +23,11 @@ aws-adfs integrates with:
   * FIDO U2F (CTAP1) / FIDO2 (CTAP2) hardware authenticators using the `WebAuthn Security Key` authentication method.
 * [Symantec VIP](https://vip.symantec.com/) MFA provider
 * [RSA SecurID](https://www.rsa.com/) MFA provider
+* [Azure AD MFA](https://learn.microsoft.com/en-us/azure/active-directory/authentication/concept-mfa-howitworks) with support for:
+  * Microsoft Authenticator app
+  * OTP 6 digit codes
+  * SMS codes
+  * Phone call
 
 ## Setup Dependencies
 
@@ -292,6 +297,8 @@ aws-adfs integrates with:
                                       factors. For "Passcode" and "WebAuthn
                                       Security Key" factors, it is always "None".
       --enforce-role-arn              Only allow the role passed in by --role-arn.
+      --verification-code TEXT        Verification code for multi-factor
+                                      authentication.
       --help                          Show this message and exit.
     ```
     <!-- AWS_LOGIN_HELP_END -->
