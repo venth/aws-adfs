@@ -23,7 +23,7 @@ def get_prepared_config(
     username_password_command,
     duo_factor,
     duo_device,
-    verification_code=None,
+    aad_verification_code=None,
     enforce_role_arn=False
 ):
     """
@@ -49,7 +49,7 @@ def get_prepared_config(
     :param username_password_command: The command used to retrieve username and password information
     :param duo_factor: The specific Duo factor to use
     :param duo_device: The specific Duo device to use
-    :param verification_code: If verification code is in config use that for multi-factor authentication
+    :param aad_verification_code: If verification code is in config use that for multi-factor authentication
     :param enforce_role_arn: If role_arn is in config then only allow the provided value
     """
     def default_if_none(value, default):
@@ -88,7 +88,7 @@ def get_prepared_config(
     adfs_config.username_password_command = default_if_none(username_password_command, adfs_config.username_password_command)
     adfs_config.duo_factor = default_if_none(duo_factor, adfs_config.duo_factor)
     adfs_config.duo_device = default_if_none(duo_device, adfs_config.duo_device)
-    adfs_config.verification_code = verification_code
+    adfs_config.aad_verification_code = aad_verification_code
     adfs_config.enforce_role_arn = enforce_role_arn
 
     return adfs_config

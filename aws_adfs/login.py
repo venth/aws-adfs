@@ -148,7 +148,7 @@ from .consts import (
     default=False,
 )
 @click.option(
-    "--verification-code",
+    "--aad-verification-code",
     help="Verification code for multi-factor authentication.",
 )
 def login(
@@ -176,7 +176,7 @@ def login(
     sspi,
     duo_factor,
     duo_device,
-    verification_code,
+    aad_verification_code,
     enforce_role_arn,
 ):
     """
@@ -196,7 +196,7 @@ def login(
         username_password_command,
         duo_factor,
         duo_device,
-        verification_code,
+        aad_verification_code,
         enforce_role_arn,
     )
 

@@ -13,7 +13,7 @@ from . import roles_assertion_extractor
 from .helpers import trace_http_request
 
 
-def extract(html_response, ssl_verification_enabled, verification_code, session):
+def extract(html_response, ssl_verification_enabled, aad_verification_code, session):
     """
     :param html_response: html result of parsing http response
     :param ssl_verification_enabled: bool to enable SSL verification
@@ -27,10 +27,10 @@ def extract(html_response, ssl_verification_enabled, verification_code, session)
         html_response,
         session,
         ssl_verification_enabled,
-        verification_code
+        aad_verification_code
     )
 
-def _retrieve_roles_page(html_response, session, ssl_verification_enabled, verification_code):
+def _retrieve_roles_page(html_response, session, ssl_verification_enabled, aad_verification_code):
     seconds_to_wait = 5
     max_attempts = 12
     counter = 1
@@ -38,11 +38,11 @@ def _retrieve_roles_page(html_response, session, ssl_verification_enabled, verif
     while True:
         time.sleep(seconds_to_wait)
 
-        verification_code_text = _verification_code_text(html_response)
-        if verification_code_text is not None:
+        aad_verification_code_text = _aad_verification_code_text(html_response)
+        if aad_verification_code_text is not None:
             seconds_to_wait = 0
-            if verification_code is None:
-                verification_code = click.prompt(verification_code_text)
+            if aad_verification_code is None:
+                aad_verification_code = click.prompt(aad_verification_code_text)
 
         response = session.post(
             _action_url_on_validation_success(html_response),
@@ -51,7 +51,7 @@ def _retrieve_roles_page(html_response, session, ssl_verification_enabled, verif
             data={
                 'AuthMethod': 'AzureMfaAuthentication',
                 'Context': _context(html_response),
-                'VerificationCode': verification_code,
+                'VerificationCode': aad_verification_code,
             }
         )
         trace_http_request(response)
@@ -70,7 +70,7 @@ def _retrieve_roles_page(html_response, session, ssl_verification_enabled, verif
             break
 
         if counter == max_attempts:
-            raise click.ClickException(u'Unsuccessful MFA verification' if verification_code else u'Timeout waiting for MFA approval')
+            raise click.ClickException(u'Unsuccessful MFA verification' if aad_verification_code else u'Timeout waiting for MFA approval')
 
         counter += 1
 
@@ -99,7 +99,7 @@ def _mfa_instructions(html_response):
     element = html_response.find(mfa_instructions_query)
     return element.text if element is not None else ''
 
-def _verification_code_text(html_response):
-    verification_code_query = './/input[@id="verificationCodeInput"]'
-    element = html_response.find(verification_code_query)
+def _aad_verification_code_text(html_response):
+    aad_verification_code_query = './/input[@id="verificationCodeInput"]'
+    element = html_response.find(aad_verification_code_query)
     return None if element is None else element.get('placeholder')
