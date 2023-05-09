@@ -1,8 +1,28 @@
 # Changelog
 
-## [2.6.3](https://github.com/venth/aws-adfs/tree/2.6.3) (2022-10-29)
+## [2.7.0](https://github.com/venth/aws-adfs/tree/2.7.0) (2023-05-09)
 
-[Full Changelog](https://github.com/venth/aws-adfs/compare/2.6.2...2.6.3)
+[Full Changelog](https://github.com/venth/aws-adfs/compare/v2.6.3...2.7.0)
+
+**Implemented enhancements:**
+
+- Add support for verification codes on Azure Cloud MFA [\#377](https://github.com/venth/aws-adfs/pull/377) ([martinverup](https://github.com/martinverup))
+
+**Merged pull requests:**
+
+- Bump pytest from 7.2.0 to 7.3.1 [\#382](https://github.com/venth/aws-adfs/pull/382) ([dependabot[bot]](https://github.com/apps/dependabot))
+- Bump coverage from 6.5.0 to 7.2.5 [\#381](https://github.com/venth/aws-adfs/pull/381) ([dependabot[bot]](https://github.com/apps/dependabot))
+- Bump black from 22.12.0 to 23.3.0 [\#380](https://github.com/venth/aws-adfs/pull/380) ([dependabot[bot]](https://github.com/apps/dependabot))
+- Bump pre-commit from 2.20.0 to 2.21.0 [\#368](https://github.com/venth/aws-adfs/pull/368) ([dependabot[bot]](https://github.com/apps/dependabot))
+- Bump setuptools from 65.5.0 to 65.5.1 [\#365](https://github.com/venth/aws-adfs/pull/365) ([dependabot[bot]](https://github.com/apps/dependabot))
+- Bump cryptography from 37.0.2 to 38.0.3 [\#364](https://github.com/venth/aws-adfs/pull/364) ([dependabot[bot]](https://github.com/apps/dependabot))
+- Bump black from 22.10.0 to 22.12.0 [\#363](https://github.com/venth/aws-adfs/pull/363) ([pdecat](https://github.com/pdecat))
+- Bump lxml from 4.9.1 to 4.9.2 [\#362](https://github.com/venth/aws-adfs/pull/362) ([dependabot[bot]](https://github.com/apps/dependabot))
+- Bump certifi from 2022.5.18.1 to 2022.12.7 [\#361](https://github.com/venth/aws-adfs/pull/361) ([dependabot[bot]](https://github.com/apps/dependabot))
+
+## [v2.6.3](https://github.com/venth/aws-adfs/tree/v2.6.3) (2022-10-29)
+
+[Full Changelog](https://github.com/venth/aws-adfs/compare/2.6.2...v2.6.3)
 
 **Merged pull requests:**
 
