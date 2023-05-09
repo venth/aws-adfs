@@ -147,6 +147,10 @@ from .consts import (
     is_flag=True,
     default=False,
 )
+@click.option(
+    "--aad-verification-code",
+    help="Verification code for Azure AD multi-factor authentication.",
+)
 def login(
     profile,
     region,
@@ -172,6 +176,7 @@ def login(
     sspi,
     duo_factor,
     duo_device,
+    aad_verification_code,
     enforce_role_arn,
 ):
     """
@@ -191,6 +196,7 @@ def login(
         username_password_command,
         duo_factor,
         duo_device,
+        aad_verification_code,
         enforce_role_arn,
     )
 

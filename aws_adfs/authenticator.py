@@ -13,7 +13,7 @@ from . import roles_assertion_extractor
 from .helpers import trace_http_request
 
 
-def authenticate(config, username=None, password=None, assertfile=None):
+def authenticate(config, username=None, password=None, assertfile=None, aad_verification_code=None):
     response, session = html_roles_fetcher.fetch_html_encoded_roles(
         adfs_host=config.adfs_host,
         adfs_cookie_location=config.adfs_cookie_location,
@@ -120,7 +120,7 @@ def _strategy(response, config, session, assertfile=None):
 
     def _azure_cloud_mfa_extractor():
         def extract():
-            return azure_cloud_mfa_auth.extract(html_response, config.ssl_verification, session)
+            return azure_cloud_mfa_auth.extract(html_response, config.ssl_verification, config.aad_verification_code, session)
         return extract
 
     if assertfile is None:
