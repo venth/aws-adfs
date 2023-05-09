@@ -23,8 +23,8 @@ def get_prepared_config(
     username_password_command,
     duo_factor,
     duo_device,
-    verification_code,
-    enforce_role_arn=False,
+    verification_code=None,
+    enforce_role_arn=False
 ):
     """
     Prepares ADFS configuration for login task.
@@ -152,9 +152,6 @@ def create_adfs_default_config(profile):
     # The specific Duo factor and device to use
     config.duo_factor = None
     config.duo_device = None
-
-    # Verification code
-    config.verification_code = None
 
     return config
 

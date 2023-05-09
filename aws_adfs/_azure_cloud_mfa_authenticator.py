@@ -22,7 +22,7 @@ def extract(html_response, ssl_verification_enabled, verification_code, session)
     """
 
     click.echo(_mfa_instructions(html_response), err=True)
-    
+
     return _retrieve_roles_page(
         html_response,
         session,
@@ -39,9 +39,10 @@ def _retrieve_roles_page(html_response, session, ssl_verification_enabled, verif
         time.sleep(seconds_to_wait)
 
         verification_code_text = _verification_code_text(html_response)
-        if verification_code_text is not None and verification_code is None:
-            verification_code = click.prompt(verification_code_text)
+        if verification_code_text is not None:
             seconds_to_wait = 0
+            if verification_code is None:
+                verification_code = click.prompt(verification_code_text)
 
         response = session.post(
             _action_url_on_validation_success(html_response),
