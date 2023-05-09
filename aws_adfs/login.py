@@ -149,7 +149,7 @@ from .consts import (
 )
 @click.option(
     "--aad-verification-code",
-    help="Verification code for multi-factor authentication.",
+    help="Verification code for Azure AD multi-factor authentication.",
 )
 def login(
     profile,
