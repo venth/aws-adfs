@@ -297,7 +297,7 @@ aws-adfs integrates with:
                                       factors. For "Passcode" and "WebAuthn
                                       Security Key" factors, it is always "None".
       --enforce-role-arn              Only allow the role passed in by --role-arn.
-      --aad-verification-code TEXT        Verification code for Azure AD multi-factor authentication
+      --aad-verification-code TEXT    Verification code for Azure AD multi-factor
                                       authentication.
       --help                          Show this message and exit.
     ```
