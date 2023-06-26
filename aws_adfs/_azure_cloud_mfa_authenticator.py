@@ -34,9 +34,15 @@ def _retrieve_roles_page(html_response, session, ssl_verification_enabled, aad_v
     seconds_to_wait = 5
     max_attempts = 12
     counter = 1
+    has_number_matching = False
 
     while True:
         time.sleep(seconds_to_wait)
+
+        number_to_match = _number_matching(html_response)
+        if number_to_match and not has_number_matching:
+            has_number_matching = True
+            click.echo(number_to_match, err=True)
 
         aad_verification_code_text = _aad_verification_code_text(html_response)
         if aad_verification_code_text is not None:
@@ -103,3 +109,8 @@ def _aad_verification_code_text(html_response):
     aad_verification_code_query = './/input[@id="verificationCodeInput"]'
     element = html_response.find(aad_verification_code_query)
     return None if element is None else element.get('placeholder')
+
+def _number_matching(html_response):
+    number_matching_query = './/p[@id="validEntropyNumber"]'
+    element = html_response.find(number_matching_query)
+    return None if element is None else element.text
