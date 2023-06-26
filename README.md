@@ -385,7 +385,7 @@ poetry run pytest
 
 ```
 export CHANGELOG_GITHUB_TOKEN=$(gopass show -o pins/Github/github-changelog-generator)
-./script/release.sh patch # or minor, major, prepatch, preminor, premajor, prerelease, or a valid semver string
+./scripts/release.sh patch # or minor, major, prepatch, preminor, premajor, prerelease, or a valid semver string
 ```
 
 ## Changelog
