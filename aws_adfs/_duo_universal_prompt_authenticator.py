@@ -13,6 +13,7 @@ except ImportError:
 
 import logging
 import json
+import platform
 import re
 
 from threading import Event, Thread
@@ -38,7 +39,9 @@ from . import roles_assertion_extractor
 
 _headers = {
     "Accept-Language": "en",
-    "User-Agent": "Mozilla/5.0 (Windows NT 6.1; WOW64; Trident/7.0; rv:11.0) like Gecko",
+    "User-Agent": "Mozilla/5.0 (X11; Linux x86_64) like Gecko"
+    if platform.system() == "Linux"
+    else "Mozilla/5.0 (Windows NT 6.1; WOW64; Trident/7.0; rv:11.0) like Gecko",
     "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
     "Accept": "text/plain, */*; q=0.01",
 }
