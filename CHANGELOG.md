@@ -1,8 +1,30 @@
 # Changelog
 
-## [2.7.0](https://github.com/venth/aws-adfs/tree/2.7.0) (2023-05-09)
+## [2.8.0](https://github.com/venth/aws-adfs/tree/2.8.0) (2023-06-26)
 
-[Full Changelog](https://github.com/venth/aws-adfs/compare/v2.6.3...2.7.0)
+[Full Changelog](https://github.com/venth/aws-adfs/compare/v2.7.0...2.8.0)
+
+**Implemented enhancements:**
+
+- Add support for number matching in Microsoft Authenticator app [\#387](https://github.com/venth/aws-adfs/pull/387) ([martinverup](https://github.com/martinverup))
+
+**Fixed bugs:**
+
+- Use Linux user-agent string to work-around Duo permission denied errors: `{"stat": "FAIL", "message_enum": 7, "data": {}}` [\#378](https://github.com/venth/aws-adfs/pull/378) ([pdecat](https://github.com/pdecat))
+
+**Merged pull requests:**
+
+- Bump cryptography from 39.0.1 to 41.0.0 [\#392](https://github.com/venth/aws-adfs/pull/392) ([dependabot[bot]](https://github.com/apps/dependabot))
+- Bump pytest from 7.3.1 to 7.4.0 [\#391](https://github.com/venth/aws-adfs/pull/391) ([dependabot[bot]](https://github.com/apps/dependabot))
+- Bump coverage from 7.2.5 to 7.2.7 [\#388](https://github.com/venth/aws-adfs/pull/388) ([dependabot[bot]](https://github.com/apps/dependabot))
+- Bump requests from 2.28.1 to 2.31.0 [\#385](https://github.com/venth/aws-adfs/pull/385) ([dependabot[bot]](https://github.com/apps/dependabot))
+- Bump fido2 from 1.1.0 to 1.1.1 [\#384](https://github.com/venth/aws-adfs/pull/384) ([dependabot[bot]](https://github.com/apps/dependabot))
+- Bump cryptography from 38.0.3 to 39.0.1 [\#370](https://github.com/venth/aws-adfs/pull/370) ([dependabot[bot]](https://github.com/apps/dependabot))
+- Add support for python 3.11 [\#207](https://github.com/venth/aws-adfs/pull/207) ([pdecat](https://github.com/pdecat))
+
+## [v2.7.0](https://github.com/venth/aws-adfs/tree/v2.7.0) (2023-05-09)
+
+[Full Changelog](https://github.com/venth/aws-adfs/compare/v2.6.3...v2.7.0)
 
 **Implemented enhancements:**
 
