@@ -1,8 +1,25 @@
 # Changelog
 
-## [2.8.0](https://github.com/venth/aws-adfs/tree/2.8.0) (2023-06-26)
+## [2.8.1](https://github.com/venth/aws-adfs/tree/2.8.1) (2023-06-27)
 
-[Full Changelog](https://github.com/venth/aws-adfs/compare/v2.7.0...2.8.0)
+[Full Changelog](https://github.com/venth/aws-adfs/compare/v2.8.0...2.8.1)
+
+**Fixed bugs:**
+
+- Failed response from DUO on macOS Darwin [\#393](https://github.com/venth/aws-adfs/issues/393)
+- Failed response from Duo [\#355](https://github.com/venth/aws-adfs/issues/355)
+
+**Closed issues:**
+
+- Number Matching | Microsoft Authenticator [\#371](https://github.com/venth/aws-adfs/issues/371)
+
+**Merged pull requests:**
+
+- Also fix User-Agent string on MacOS \(Darwin\) [\#394](https://github.com/venth/aws-adfs/pull/394) ([Leglaw](https://github.com/Leglaw))
+
+## [v2.8.0](https://github.com/venth/aws-adfs/tree/v2.8.0) (2023-06-26)
+
+[Full Changelog](https://github.com/venth/aws-adfs/compare/v2.7.0...v2.8.0)
 
 **Implemented enhancements:**
 
