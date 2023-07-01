@@ -16,7 +16,7 @@ def account_aliases(session, username, password, auth_method, saml_response, con
         verify=config.ssl_verification,
         headers={
             'Accept-Language': 'en',
-            'User-Agent': 'Mozilla/5.0 (Windows NT 6.1; WOW64; Trident/7.0; rv:11.0) like Gecko',
+            'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64) Gecko/20100101 Firefox/60.0',
             'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
             'Accept': 'text/plain, */*; q=0.01',
         },
