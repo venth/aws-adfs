@@ -1,8 +1,30 @@
 # Changelog
 
-## [2.8.1](https://github.com/venth/aws-adfs/tree/2.8.1) (2023-06-27)
+## [2.8.2](https://github.com/venth/aws-adfs/tree/2.8.2) (2023-09-14)
 
-[Full Changelog](https://github.com/venth/aws-adfs/compare/v2.8.0...2.8.1)
+[Full Changelog](https://github.com/venth/aws-adfs/compare/v2.8.1...2.8.2)
+
+**Fixed bugs:**
+
+- fix: drop user-agent header from requests as it only seems to cause issues, especially with Duo [\#410](https://github.com/venth/aws-adfs/pull/410) ([pdecat](https://github.com/pdecat))
+
+**Closed issues:**
+
+- All DUO authentication methods currently failing [\#407](https://github.com/venth/aws-adfs/issues/407)
+
+**Merged pull requests:**
+
+- Bump cryptography from 41.0.1 to 41.0.3 [\#409](https://github.com/venth/aws-adfs/pull/409) ([dependabot[bot]](https://github.com/apps/dependabot))
+- Bump certifi from 2023.5.7 to 2023.7.22 [\#408](https://github.com/venth/aws-adfs/pull/408) ([dependabot[bot]](https://github.com/apps/dependabot))
+- Bump pytest from 7.4.0 to 7.4.2 [\#406](https://github.com/venth/aws-adfs/pull/406) ([dependabot[bot]](https://github.com/apps/dependabot))
+- Bump actions/checkout from 3 to 4 [\#405](https://github.com/venth/aws-adfs/pull/405) ([dependabot[bot]](https://github.com/apps/dependabot))
+- Bump click from 8.1.3 to 8.1.7 [\#403](https://github.com/venth/aws-adfs/pull/403) ([dependabot[bot]](https://github.com/apps/dependabot))
+- Bump fido2 from 1.1.1 to 1.1.2 [\#397](https://github.com/venth/aws-adfs/pull/397) ([dependabot[bot]](https://github.com/apps/dependabot))
+- Bump lxml from 4.9.2 to 4.9.3 [\#395](https://github.com/venth/aws-adfs/pull/395) ([dependabot[bot]](https://github.com/apps/dependabot))
+
+## [v2.8.1](https://github.com/venth/aws-adfs/tree/v2.8.1) (2023-06-27)
+
+[Full Changelog](https://github.com/venth/aws-adfs/compare/v2.8.0...v2.8.1)
 
 **Fixed bugs:**
 
