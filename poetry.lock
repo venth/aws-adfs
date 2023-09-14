@@ -462,17 +462,17 @@ test = ["pytest (>=6)"]
 
 [[package]]
 name = "fido2"
-version = "1.1.1"
+version = "1.1.2"
 description = "FIDO2/WebAuthn library for implementing clients and servers."
 optional = false
 python-versions = ">=3.7,<4.0"
 files = [
-    {file = "fido2-1.1.1-py3-none-any.whl", hash = "sha256:54017b69522b1581e4222443a0b3fff5eb2626f8e773a4a7b955f3e55fb3b4fc"},
-    {file = "fido2-1.1.1.tar.gz", hash = "sha256:5dc495ca8c59c1c337383b4b8c314d46b92d5c6fc650e71984c6d7f954079fc3"},
+    {file = "fido2-1.1.2-py3-none-any.whl", hash = "sha256:a3b7d7d233dec3a4fa0d6178fc34d1cce17b820005a824f6ab96917a1e3be8d8"},
+    {file = "fido2-1.1.2.tar.gz", hash = "sha256:6110d913106f76199201b32d262b2857562cc46ba1d0b9c51fbce30dc936c573"},
 ]
 
 [package.dependencies]
-cryptography = ">=2.6,<35 || >35,<43"
+cryptography = ">=2.6,<35 || >35,<44"
 
 [package.extras]
 pcsc = ["pyscard (>=1.9,<3)"]
