@@ -28,6 +28,7 @@ aws-adfs integrates with:
   * OTP 6 digit codes
   * SMS codes
   * Phone call
+* [Silverfort](https://www.silverfort.com/) MFA provider
 
 ## Setup Dependencies
 
