@@ -14,7 +14,7 @@ from . import roles_assertion_extractor
 from .helpers import trace_http_request
 
 
-def authenticate(config, username=None, password=None, assertfile=None, aad_verification_code=None):
+def authenticate(config, username=None, password=None, assertfile=None):
     response, session = html_roles_fetcher.fetch_html_encoded_roles(
         adfs_host=config.adfs_host,
         adfs_cookie_location=config.adfs_cookie_location,
@@ -180,6 +180,7 @@ def _is_symantec_vip_authentication(html_response):
     ):
         return True
 
+
 def _is_rsa_authentication(html_response):
     auth_method = './/input[@id="authMethod"]'
     element = html_response.find(auth_method)
@@ -188,6 +189,7 @@ def _is_rsa_authentication(html_response):
         and element.get('value') == 'SecurIDAuthentication'
     )
 
+
 def _is_azure_mfa_authentication(html_response):
     auth_method = './/input[@id="authMethod"]'
     element = html_response.find(auth_method)
@@ -195,6 +197,7 @@ def _is_azure_mfa_authentication(html_response):
         element is not None
         and element.get('value') == 'AzureMfaServerAuthentication'
     )
+
 
 def _is_azure_cloud_mfa_authentication(html_response):
     auth_method = './/input[@id="authMethod"]'
