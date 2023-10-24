@@ -1,16 +1,30 @@
 # Changelog
 
-## [2.8.2](https://github.com/venth/aws-adfs/tree/2.8.2) (2023-09-14)
+## [2.9.0](https://github.com/venth/aws-adfs/tree/2.9.0) (2023-10-24)
 
-[Full Changelog](https://github.com/venth/aws-adfs/compare/v2.8.1...2.8.2)
+[Full Changelog](https://github.com/venth/aws-adfs/compare/v2.8.2...2.9.0)
 
-**Fixed bugs:**
+**Implemented enhancements:**
 
-- fix: drop user-agent header from requests as it only seems to cause issues, especially with Duo [\#410](https://github.com/venth/aws-adfs/pull/410) ([pdecat](https://github.com/pdecat))
+- Silverfort support for aws-adfs authentications [\#415](https://github.com/venth/aws-adfs/pull/415) ([rotemsf](https://github.com/rotemsf))
 
 **Closed issues:**
 
+- Error: Cannot begin authentication process. The error response: {"stat": "FAIL", "message\_enum": 57, "data": {}} [\#411](https://github.com/venth/aws-adfs/issues/411)
+
+**Merged pull requests:**
+
+- Bump urllib3 from 1.26.16 to 1.26.18 [\#416](https://github.com/venth/aws-adfs/pull/416) ([dependabot[bot]](https://github.com/apps/dependabot))
+- Bump cryptography from 41.0.3 to 41.0.4 [\#412](https://github.com/venth/aws-adfs/pull/412) ([dependabot[bot]](https://github.com/apps/dependabot))
+
+## [v2.8.2](https://github.com/venth/aws-adfs/tree/v2.8.2) (2023-09-14)
+
+[Full Changelog](https://github.com/venth/aws-adfs/compare/v2.8.1...v2.8.2)
+
+**Fixed bugs:**
+
 - All DUO authentication methods currently failing [\#407](https://github.com/venth/aws-adfs/issues/407)
+- fix: drop user-agent header from requests as it only seems to cause issues, especially with Duo [\#410](https://github.com/venth/aws-adfs/pull/410) ([pdecat](https://github.com/pdecat))
 
 **Merged pull requests:**
 
