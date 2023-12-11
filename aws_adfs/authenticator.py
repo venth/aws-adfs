@@ -101,7 +101,7 @@ def _strategy(response, config, session, assertfile=None):
 
     def _symantec_vip_extractor():
         def extract():
-            return symantec_vip_access.extract(html_response, config.ssl_verification, session)
+            return symantec_vip_access.extract(html_response, config.ssl_verification, config.mfa_token_command, config.mfa_token, session)
         return extract
 
     def _file_extractor():
@@ -111,7 +111,7 @@ def _strategy(response, config, session, assertfile=None):
 
     def _rsa_auth_extractor():
         def extract():
-            return rsa_auth.extract(html_response, config.ssl_verification, session)
+            return rsa_auth.extract(html_response, config.ssl_verification, config.mfa_token_command, config.mfa_token, session)
         return extract
 
     def _azure_mfa_extractor():

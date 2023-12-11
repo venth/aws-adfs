@@ -24,6 +24,7 @@ class TestConfigPreparation:
         default_session_duration = 3600
         default_sspi = False
         default_username_password_command = None
+        default_mfa_token_command = None
         default_duo_factor = None
         default_duo_device = None
         default_enforce_role_arn = False
@@ -41,6 +42,7 @@ class TestConfigPreparation:
             default_session_duration,
             default_sspi,
             default_username_password_command,
+            default_mfa_token_command,
             default_duo_factor,
             default_duo_device,
         )
@@ -80,6 +82,7 @@ class TestConfigPreparation:
         irrelevant_s3_signature_version = "irrelevant_s3_signature_version"
         irrelevant_session_duration = "irrelevant_session_duration"
         irrelevant_username_password_command = "irrelevant_username_password_command"
+        irrelevant_mfa_token_command = "irrelevant_mfa_token_command"
         irrelevant_duo_factor = "irrelevant_duo_factor"
         irrelevant_duo_device = "irrelevant_duo_device"
 
@@ -96,6 +99,7 @@ class TestConfigPreparation:
             irrelevant_session_duration,
             default_sspi,
             irrelevant_username_password_command,
+            irrelevant_mfa_token_command,
             irrelevant_duo_factor,
             irrelevant_duo_device,
         )

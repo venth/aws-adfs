@@ -21,6 +21,7 @@ def get_prepared_config(
     session_duration,
     sspi,
     username_password_command,
+    mfa_token_command,
     duo_factor,
     duo_device,
     aad_verification_code=None,
@@ -47,6 +48,7 @@ def get_prepared_config(
     :param session_duration: AWS STS session duration (default 1 hour)
     :param sspi: Whether SSPI is enabled
     :param username_password_command: The command used to retrieve username and password information
+    :param mfa_token_command: The command used to retrieve MFA token
     :param duo_factor: The specific Duo factor to use
     :param duo_device: The specific Duo device to use
     :param aad_verification_code: If verification code is in config use that for multi-factor authentication
@@ -86,6 +88,7 @@ def get_prepared_config(
     adfs_config.session_duration = default_if_none(session_duration, adfs_config.session_duration)
     adfs_config.sspi = default_if_none(sspi, adfs_config.sspi)
     adfs_config.username_password_command = default_if_none(username_password_command, adfs_config.username_password_command)
+    adfs_config.mfa_token_command = default_if_none(mfa_token_command, adfs_config.mfa_token_command)
     adfs_config.duo_factor = default_if_none(duo_factor, adfs_config.duo_factor)
     adfs_config.duo_device = default_if_none(duo_device, adfs_config.duo_device)
     adfs_config.aad_verification_code = aad_verification_code
@@ -148,6 +151,11 @@ def create_adfs_default_config(profile):
 
     # The command used to retrieve username and password information
     config.username_password_command = None
+
+    # The command used to retrieve MFA token information
+    config.mfa_token_command = None
+
+    config.mfa_token = os.environ.get('mfa_token')
 
     # The specific Duo factor and device to use
     config.duo_factor = None
@@ -219,6 +227,7 @@ def _load_adfs_config_from_stored_profile(adfs_config, profile):
             profile, 'adfs_config.sspi',
             str(adfs_config.sspi)))
         adfs_config.username_password_command = config.get_or(profile, 'adfs_config.username_password_command', adfs_config.username_password_command)
+        adfs_config.mfa_token_command = config.get_or(profile, 'adfs_config.mfa_token_command', adfs_config.mfa_token_command)
 
         adfs_config.duo_factor = config.get_or(profile, "adfs_config.duo_factor", adfs_config.duo_factor)
         if adfs_config.duo_factor == "None":
