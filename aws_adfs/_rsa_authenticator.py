@@ -4,6 +4,8 @@ import lxml.etree as ET
 import logging
 import re
 
+from . import run_command
+
 try:
     # Python 3
     from urllib.parse import urlparse, parse_qs
@@ -15,7 +17,7 @@ from . import roles_assertion_extractor
 from .helpers import trace_http_request
 
 
-def extract(html_response, ssl_verification_enabled, session):
+def extract(html_response, ssl_verification_enabled, mfa_token_command, mfa_token, session):
     """
     :param response: raw http response
     :param html_response: html result of parsing http response
@@ -24,7 +26,15 @@ def extract(html_response, ssl_verification_enabled, session):
 
     roles_page_url = _action_url_on_validation_success(html_response)
 
-    rsa_securid_code = click.prompt(text='Enter your RSA SecurID token', type=str, hide_input=True)
+    if mfa_token_command:
+      data = run_command.run_command(mfa_token_command)
+      rsa_securid_code = data['mfa_token']
+      logging.debug(f"using RSA SecurID token from command: {rsa_securid_code}")
+    elif mfa_token:
+      rsa_securid_code = mfa_token
+      logging.debug(f"using RSA SecurID token from env: {rsa_securid_code}")
+    else:
+      rsa_securid_code = click.prompt(text='Enter your RSA SecurID token', type=str, hide_input=True)
 
     click.echo('Going for aws roles', err=True)
     return _retrieve_roles_page(

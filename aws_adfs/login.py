@@ -19,6 +19,7 @@ import requests
 from botocore import client
 
 from . import authenticator, helpers, prepare, role_chooser
+from . import run_command
 from .consts import (
     DUO_UNIVERSAL_PROMPT_FACTOR_DUO_PUSH,
     DUO_UNIVERSAL_PROMPT_FACTOR_PASSCODE,
@@ -76,9 +77,13 @@ from .consts import (
     help='Read username and password from the output of a shell command (expected JSON format: `{"username": "myusername", "password": "mypassword"}`)',
 )
 @click.option(
+    "--mfa-token-command",
+    help='Read MFA token for Symantec or RSA authenticators from the output of a shell command (expected JSON format: `{"mfa_token": "123654"}`)',
+)
+@click.option(
     '--env',
     is_flag=True,
-    help='Read username, password from environment variables (username and password).',
+    help='Read username, password and optionally an MFA token from environment variables (username, password and mfa_token).',
 )
 @click.option(
     '--stdin',
@@ -161,6 +166,7 @@ def login(
     provider_id,
     s3_signature_version,
     username_password_command,
+    mfa_token_command,
     env,
     stdin,
     authfile,
@@ -194,6 +200,7 @@ def login(
         session_duration,
         sspi,
         username_password_command,
+        mfa_token_command,
         duo_factor,
         duo_device,
         aad_verification_code,
@@ -220,11 +227,9 @@ def login(
         # If we fail to get an assertion, prompt for credentials and try again
         if assertion is None:
             password = None
-
             if config.username_password_command:
-                config.adfs_user, password = _username_password_command_credentials(
-                    username_password_command
-                )
+                data = run_command.run_command(username_password_command)
+                config.adfs_user, password = data['username'], data['password']
             if stdin:
                 config.adfs_user, password = _stdin_user_credentials()
             elif env:
@@ -437,40 +442,6 @@ def _emit_summary(config, session_duration):
         ),
         err=True
     )
-
-
-def _username_password_command_credentials(username_password_command):
-    try:
-        logging.debug("Executing `{}`".format(username_password_command))
-        proc = subprocess.run(
-            username_password_command,
-            stdout=subprocess.PIPE,
-            stderr=subprocess.STDOUT,
-            check=True,
-            shell=True,
-        )
-        data = json.loads(proc.stdout)
-        username = data["username"]
-        password = data["password"]
-    except subprocess.CalledProcessError as e:
-        logging.error(
-            "Failed to execute the `{}` command to retrieve username and password: \n\n{}".format(
-                username_password_command, e.output
-            )
-        )
-        username = None
-        password = None
-    except json.JSONDecodeError as e:
-        logging.error(
-            "Failed to decode the output of the `{}` command as JSON to retrieve username and password: \n\n{}".format(
-                username_password_command, e
-            )
-        )
-        username = None
-        password = None
-
-    return username, password
-
 
 def _file_user_credentials(profile, authfile):
     config = configparser.ConfigParser()
