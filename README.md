@@ -252,7 +252,8 @@ aws-adfs integrates with:
                                       of a shell command (expected JSON format:
                                       `{"username": "myusername", "password":
                                       "mypassword"}`)
-      --mfa-token-command TEXT        Read MFA token from the output of a shell
+      --mfa-token-command TEXT        Read MFA token for Symantec or RSA
+                                      authenticators from the output of a shell
                                       command (expected JSON format:
                                       `{"mfa_token": "123654"}`)
       --env                           Read username, password and optionally an

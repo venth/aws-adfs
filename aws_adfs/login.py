@@ -78,7 +78,7 @@ from .consts import (
 )
 @click.option(
     "--mfa-token-command",
-    help='Read MFA token from the output of a shell command (expected JSON format: `{"mfa_token": "123654"}`)',
+    help='Read MFA token for Symantec or RSA authenticators from the output of a shell command (expected JSON format: `{"mfa_token": "123654"}`)',
 )
 @click.option(
     '--env',
