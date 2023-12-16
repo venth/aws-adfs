@@ -1,8 +1,23 @@
 # Changelog
 
-## [2.9.0](https://github.com/venth/aws-adfs/tree/2.9.0) (2023-10-24)
+## [2.10.0](https://github.com/venth/aws-adfs/tree/2.10.0) (2023-12-16)
 
-[Full Changelog](https://github.com/venth/aws-adfs/compare/v2.8.2...2.9.0)
+[Full Changelog](https://github.com/venth/aws-adfs/compare/v2.9.0...2.10.0)
+
+**Implemented enhancements:**
+
+- Support MFA Token from STDIN or ENV or AUTHFILE [\#174](https://github.com/venth/aws-adfs/issues/174)
+- add support for mfa\_token env and mfa-token-command [\#420](https://github.com/venth/aws-adfs/pull/420) ([mheiges](https://github.com/mheiges))
+
+**Merged pull requests:**
+
+- Bump actions/setup-python from 4 to 5 [\#419](https://github.com/venth/aws-adfs/pull/419) ([dependabot[bot]](https://github.com/apps/dependabot))
+- Bump cryptography from 41.0.4 to 41.0.6 [\#418](https://github.com/venth/aws-adfs/pull/418) ([dependabot[bot]](https://github.com/apps/dependabot))
+- Bump pytest from 7.4.2 to 7.4.3 [\#417](https://github.com/venth/aws-adfs/pull/417) ([dependabot[bot]](https://github.com/apps/dependabot))
+
+## [v2.9.0](https://github.com/venth/aws-adfs/tree/v2.9.0) (2023-10-24)
+
+[Full Changelog](https://github.com/venth/aws-adfs/compare/v2.8.2...v2.9.0)
 
 **Implemented enhancements:**
 
