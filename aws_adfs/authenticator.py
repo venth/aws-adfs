@@ -9,6 +9,7 @@ from . import _symantec_vip_access as symantec_vip_access
 from . import _azure_mfa_authenticator as azure_mfa_auth
 from . import _azure_cloud_mfa_authenticator as azure_cloud_mfa_auth
 from . import _silverfort_authenticator as silverfort_mfa_auth
+from . import _safenet_mfa as safenet_mfa
 from . import html_roles_fetcher
 from . import roles_assertion_extractor
 from .helpers import trace_http_request
@@ -128,6 +129,11 @@ def _strategy(response, config, session, assertfile=None):
         def extract():
             return silverfort_mfa_auth.extract(html_response, config.ssl_verification, session)
         return extract
+    
+    def _safenet_extractor():
+        def extract():
+            return safenet_mfa.extract(html_response, config.ssl_verification, config.mfa_token_command, config.mfa_token, session)
+        return extract
 
     if assertfile is None:
         chosen_strategy = _plain_extractor
@@ -148,6 +154,8 @@ def _strategy(response, config, session, assertfile=None):
         chosen_strategy = _azure_cloud_mfa_extractor
     elif _is_silverfort_mfa_authentication(html_response):
         chosen_strategy = _silverfort_extractor
+    elif _is_safenet_mfa_authentication(html_response):
+        chosen_strategy = _safenet_extractor
 
     return chosen_strategy()
 
@@ -214,4 +222,12 @@ def _is_silverfort_mfa_authentication(html_response):
     return (
         element is not None
         and element.get('value') == 'SilverfortAdfs'
+    )
+
+def _is_safenet_mfa_authentication(html_response):
+    auth_method = './/input[@name="AuthMethod"]'
+    element = html_response.find(auth_method)
+    return (
+        element is not None
+        and element.get('value') == 'SafeNet-MFA'
     )
