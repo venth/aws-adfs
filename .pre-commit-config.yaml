@@ -1,6 +1,6 @@
 repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v4.3.0
+    rev: v4.5.0
     hooks:
     - id: trailing-whitespace
     - id: end-of-file-fixer
@@ -8,7 +8,7 @@ repos:
     - id: check-added-large-files
 
   - repo: https://github.com/python-jsonschema/check-jsonschema
-    rev: 0.16.0
+    rev: 0.27.3
     hooks:
     - id: check-github-actions
     - id: check-github-workflows
