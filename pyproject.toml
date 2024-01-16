@@ -33,7 +33,7 @@ botocore = "^1.23"
 click = "^8.0"
 configparser = "5.3.0"
 fido2 = "^1.0"
-lxml = "^4.9"
+lxml = ">=4.9,<6.0"
 requests = "^2.27"
 requests-kerberos = [
     { version = "^0.14", markers = "platform_system != 'Windows'" },
