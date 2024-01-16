@@ -1,8 +1,21 @@
 # Changelog
 
-## [2.10.0](https://github.com/venth/aws-adfs/tree/2.10.0) (2023-12-16)
+## [2.11.0](https://github.com/venth/aws-adfs/tree/2.11.0) (2024-01-16)
 
-[Full Changelog](https://github.com/venth/aws-adfs/compare/v2.9.0...2.10.0)
+[Full Changelog](https://github.com/venth/aws-adfs/compare/v2.10.0...2.11.0)
+
+**Implemented enhancements:**
+
+- Support SafeNet Trusted Access MFA [\#425](https://github.com/venth/aws-adfs/pull/425) ([alencar](https://github.com/alencar))
+
+**Merged pull requests:**
+
+- Bump lxml from 4.9.3 to 5.1.0 [\#424](https://github.com/venth/aws-adfs/pull/424) ([dependabot[bot]](https://github.com/apps/dependabot))
+- Bump pytest from 7.4.3 to 7.4.4 [\#422](https://github.com/venth/aws-adfs/pull/422) ([dependabot[bot]](https://github.com/apps/dependabot))
+
+## [v2.10.0](https://github.com/venth/aws-adfs/tree/v2.10.0) (2023-12-16)
+
+[Full Changelog](https://github.com/venth/aws-adfs/compare/v2.9.0...v2.10.0)
 
 **Implemented enhancements:**
 
