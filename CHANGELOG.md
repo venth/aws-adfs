@@ -1,8 +1,8 @@
 # Changelog
 
-## [2.11.0](https://github.com/venth/aws-adfs/tree/2.11.0) (2024-01-16)
+## [v2.11.0](https://github.com/venth/aws-adfs/tree/v2.11.0) (2024-01-16)
 
-[Full Changelog](https://github.com/venth/aws-adfs/compare/v2.10.0...2.11.0)
+[Full Changelog](https://github.com/venth/aws-adfs/compare/v2.10.0...v2.11.0)
 
 **Implemented enhancements:**
 
