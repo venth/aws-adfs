@@ -129,7 +129,7 @@ def _strategy(response, config, session, assertfile=None):
         def extract():
             return silverfort_mfa_auth.extract(html_response, config.ssl_verification, session)
         return extract
-    
+
     def _safenet_extractor():
         def extract():
             return safenet_mfa.extract(html_response, config.ssl_verification, config.mfa_token_command, config.mfa_token, session)
