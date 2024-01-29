@@ -145,7 +145,7 @@ def _perform_authentication_transaction(
     ssl_verification_enabled,
 ):
     duo_host = re.sub(
-        r"/frame/frameless/v4/auth.*",
+        r"/frame/frameless/v\d+/auth.*",
         "",
         duo_url,
     )
