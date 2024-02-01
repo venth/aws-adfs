@@ -5,7 +5,7 @@ build-backend = "poetry.core.masonry.api"
 [tool]
 [tool.poetry]
 name = "aws-adfs"
-version = "2.11.2"
+version = "2.11.3a0"
 description = "AWS CLI authenticator via ADFS - small command-line tool to authenticate via ADFS and assume chosen role"
 keywords = ["aws", "adfs", "console", "tool"]
 classifiers = [
