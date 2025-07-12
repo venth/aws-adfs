@@ -487,6 +487,16 @@ def _initiate_authentication(
     )
     trace_http_request(response)
 
+    # API BREAKING CHANGE. There's now a callback that has to happen here
+    response = session.post(
+        response.url,
+        verify=ssl_verification_enabled,
+        headers=_headers,
+        allow_redirects=True,
+        params={"sid": sid, "tx": tx},
+        data=data,
+    )
+
     html_response = ET.fromstring(response.text, ET.HTMLParser())
     preferred_factor = _preferred_factor(html_response)
     preferred_device = _preferred_device(html_response)
