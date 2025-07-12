@@ -1,8 +1,24 @@
 # Changelog
 
-## [2.11.2](https://github.com/venth/aws-adfs/tree/2.11.2) (2024-02-01)
+## [2.12.0](https://github.com/venth/aws-adfs/tree/2.12.0) (2025-07-12)
 
-[Full Changelog](https://github.com/venth/aws-adfs/compare/v2.11.1...2.11.2)
+[Full Changelog](https://github.com/venth/aws-adfs/compare/v2.11.2...2.12.0)
+
+**Implemented enhancements:**
+
+- quick fix for breaking duo api change [\#441](https://github.com/venth/aws-adfs/pull/441) ([thecaffiend](https://github.com/thecaffiend))
+
+**Closed issues:**
+
+- "AttributeError: 'NoneType' object has no attribute 'get' " while trying to login [\#438](https://github.com/venth/aws-adfs/issues/438)
+
+**Merged pull requests:**
+
+- fix\(deps\)!: drop EOLed python 3.7 and 3.8, add 3.11, 3.12 and 3.13 [\#443](https://github.com/venth/aws-adfs/pull/443) ([pdecat](https://github.com/pdecat))
+
+## [v2.11.2](https://github.com/venth/aws-adfs/tree/v2.11.2) (2024-02-01)
+
+[Full Changelog](https://github.com/venth/aws-adfs/compare/v2.11.1...v2.11.2)
 
 **Merged pull requests:**
 
