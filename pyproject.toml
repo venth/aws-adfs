@@ -27,7 +27,7 @@ readme = "README.md"
 aws-adfs = "aws_adfs.commands:cli"
 
 [tool.poetry.dependencies]
-python = "^3.7"
+python = "^3.9"
 boto3 = "^1.24"
 botocore = "^1.23"
 click = "^8.0"
@@ -51,4 +51,4 @@ toml = "^0.10"
 
 [tool.black]
 line-length = 130          # black's default is 88
-target-version = ['py310']
+target-version = ['py313']
