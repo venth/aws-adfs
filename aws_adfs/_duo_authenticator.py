@@ -250,7 +250,7 @@ def _load_duo_result_url(
     if json_response['stat'] != 'OK':
         raise click.ClickException(
             u'There was an issue when following the Duo result URL after authentication.'
-            u' The error response: {}'.format(
+            u' The error response text: {}'.format(
                 response.text
             )
         )
