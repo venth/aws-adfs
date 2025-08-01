@@ -257,7 +257,7 @@ def _load_duo_result_url(duo_host, sid, txid, factor, xsrf, session, ssl_verific
 
     if response.status_code != 200:
         raise click.ClickException(
-            "Issues when following the Duo result URL after authentication. The error response {}".format(response)
+            f"Status code not 200 when following the Duo result URL after authentication. The error response {response} - {response.url} - {response.text}"
         )
 
     return response
@@ -452,7 +452,8 @@ def _initiate_authentication(
 
     sid = query.get("sid")
     if sid is None:
-        # No need for second factor authentification, Duo directly returned the authentication cookie
+        logging.info("No need for second factor authentification, "
+                     "Duo directly returned the authentication cookie")
         return (None, None, None, None, None, _js_cookie(html_response), duo_url), True
 
     tx = html_response.find('.//input[@name="tx"]').get("value")
@@ -486,17 +487,34 @@ def _initiate_authentication(
         data=data,
     )
     trace_http_request(response)
-
+    for res in response.history:
+        logging.info(f"history: {res} - {res.url}")
     # API BREAKING CHANGE. There's now a callback that has to happen here
-    response = session.post(
-        response.url,
-        verify=ssl_verification_enabled,
-        headers=_headers,
-        allow_redirects=True,
-        params={"sid": sid, "tx": tx},
-        data=data,
-    )
+    logging.info(f"duo_url: {duo_url}")
+    logging.info(f"response.url: {response.url}")
+    try:
+        callback_response = session.post(
+            response.url,
+            verify=ssl_verification_enabled,
+            headers=_headers,
+            allow_redirects=True,
+            params={"sid": sid, "tx": tx},
+            data=data,
+        )
+        trace_http_request(callback_response)
+        # Do not overwrite the response unconditionally. If this breaks for some users, we'll need to find out how the response
+        # differs and how to use that for a decision what to do.
+        # In the case where it's not needed, "stat": "FAIL" can be seen in the response.
+        callback_json = response.json()
+        if callback_json["stat"] == "OK":
+            logging.info("Callback stat OK, using response.")
+            response = callback_response
+    except Exception as e:
+        logging.error("Error doing callback", exc_info=e)
+        logging.error(f"ignoring: {e}")
 
+
+    logging.info("after callback")
     html_response = ET.fromstring(response.text, ET.HTMLParser())
     preferred_factor = _preferred_factor(html_response)
     preferred_device = _preferred_device(html_response)
