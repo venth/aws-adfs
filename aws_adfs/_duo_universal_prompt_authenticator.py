@@ -505,7 +505,7 @@ def _initiate_authentication(
         # Do not overwrite the response unconditionally. If this breaks for some users, we'll need to find out how the response
         # differs and how to use that for a decision what to do.
         # In the case where it's not needed, "stat": "FAIL" can be seen in the response.
-        callback_json = response.json()
+        callback_json = callback_response.json()
         if callback_json["stat"] == "OK":
             logging.info("Callback stat OK, using response.")
             response = callback_response
