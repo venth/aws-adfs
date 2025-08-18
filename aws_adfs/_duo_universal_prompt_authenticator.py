@@ -223,19 +223,20 @@ def _authentication_result(duo_host, sid, txid, factor, xsrf, session, ssl_verif
 
     if response.status_code != 200:
         raise click.ClickException(
-            "Issues during retrieval of a code entered into the device. The error response {}".format(response)
+            "HTTP status code not 200 during UP retrieval of a code entered into the device."
+            "The error response: {}".format(response)
         )
 
     json_response = response.json()
     if json_response["stat"] != "OK":
         raise click.ClickException(
-            "There was an issue during retrieval of a code entered into the device."
+            "'stat' not ok during UP retrieval of a code entered into the device."
             " The error response: {}".format(response.text)
         )
 
     if json_response["response"]["status_code"] != "allow":
         raise click.ClickException(
-            "There was an issue during retrieval of a code entered into the device."
+            "Response 'status_code' not 'allow' during UP retrieval of a code entered into the device."
             " The error response: {}".format(response.text)
         )
 
@@ -278,7 +279,7 @@ def _verify_authentication_status(duo_host, sid, txid, session, ssl_verification
         json_response = response.json()
         if json_response["stat"] != "OK":
             raise click.ClickException(
-                "There was an issue during second factor verification. The error response: {}".format(response.text)
+                "'stat' not OK during UP second factor verification. The error response: {}".format(response.text)
             )
 
         if json_response["response"]["status_code"] not in [
@@ -289,7 +290,7 @@ def _verify_authentication_status(duo_host, sid, txid, session, ssl_verification
             "allow"
         ]:
             raise click.ClickException(
-                "There was an issue during second factor verification. The error response: {}".format(response.text)
+                "Bad 'status_code' during UP second factor verification. The error response: {}".format(response.text)
             )
 
         if json_response["response"]["status_code"] == "pushed":
@@ -351,7 +352,7 @@ def _verify_authentication_status(duo_host, sid, txid, session, ssl_verification
 
         responses.append(response.text)
 
-    raise click.ClickException("There was an issue during second factor verification. The responses: {}".format(responses))
+    raise click.ClickException("Number of responses exceeded during UP second factor verification. The responses: {}".format(responses))
 
 
 def _webauthn_get_assertion(
