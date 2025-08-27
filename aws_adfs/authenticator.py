@@ -192,10 +192,8 @@ def _is_symantec_vip_authentication(html_response):
 def _is_rsa_authentication(html_response):
     auth_method = './/input[@id="authMethod"]'
     element = html_response.find(auth_method)
-    return (
-        element is not None
-        and element.get('value') == 'SecurIDAuthentication'
-    )
+    return element is not None and element.get("value") in ("SecurIDAuthentication", "SecurIDv2Authentication")
+
 
 
 def _is_azure_mfa_authentication(html_response):
