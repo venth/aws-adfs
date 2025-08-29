@@ -506,10 +506,17 @@ def _initiate_authentication(
         # Do not overwrite the response unconditionally. If this breaks for some users, we'll need to find out how the response
         # differs and how to use that for a decision what to do.
         # In the case where it's not needed, "stat": "FAIL" can be seen in the response.
-        callback_json = callback_response.json()
-        if callback_json["stat"] == "OK":
-            logging.info("Callback stat OK, using response.")
-            response = callback_response
+        content_type = callback_response.headers.get('content-type')
+        logging.debug(f"Callback response content type: {content_type}")
+        if 'application/json' in content_type:
+            callback_json = callback_response.json()
+            if callback_json["stat"] == "OK":
+                logging.info("Callback stat OK, using response.")
+                response = callback_response
+            else:
+                logging.debug("Callback stat not OK, ignoring response.")
+        else:
+            logging.debug("Callback did not return json, ignoring response.")
     except Exception as e:
         logging.error("Error doing callback", exc_info=e)
         logging.error(f"ignoring: {e}")
