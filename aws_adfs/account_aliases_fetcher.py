@@ -6,7 +6,7 @@ import lxml.etree as ET
 from .helpers import trace_http_request
 
 
-_account_alias_pattern = re.compile("Account: *([^(]+) *\\(([0-9]+)\\)")
+_account_alias_pattern = re.compile(r"Account: *([^(]+) *\(([0-9]+)\)")
 _account_without_alias_pattern = re.compile(r"Account: *\(?([0-9]+)\)?")
 
 

@@ -40,7 +40,7 @@ def cli(verbose):
     logging.basicConfig(
         format=log_format,
         stream=sys.stderr,
-        level=logging.DEBUG if verbose else logging.INFO,
+        level=logging.DEBUG if verbose else logging.ERROR,
     )
     if verbose:
         try:

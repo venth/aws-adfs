@@ -490,6 +490,7 @@ def _initiate_authentication(
     trace_http_request(response)
     for res in response.history:
         logging.info(f"history: {res} - {res.url}")
+
     # API BREAKING CHANGE. There's now a callback that has to happen here
     logging.info(f"duo_url: {duo_url}")
     logging.info(f"response.url: {response.url}")
@@ -520,9 +521,8 @@ def _initiate_authentication(
     except Exception as e:
         logging.error("Error doing callback", exc_info=e)
         logging.error(f"ignoring: {e}")
+    logging.info("Callback completed")
 
-
-    logging.info("after callback")
     html_response = ET.fromstring(response.text, ET.HTMLParser())
     preferred_factor = _preferred_factor(html_response)
     preferred_device = _preferred_device(html_response)
