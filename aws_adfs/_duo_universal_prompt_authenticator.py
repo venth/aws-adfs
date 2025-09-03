@@ -258,7 +258,7 @@ def _load_duo_result_url(duo_host, sid, txid, factor, xsrf, session, ssl_verific
 
     if response.status_code != 200:
         raise click.ClickException(
-            f"Status code not 200 when following the Duo result URL after authentication. The error response {response} - {response.url} - {response.text}"
+            f"HTTP status code not 200 when following the Duo result URL after authentication. The error response {response} - {response.url} - {response.text}"
         )
 
     return response
