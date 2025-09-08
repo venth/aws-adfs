@@ -241,7 +241,7 @@ def _load_duo_result_url(
 
     if response.status_code != 200:
         raise click.ClickException(
-            u'Issues when following the Duo result URL after '
+            u'HTTP status code not 200 when following the Duo result URL after '
             u'authentication. The error response {}'.format(
                 response
             )
@@ -249,8 +249,8 @@ def _load_duo_result_url(
     json_response = response.json()
     if json_response['stat'] != 'OK':
         raise click.ClickException(
-            u'There was an issue when following the Duo result URL after authentication.'
-            u' The error response: {}'.format(
+            u"'stat' not OK when following the Duo result URL after authentication."
+            u' The error response text: {}'.format(
                 response.text
             )
         )
