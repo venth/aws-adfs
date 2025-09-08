@@ -1,8 +1,16 @@
 # Changelog
 
-## [2.12.0](https://github.com/venth/aws-adfs/tree/2.12.0) (2025-07-12)
+## [2.12.1](https://github.com/venth/aws-adfs/tree/2.12.1) (2025-09-08)
 
-[Full Changelog](https://github.com/venth/aws-adfs/compare/v2.11.2...2.12.0)
+[Full Changelog](https://github.com/venth/aws-adfs/compare/v2.12.0...2.12.1)
+
+**Merged pull requests:**
+
+- Debug issue from gh440 [\#444](https://github.com/venth/aws-adfs/pull/444) ([erpel](https://github.com/erpel))
+
+## [v2.12.0](https://github.com/venth/aws-adfs/tree/v2.12.0) (2025-07-12)
+
+[Full Changelog](https://github.com/venth/aws-adfs/compare/v2.11.2...v2.12.0)
 
 **Implemented enhancements:**
 
