@@ -1,3 +1,4 @@
+import base64
 import binascii
 import click
 import lxml.etree as ET
@@ -891,11 +892,12 @@ _PWL_ASYNC_FACTORS = {
     },
 }
 
-# Factors the pwl flow can currently drive; WebAuthn is not yet supported.
+# Factors the pwl flow can currently drive.
 _PWL_SUPPORTED_FACTORS = (
     DUO_UNIVERSAL_PROMPT_FACTOR_DUO_PUSH,
     DUO_UNIVERSAL_PROMPT_FACTOR_PHONE_CALL,
     DUO_UNIVERSAL_PROMPT_FACTOR_PASSCODE,
+    DUO_UNIVERSAL_PROMPT_FACTOR_WEBAUTHN,
 )
 
 
@@ -916,10 +918,7 @@ def _pwl_perform_authentication_transaction(ctx, factor, device, session, ssl_ve
     if factor == DUO_UNIVERSAL_PROMPT_FACTOR_PASSCODE:
         return _pwl_authenticate_passcode(ctx, session, ssl_verification_enabled)
     if factor == DUO_UNIVERSAL_PROMPT_FACTOR_WEBAUTHN:
-        raise click.ClickException(
-            "WebAuthn is not yet supported with the new Duo Universal Prompt (pwl) flow. "
-            "Use one of: '{}'.".format(supported)
-        )
+        return _pwl_authenticate_webauthn(ctx, session, ssl_verification_enabled)
 
     raise click.ClickException(
         "The Duo factor '{}' is not supported with the new Duo Universal Prompt (pwl) flow. "
@@ -985,6 +984,122 @@ def _pwl_authenticate_passcode(ctx, session, ssl_verification_enabled):
     # accepted, so there is no transaction to poll before finalizing.
     _pwl_post_factor(
         ctx, "/auth/factors/mobile_otp", {"mobile_otp": passcode}, session, ssl_verification_enabled, "submitting Duo passcode"
+    )
+    return _pwl_finalize_auth(ctx, session, ssl_verification_enabled)
+
+
+def _pwl_b64(value):
+    # The pwl passkey submit expects standard base64 (with padding) for the
+    # assertion response fields, unlike the base64url used elsewhere.
+    return base64.b64encode(bytes(value)).decode("ascii")
+
+
+def _pwl_get_passkey_options(ctx, session, ssl_verification_enabled):
+    # Duo drives security keys through a dedicated passkey factor. The
+    # initialization call returns the WebAuthn credential request options and a
+    # session id that ties the later assertion submission to this challenge.
+    features = json.loads(_PWL_BROWSER_FEATURES)
+    features["webauthn_supported"] = True
+    response = session.get(
+        _pwl_url(ctx, "/auth/factors/passkey/initialization"),
+        verify=ssl_verification_enabled,
+        headers=_pwl_headers(ctx),
+        params={
+            "authkey": ctx["authkey"],
+            "browser_features": json.dumps(features),
+            "auth_method_type": "cross_platform",
+        },
+    )
+    trace_http_request(response)
+    body = _pwl_check_ok(response, "initializing the Duo security key challenge")
+    logging.info("pwl passkey init response: {}".format(json.dumps(body.get("response"))))
+    return body["response"]
+
+
+def _pwl_authenticate_webauthn(ctx, session, ssl_verification_enabled):
+    init = _pwl_get_passkey_options(ctx, session, ssl_verification_enabled)
+    session_id = init["session_id"]
+    options = init["credential_request_options"]
+
+    # fido2 expects raw bytes for the challenge and credential ids.
+    options["challenge"] = websafe_decode(options["challenge"])
+    for cred in options.get("allowCredentials", []):
+        cred["id"] = websafe_decode(cred["id"])
+        cred.pop("transports", None)
+
+    devices = list(CtapHidDevice.list_devices())
+    if CtapPcscDevice:
+        devices.extend(list(CtapPcscDevice.list_devices()))
+    if not devices:
+        raise click.ClickException("No FIDO U2F / FIDO2 authenticator is eligible.")
+
+    rq = queue.Queue()
+    cancel = Event()
+    for device in devices:
+        thread = Thread(
+            target=_pwl_webauthn_get_assertion,
+            args=(device, ctx, options, session_id, session, ssl_verification_enabled, cancel, rq),
+        )
+        thread.daemon = True
+        thread.start()
+
+    # Return the first authenticator that produces a usable assertion.
+    return rq.get()
+
+
+def _pwl_webauthn_get_assertion(device, ctx, options, session_id, session, ssl_verification_enabled, cancel, rq):
+    click.echo(
+        "Activate your FIDO U2F / FIDO2 authenticator now: '{}'".format(device),
+        err=True,
+    )
+    client = Fido2Client(device, options["extensions"]["appid"])
+    try:
+        assertion = client.get_assertion(options, event=cancel)
+        authenticator_assertion_response = assertion.get_response(0)
+        assertion_response = assertion.get_assertions()[0]
+
+        public_key_credential = {
+            "id": websafe_encode(assertion_response.credential["id"]),
+            "type": assertion_response.credential["type"],
+            "authenticatorAttachment": "cross-platform",
+            "response": {
+                "authenticatorData": _pwl_b64(assertion_response.auth_data),
+                "clientDataJSON": _pwl_b64(authenticator_assertion_response["clientData"]),
+                "signature": _pwl_b64(assertion_response.signature),
+            },
+            "extensionResults": authenticator_assertion_response.get("extensionResults") or {},
+        }
+
+        click.echo(
+            "Got response from FIDO U2F / FIDO2 authenticator: '{}'".format(device),
+            err=True,
+        )
+        rq.put(_pwl_submit_passkey(ctx, session_id, public_key_credential, session, ssl_verification_enabled))
+    except Exception as e:
+        logging.debug("Got an exception while waiting for {}: {}".format(device, e))
+        if not cancel.is_set():
+            raise
+    finally:
+        # Cancel the other FIDO U2F / FIDO2 prompts.
+        cancel.set()
+        device.close()
+
+
+def _pwl_submit_passkey(ctx, session_id, public_key_credential, session, ssl_verification_enabled):
+    # The passkey factor is synchronous: an OK response means the assertion was
+    # accepted, so finalize immediately to obtain the OIDC redirect back to ADFS.
+    _pwl_post_factor(
+        ctx,
+        "/auth/factors/passkey",
+        {
+            "auth_method_type": "cross_platform",
+            "session_id": session_id,
+            "result": {"public_key_credential": public_key_credential},
+            "saw_good_news": False,
+        },
+        session,
+        ssl_verification_enabled,
+        "submitting Duo security key assertion",
     )
     return _pwl_finalize_auth(ctx, session, ssl_verification_enabled)
 
