@@ -759,42 +759,68 @@ def _pwl_check_ok(response, context):
     return body
 
 
-def _pwl_find_devices(obj):
-    # Recursively collect device descriptors (dicts that carry a "pkey").
-    found = []
-    if isinstance(obj, dict):
-        if "pkey" in obj:
-            found.append(obj)
-        for value in obj.values():
-            found.extend(_pwl_find_devices(value))
-    elif isinstance(obj, list):
-        for value in obj:
-            found.extend(_pwl_find_devices(value))
-    return found
+def _pwl_factors(payload):
+    # Factor descriptors are nested under auth_factors_context in the payload
+    # response; the pre_authn/evaluation response exposes them at the top level.
+    context = payload.get("auth_factors_context") or payload
+    return (context.get("available_unified_auth_factors") or {}).get("factors", [])
 
 
-def _pwl_select_pkey(payload, device):
-    devices = _pwl_find_devices(payload)
-    logging.info(
-        "pwl devices discovered: {}".format(
-            [{k: d.get(k) for k in ("pkey", "name", "index", "device")} for d in devices]
+def _pwl_devices_for_factor(payload, factor_type):
+    # Collect only the devices that support the requested factor, keyed by pkey.
+    # A single physical device can appear under several factor_types, so scoping
+    # avoids selecting a device that cannot service the chosen factor.
+    devices = []
+    seen = set()
+    for entry in _pwl_factors(payload):
+        if entry.get("factor_type") != factor_type:
+            continue
+        info = entry.get("device_info") or entry.get("phone_info") or {}
+        pkey = info.get("pkey")
+        if not pkey or pkey in seen:
+            continue
+        seen.add(pkey)
+        devices.append(
+            {"pkey": pkey, "name": info.get("name"), "end_of_number": info.get("end_of_number")}
         )
-    )
+    return devices
+
+
+def _pwl_select_pkey(payload, factor_type, device):
+    devices = _pwl_devices_for_factor(payload, factor_type)
+    logging.info("pwl {} devices: {}".format(factor_type, json.dumps(devices)))
     if not devices:
         raise click.ClickException(
-            "Could not find any Duo devices in the prompt payload: {}".format(json.dumps(payload))
+            "No Duo device supports the '{}' factor. Prompt payload: {}".format(
+                factor_type, json.dumps(payload)
+            )
         )
 
     if device and device != "None":
         for candidate in devices:
-            if device in (candidate.get("index"), candidate.get("device"), candidate.get("name")):
+            name = candidate.get("name") or ""
+            end_of_number = candidate.get("end_of_number") or ""
+            if (
+                device == candidate["pkey"]
+                or device in name
+                or (end_of_number and end_of_number in device)
+                or device == end_of_number
+            ):
                 return candidate["pkey"]
+        # Backwards compatibility with the legacy "phoneN" ordinal device names.
         match = re.match(r"phone(\d+)$", device)
         if match:
             index = int(match.group(1)) - 1
             if 0 <= index < len(devices):
                 return devices[index]["pkey"]
+        click.echo(
+            "Configured device '{}' did not match an available device; using the default.".format(device),
+            err=True,
+        )
 
+    # No device specified (or no match): use Duo's default, the first device
+    # offered for this factor. This keeps the flow non-interactive, mirroring
+    # the legacy prompt which let Duo pick the device when none was given.
     return devices[0]["pkey"]
 
 
@@ -844,46 +870,86 @@ def _pwl_evaluate_pre_authn(ctx, session, ssl_verification_enabled):
         logging.info("pwl pre_authn/evaluation failed (continuing): {}".format(e))
 
 
+# Async pwl factors share a POST -> poll -> finalize shape; only the
+# endpoints, transaction-id field, and long-poll flag differ between them.
+_PWL_ASYNC_FACTORS = {
+    DUO_UNIVERSAL_PROMPT_FACTOR_DUO_PUSH: {
+        "factor_type": "push",
+        "auth_path": "/auth/factors/push/auth",
+        "txid_field": "push_txid",
+        "poll_path": "/auth/factors/push/status",
+        "use_saw_good_news": True,
+        "context": "initiating Duo Push",
+    },
+    DUO_UNIVERSAL_PROMPT_FACTOR_PHONE_CALL: {
+        "factor_type": "phone_call",
+        "auth_path": "/auth/factors/phone_call",
+        "txid_field": "txid",
+        "poll_path": "/auth/factors/phone_call/poll",
+        "use_saw_good_news": False,
+        "context": "initiating Duo phone call",
+    },
+}
+
+# Factors the pwl flow can currently drive; WebAuthn is not yet supported.
+_PWL_SUPPORTED_FACTORS = (
+    DUO_UNIVERSAL_PROMPT_FACTOR_DUO_PUSH,
+    DUO_UNIVERSAL_PROMPT_FACTOR_PHONE_CALL,
+    DUO_UNIVERSAL_PROMPT_FACTOR_PASSCODE,
+)
+
+
 def _pwl_perform_authentication_transaction(ctx, factor, device, session, ssl_verification_enabled):
+    supported = "', '".join(_PWL_SUPPORTED_FACTORS)
     if factor is None:
         factor = click.prompt(
-            text="Please enter your desired authentication method (Ex: Duo Push)", type=str
+            text="Please enter your desired authentication method (e.g. '{}')".format(supported),
+            type=str,
         )
 
     _pwl_initialize_pre_authn(ctx, session, ssl_verification_enabled)
     _pwl_evaluate_pre_authn(ctx, session, ssl_verification_enabled)
     payload = _pwl_get_payload(ctx, session, ssl_verification_enabled)
 
-    if factor == DUO_UNIVERSAL_PROMPT_FACTOR_DUO_PUSH:
-        return _pwl_authenticate_push(ctx, payload, device, session, ssl_verification_enabled)
-
-    if factor == DUO_UNIVERSAL_PROMPT_FACTOR_PHONE_CALL:
-        return _pwl_authenticate_phone_call(ctx, payload, device, session, ssl_verification_enabled)
+    if factor in _PWL_ASYNC_FACTORS:
+        return _pwl_authenticate_async(ctx, factor, payload, device, session, ssl_verification_enabled)
+    if factor == DUO_UNIVERSAL_PROMPT_FACTOR_PASSCODE:
+        return _pwl_authenticate_passcode(ctx, session, ssl_verification_enabled)
+    if factor == DUO_UNIVERSAL_PROMPT_FACTOR_WEBAUTHN:
+        raise click.ClickException(
+            "WebAuthn is not yet supported with the new Duo Universal Prompt (pwl) flow. "
+            "Use one of: '{}'.".format(supported)
+        )
 
     raise click.ClickException(
-        "The Duo factor '{}' is not yet supported with the new Duo Universal Prompt (pwl) flow. "
-        "Currently supported: '{}' and '{}'.".format(
-            factor, DUO_UNIVERSAL_PROMPT_FACTOR_DUO_PUSH, DUO_UNIVERSAL_PROMPT_FACTOR_PHONE_CALL
-        )
+        "The Duo factor '{}' is not supported with the new Duo Universal Prompt (pwl) flow. "
+        "Supported factors: '{}'.".format(factor, supported)
     )
 
 
-def _pwl_authenticate_push(ctx, payload, device, session, ssl_verification_enabled):
-    pkey = _pwl_select_pkey(payload, device)
-    click.echo(
-        "Triggering authentication method: '{}' with '{}'".format(
-            DUO_UNIVERSAL_PROMPT_FACTOR_DUO_PUSH, device or pkey
-        ),
-        err=True,
-    )
+def _pwl_post_factor(ctx, path, extra_data, session, ssl_verification_enabled, context):
+    data = {"authkey": ctx["authkey"]}
+    data.update(extra_data)
     response = session.post(
-        _pwl_url(ctx, "/auth/factors/push/auth"),
+        _pwl_url(ctx, path),
         verify=ssl_verification_enabled,
         headers=_pwl_headers(ctx, json_body=True),
-        data=json.dumps({"authkey": ctx["authkey"], "pkey": pkey}),
+        data=json.dumps(data),
     )
     trace_http_request(response)
-    body = _pwl_check_ok(response, "initiating Duo Push")
+    return _pwl_check_ok(response, context)
+
+
+def _pwl_authenticate_async(ctx, factor, payload, device, session, ssl_verification_enabled):
+    spec = _PWL_ASYNC_FACTORS[factor]
+    pkey = _pwl_select_pkey(payload, spec["factor_type"], device)
+    click.echo(
+        "Triggering authentication method: '{}' with '{}'".format(factor, device or pkey),
+        err=True,
+    )
+    body = _pwl_post_factor(
+        ctx, spec["auth_path"], {"pkey": pkey}, session, ssl_verification_enabled, spec["context"]
+    )
     step_up_code = body["response"].get("step_up_code")
     if step_up_code:
         click.echo(
@@ -891,60 +957,82 @@ def _pwl_authenticate_push(ctx, payload, device, session, ssl_verification_enabl
             "Enter this code on your phone to approve the push: {}".format(step_up_code),
             err=True,
         )
-    push_txid = body["response"].get("push_txid") or body["response"].get("txid")
-    logging.info("pwl push_txid: {}".format(push_txid))
-    return _pwl_poll_status(ctx, "push", push_txid, session, ssl_verification_enabled)
+    txid = (
+        body["response"].get(spec["txid_field"])
+        or body["response"].get("txid")
+        or body["response"].get("push_txid")
+    )
+    logging.info("pwl {} txid: {}".format(spec["factor_type"], txid))
+    return _pwl_poll_status(
+        ctx,
+        spec["poll_path"],
+        spec["txid_field"],
+        txid,
+        spec["use_saw_good_news"],
+        session,
+        ssl_verification_enabled,
+    )
 
 
-def _pwl_authenticate_phone_call(ctx, payload, device, session, ssl_verification_enabled):
-    pkey = _pwl_select_pkey(payload, device)
+def _pwl_authenticate_passcode(ctx, session, ssl_verification_enabled):
+    passcode = None
+    while not passcode or not re.match(r"^[0-9]{6,}$", passcode):
+        passcode = click.prompt("Enter passcode (6+ digit number)", hide_input=True)
     click.echo(
-        "Triggering authentication method: '{}' with '{}'".format(
-            DUO_UNIVERSAL_PROMPT_FACTOR_PHONE_CALL, device or pkey
-        ),
-        err=True,
+        "Triggering authentication method: '{}'".format(DUO_UNIVERSAL_PROMPT_FACTOR_PASSCODE), err=True
     )
-    response = session.post(
-        _pwl_url(ctx, "/auth/factors/phone_call"),
-        verify=ssl_verification_enabled,
-        headers=_pwl_headers(ctx, json_body=True),
-        data=json.dumps({"authkey": ctx["authkey"], "pkey": pkey}),
+    # mobile_otp is a synchronous factor: an OK response means the passcode was
+    # accepted, so there is no transaction to poll before finalizing.
+    _pwl_post_factor(
+        ctx, "/auth/factors/mobile_otp", {"mobile_otp": passcode}, session, ssl_verification_enabled, "submitting Duo passcode"
     )
-    trace_http_request(response)
-    body = _pwl_check_ok(response, "initiating Duo phone call")
-    txid = body["response"].get("txid") or body["response"].get("push_txid")
-    logging.info("pwl phone_call txid: {}".format(txid))
-    return _pwl_poll_status(ctx, "phone_call", txid, session, ssl_verification_enabled)
+    return _pwl_finalize_auth(ctx, session, ssl_verification_enabled)
 
 
-def _pwl_poll_status(ctx, factor_path, txid, session, ssl_verification_enabled):
+def _pwl_poll_status(ctx, poll_path, txid_param, txid, use_saw_good_news, session, ssl_verification_enabled):
     if not txid:
         raise click.ClickException("Duo did not return a transaction id when starting authentication.")
 
-    status_url = _pwl_url(ctx, "/auth/factors/{}/status".format(factor_path))
+    status_url = _pwl_url(ctx, poll_path)
     saw_good_news = "false"
     for _ in range(60):
+        params = {"authkey": ctx["authkey"], txid_param: txid}
+        if use_saw_good_news:
+            params["saw_good_news"] = saw_good_news
         response = session.get(
             status_url,
             verify=ssl_verification_enabled,
             headers=_pwl_headers(ctx),
-            params={"authkey": ctx["authkey"], "push_txid": txid, "saw_good_news": saw_good_news},
+            params=params,
         )
         trace_http_request(response)
         body = _pwl_check_ok(response, "polling Duo authentication status")
-        result = body["response"].get("result", body["response"])
-        logging.info("pwl status result: {}".format(json.dumps(result)))
+        response_body = body["response"]
+        logging.info("pwl status result: {}".format(json.dumps(response_body)))
 
-        result_status = str(result.get("result") or result.get("status_code") or "").upper()
+        # push nests the status under response.result as an object, while
+        # phone_call returns response.result as a bare status string; support
+        # both shapes.
+        inner = response_body.get("result")
+        if isinstance(inner, dict):
+            detail = inner
+            result_status = str(inner.get("result") or inner.get("status_code") or "").upper()
+        elif isinstance(inner, str):
+            detail = response_body
+            result_status = inner.upper()
+        else:
+            detail = response_body
+            result_status = str(response_body.get("status_code") or "").upper()
+
         if result_status in ("SUCCESS", "ALLOW"):
-            result_url = result.get("result_url")
+            result_url = detail.get("result_url") or response_body.get("result_url")
             if result_url:
                 return _pwl_fetch_result(ctx, result_url, session, ssl_verification_enabled)
             # The pwl flow does not return a result_url; finalize the auth to
             # obtain the OIDC redirect url back to ADFS.
             return _pwl_finalize_auth(ctx, session, ssl_verification_enabled)
         if result_status in ("FAILURE", "DENY", "FRAUD", "ERROR"):
-            raise click.ClickException("Duo authentication was denied or failed: {}".format(json.dumps(result)))
+            raise click.ClickException("Duo authentication was denied or failed: {}".format(json.dumps(response_body)))
 
         saw_good_news = "true"
         time.sleep(1)
