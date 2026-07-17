@@ -1,8 +1,9 @@
+import base64
 import binascii
 import click
 import lxml.etree as ET
 
-from fido2.client import ClientError, Fido2Client
+from fido2.client import Fido2Client
 from fido2.hid import CtapHidDevice
 from fido2.utils import websafe_decode, websafe_encode
 
@@ -13,8 +14,8 @@ except ImportError:
 
 import logging
 import json
-import platform
 import re
+import time
 
 from threading import Event, Thread
 
@@ -66,6 +67,7 @@ def extract(html_response, ssl_verification_enabled, session, duo_factor, duo_de
         webauthn_supported,
         auth_signature,
         duo_url,
+        pwl_ctx,
     ), initiated = _initiate_authentication(
         duo_url,
         adfs_context,
@@ -75,6 +77,37 @@ def extract(html_response, ssl_verification_enabled, session, duo_factor, duo_de
         ssl_verification_enabled,
     )
     if initiated:
+        # Duo migrated some tenants to the "pwl" Universal Prompt: a single page
+        # app driven by /prompt/{akey}/auth/* JSON endpoints keyed by an authkey
+        # instead of the older sid-based /frame/v4/* endpoints (upstream #446).
+        if pwl_ctx is not None:
+            click.echo("Waiting for additional authentication", err=True)
+
+            if duo_factor:
+                preferred_factor = duo_factor
+            if duo_device:
+                preferred_device = duo_device
+
+            signed_response = _pwl_perform_authentication_transaction(
+                pwl_ctx,
+                preferred_factor,
+                preferred_device,
+                session,
+                ssl_verification_enabled,
+            )
+            if signed_response == "cancelled":
+                click.echo("Authentication method cancelled, aborting.")
+                exit(-2)
+
+            click.echo("Going for aws roles", err=True)
+            return _pwl_retrieve_roles_page(
+                signed_response,
+                roles_page_url,
+                adfs_context,
+                session,
+                ssl_verification_enabled,
+            )
+
         if auth_signature is None:
             click.echo("Waiting for additional authentication", err=True)
 
@@ -444,18 +477,23 @@ def _initiate_authentication(
     trace_http_request(response)
 
     if response.status_code != 200 or response.url is None:
-        return (None, None, None, None, None, None, None), False
+        return (None, None, None, None, None, None, None, None), False
 
     duo_url = response.url
     o = urlparse(duo_url)
     query = parse_qs(o.query)
     html_response = ET.fromstring(response.text, ET.HTMLParser())
 
+    if _is_pwl_prompt(html_response):
+        logging.info("Detected Duo pwl Universal Prompt (authkey-based flow)")
+        pwl_ctx = _pwl_context(html_response, duo_url)
+        return (None, None, None, None, None, None, duo_url, pwl_ctx), True
+
     sid = query.get("sid")
     if sid is None:
         logging.info("No need for second factor authentification, "
                      "Duo directly returned the authentication cookie")
-        return (None, None, None, None, None, _js_cookie(html_response), duo_url), True
+        return (None, None, None, None, None, _js_cookie(html_response), duo_url, None), True
 
     tx = html_response.find('.//input[@name="tx"]').get("value")
     xsrf = html_response.find('.//input[@name="_xsrf"]').get("value")
@@ -528,7 +566,7 @@ def _initiate_authentication(
     preferred_device = _preferred_device(html_response)
     webauthn_supported = _webauthn_supported(html_response)
     xsrf = _xsrf(html_response)
-    return (sid, xsrf, preferred_factor, preferred_device, webauthn_supported, None, duo_url), True
+    return (sid, xsrf, preferred_factor, preferred_device, webauthn_supported, None, duo_url, None), True
 
 
 def _js_cookie(html_response):
@@ -649,3 +687,522 @@ def _action_url_on_validation_success(html_response):
     duo_auth_method = './/form[@id="options"]'
     element = html_response.find(duo_auth_method)
     return element.get("action")
+
+
+# ---------------------------------------------------------------------------
+# Duo "pwl" Universal Prompt (single page app) support.
+#
+# Newer Duo tenants serve a JavaScript prompt whose root element exposes an
+# akey/authkey and no longer a sid. Authentication is driven by JSON endpoints
+# under /prompt/{akey}/auth/* identified by the authkey plus session cookies.
+# See upstream issue #446.
+# ---------------------------------------------------------------------------
+
+_PWL_BROWSER_FEATURES = json.dumps(
+    {
+        "touch_supported": False,
+        "platform_authenticator_status": "unavailable",
+        "webauthn_supported": False,
+        "screen_resolution_height": 1080,
+        "screen_resolution_width": 1920,
+        "screen_color_depth": 24,
+        "is_uvpa_available": False,
+        "client_capabilities_uvpa": False,
+    }
+)
+
+
+def _is_pwl_prompt(html_response):
+    # The pwl Universal Prompt root element carries the akey/authkey used to
+    # drive the JSON auth endpoints.
+    return bool(html_response.xpath("//*[@data-authkey]"))
+
+
+def _pwl_context(html_response, duo_url):
+    root = html_response.xpath("//*[@data-authkey]")[0]
+    parsed = urlparse(duo_url)
+    query = parse_qs(parsed.query)
+    req_trace_group = root.get("data-req-trace-group") or query.get("req_trace_group", [None])[0]
+    return {
+        "host": parsed.netloc,
+        "akey": root.get("data-akey"),
+        "authkey": root.get("data-authkey"),
+        "req_trace_group": req_trace_group,
+    }
+
+
+def _pwl_url(ctx, path):
+    return "https://{}/prompt/{}{}".format(ctx["host"], ctx["akey"], path)
+
+
+def _pwl_headers(ctx, json_body=False):
+    headers = {
+        "Accept": "application/json",
+        "X-Requested-With": "XMLHttpRequest",
+        "X-Duo-Req-Trace-Group": ctx.get("req_trace_group") or "",
+    }
+    if json_body:
+        headers["Content-Type"] = "application/json"
+    return headers
+
+
+def _pwl_check_ok(response, context):
+    if response.status_code != 200:
+        raise click.ClickException(
+            "HTTP {} while {}. The error response: {}".format(response.status_code, context, response.text)
+        )
+    try:
+        body = response.json()
+    except ValueError:
+        raise click.ClickException("Non-JSON response while {}: {}".format(context, response.text))
+    if body.get("stat") != "OK":
+        raise click.ClickException("Duo returned a non-OK status while {}: {}".format(context, response.text))
+    return body
+
+
+def _pwl_factors(payload):
+    # Factor descriptors are nested under auth_factors_context in the payload
+    # response; the pre_authn/evaluation response exposes them at the top level.
+    context = payload.get("auth_factors_context") or payload
+    return (context.get("available_unified_auth_factors") or {}).get("factors", [])
+
+
+def _pwl_devices_for_factor(payload, factor_type):
+    # Collect only the devices that support the requested factor, keyed by pkey.
+    # A single physical device can appear under several factor_types, so scoping
+    # avoids selecting a device that cannot service the chosen factor.
+    devices = []
+    seen = set()
+    for entry in _pwl_factors(payload):
+        if entry.get("factor_type") != factor_type:
+            continue
+        info = entry.get("device_info") or entry.get("phone_info") or {}
+        pkey = info.get("pkey")
+        if not pkey or pkey in seen:
+            continue
+        seen.add(pkey)
+        devices.append(
+            {"pkey": pkey, "name": info.get("name"), "end_of_number": info.get("end_of_number")}
+        )
+    return devices
+
+
+def _pwl_select_pkey(payload, factor_type, device):
+    devices = _pwl_devices_for_factor(payload, factor_type)
+    logging.debug("pwl {} devices: {}".format(factor_type, json.dumps(devices)))
+    if not devices:
+        raise click.ClickException(
+            "No Duo device supports the '{}' factor. Prompt payload: {}".format(
+                factor_type, json.dumps(payload)
+            )
+        )
+
+    if device and device != "None":
+        for candidate in devices:
+            name = candidate.get("name") or ""
+            end_of_number = candidate.get("end_of_number") or ""
+            if (
+                device == candidate["pkey"]
+                or device in name
+                or (end_of_number and end_of_number in device)
+                or device == end_of_number
+            ):
+                return candidate["pkey"]
+        # Backwards compatibility with the legacy "phoneN" ordinal device names.
+        match = re.match(r"phone(\d+)$", device)
+        if match:
+            index = int(match.group(1)) - 1
+            if 0 <= index < len(devices):
+                return devices[index]["pkey"]
+        click.echo(
+            "Configured device '{}' did not match an available device; using the default.".format(device),
+            err=True,
+        )
+
+    # No device specified (or no match): use Duo's default, the first device
+    # offered for this factor. This keeps the flow non-interactive, mirroring
+    # the legacy prompt which let Duo pick the device when none was given.
+    return devices[0]["pkey"]
+
+
+def _pwl_get_payload(ctx, session, ssl_verification_enabled):
+    response = session.get(
+        _pwl_url(ctx, "/auth/payload"),
+        verify=ssl_verification_enabled,
+        headers=_pwl_headers(ctx),
+        params={"authkey": ctx["authkey"], "browser_features": _PWL_BROWSER_FEATURES},
+    )
+    trace_http_request(response)
+    body = _pwl_check_ok(response, "fetching the Duo authentication payload")
+    logging.debug("pwl payload response: {}".format(json.dumps(body.get("response"))))
+    return body["response"]
+
+
+def _pwl_initialize_pre_authn(ctx, session, ssl_verification_enabled):
+    # The SPA calls /pre_authn/initialization first to establish the server-side
+    # auth session; /auth/payload returns HTTP 400 if this is skipped.
+    response = session.get(
+        _pwl_url(ctx, "/pre_authn/initialization"),
+        verify=ssl_verification_enabled,
+        headers=_pwl_headers(ctx),
+        params={"authkey": ctx["authkey"], "is_ipad": "false"},
+    )
+    trace_http_request(response)
+    _pwl_check_ok(response, "initializing the Duo pre-authentication session")
+
+
+def _pwl_evaluate_pre_authn(ctx, session, ssl_verification_enabled):
+    # Best-effort: the SPA performs a pre-auth risk evaluation before offering
+    # factors. It is not required to trigger a push, so failures are ignored.
+    try:
+        response = session.get(
+            _pwl_url(ctx, "/pre_authn/evaluation"),
+            verify=ssl_verification_enabled,
+            headers=_pwl_headers(ctx),
+            params={
+                "authkey": ctx["authkey"],
+                "browser_features": _PWL_BROWSER_FEATURES,
+                "local_trust_choice": "undecided",
+            },
+        )
+        trace_http_request(response)
+        logging.debug("pwl pre_authn/evaluation response: {}".format(response.text))
+    except Exception as e:
+        logging.info("pwl pre_authn/evaluation failed (continuing): {}".format(e))
+
+
+# Async pwl factors share a POST -> poll -> finalize shape; only the
+# endpoints, transaction-id field, and long-poll flag differ between them.
+_PWL_ASYNC_FACTORS = {
+    DUO_UNIVERSAL_PROMPT_FACTOR_DUO_PUSH: {
+        "factor_type": "push",
+        "auth_path": "/auth/factors/push/auth",
+        "txid_field": "push_txid",
+        "poll_path": "/auth/factors/push/status",
+        "use_saw_good_news": True,
+        "context": "initiating Duo Push",
+    },
+    DUO_UNIVERSAL_PROMPT_FACTOR_PHONE_CALL: {
+        "factor_type": "phone_call",
+        "auth_path": "/auth/factors/phone_call",
+        "txid_field": "txid",
+        "poll_path": "/auth/factors/phone_call/poll",
+        "use_saw_good_news": False,
+        "context": "initiating Duo phone call",
+    },
+}
+
+# Factors the pwl flow can currently drive.
+_PWL_SUPPORTED_FACTORS = (
+    DUO_UNIVERSAL_PROMPT_FACTOR_DUO_PUSH,
+    DUO_UNIVERSAL_PROMPT_FACTOR_PHONE_CALL,
+    DUO_UNIVERSAL_PROMPT_FACTOR_PASSCODE,
+    DUO_UNIVERSAL_PROMPT_FACTOR_WEBAUTHN,
+)
+
+
+def _pwl_perform_authentication_transaction(ctx, factor, device, session, ssl_verification_enabled):
+    supported = "', '".join(_PWL_SUPPORTED_FACTORS)
+    if factor is None:
+        factor = click.prompt(
+            text="Please enter your desired authentication method (e.g. '{}')".format(supported),
+            type=str,
+        )
+
+    _pwl_initialize_pre_authn(ctx, session, ssl_verification_enabled)
+    _pwl_evaluate_pre_authn(ctx, session, ssl_verification_enabled)
+    payload = _pwl_get_payload(ctx, session, ssl_verification_enabled)
+
+    if factor in _PWL_ASYNC_FACTORS:
+        return _pwl_authenticate_async(ctx, factor, payload, device, session, ssl_verification_enabled)
+    if factor == DUO_UNIVERSAL_PROMPT_FACTOR_PASSCODE:
+        return _pwl_authenticate_passcode(ctx, session, ssl_verification_enabled)
+    if factor == DUO_UNIVERSAL_PROMPT_FACTOR_WEBAUTHN:
+        return _pwl_authenticate_webauthn(ctx, session, ssl_verification_enabled)
+
+    raise click.ClickException(
+        "The Duo factor '{}' is not supported with the new Duo Universal Prompt (pwl) flow. "
+        "Supported factors: '{}'.".format(factor, supported)
+    )
+
+
+def _pwl_post_factor(ctx, path, extra_data, session, ssl_verification_enabled, context):
+    data = {"authkey": ctx["authkey"]}
+    data.update(extra_data)
+    response = session.post(
+        _pwl_url(ctx, path),
+        verify=ssl_verification_enabled,
+        headers=_pwl_headers(ctx, json_body=True),
+        data=json.dumps(data),
+    )
+    trace_http_request(response)
+    return _pwl_check_ok(response, context)
+
+
+def _pwl_authenticate_async(ctx, factor, payload, device, session, ssl_verification_enabled):
+    spec = _PWL_ASYNC_FACTORS[factor]
+    pkey = _pwl_select_pkey(payload, spec["factor_type"], device)
+    click.echo(
+        "Triggering authentication method: '{}' with '{}'".format(factor, device or pkey),
+        err=True,
+    )
+    body = _pwl_post_factor(
+        ctx, spec["auth_path"], {"pkey": pkey}, session, ssl_verification_enabled, spec["context"]
+    )
+    step_up_code = body["response"].get("step_up_code")
+    if step_up_code:
+        click.echo(
+            "Duo Mobile is requesting a verification code. "
+            "Enter this code on your phone to approve the push: {}".format(step_up_code),
+            err=True,
+        )
+    txid = (
+        body["response"].get(spec["txid_field"])
+        or body["response"].get("txid")
+        or body["response"].get("push_txid")
+    )
+    logging.debug("pwl {} txid: {}".format(spec["factor_type"], txid))
+    return _pwl_poll_status(
+        ctx,
+        spec["poll_path"],
+        spec["txid_field"],
+        txid,
+        spec["use_saw_good_news"],
+        session,
+        ssl_verification_enabled,
+    )
+
+
+def _pwl_authenticate_passcode(ctx, session, ssl_verification_enabled):
+    passcode = None
+    while not passcode or not re.match(r"^[0-9]{6,}$", passcode):
+        passcode = click.prompt("Enter passcode (6+ digit number)", hide_input=True)
+    click.echo(
+        "Triggering authentication method: '{}'".format(DUO_UNIVERSAL_PROMPT_FACTOR_PASSCODE), err=True
+    )
+    # mobile_otp is a synchronous factor: an OK response means the passcode was
+    # accepted, so there is no transaction to poll before finalizing.
+    _pwl_post_factor(
+        ctx, "/auth/factors/mobile_otp", {"mobile_otp": passcode}, session, ssl_verification_enabled, "submitting Duo passcode"
+    )
+    return _pwl_finalize_auth(ctx, session, ssl_verification_enabled)
+
+
+def _pwl_b64(value):
+    # The pwl passkey submit expects standard base64 (with padding) for the
+    # assertion response fields, unlike the base64url used elsewhere.
+    return base64.b64encode(bytes(value)).decode("ascii")
+
+
+def _pwl_get_passkey_options(ctx, session, ssl_verification_enabled):
+    # Duo drives security keys through a dedicated passkey factor. The
+    # initialization call returns the WebAuthn credential request options and a
+    # session id that ties the later assertion submission to this challenge.
+    features = json.loads(_PWL_BROWSER_FEATURES)
+    features["webauthn_supported"] = True
+    response = session.get(
+        _pwl_url(ctx, "/auth/factors/passkey/initialization"),
+        verify=ssl_verification_enabled,
+        headers=_pwl_headers(ctx),
+        params={
+            "authkey": ctx["authkey"],
+            "browser_features": json.dumps(features),
+            "auth_method_type": "cross_platform",
+        },
+    )
+    trace_http_request(response)
+    body = _pwl_check_ok(response, "initializing the Duo security key challenge")
+    logging.debug("pwl passkey init response: {}".format(json.dumps(body.get("response"))))
+    return body["response"]
+
+
+def _pwl_authenticate_webauthn(ctx, session, ssl_verification_enabled):
+    init = _pwl_get_passkey_options(ctx, session, ssl_verification_enabled)
+    session_id = init["session_id"]
+    options = init["credential_request_options"]
+
+    # fido2 expects raw bytes for the challenge and credential ids.
+    options["challenge"] = websafe_decode(options["challenge"])
+    for cred in options.get("allowCredentials", []):
+        cred["id"] = websafe_decode(cred["id"])
+        cred.pop("transports", None)
+
+    devices = list(CtapHidDevice.list_devices())
+    if CtapPcscDevice:
+        devices.extend(list(CtapPcscDevice.list_devices()))
+    if not devices:
+        raise click.ClickException("No FIDO U2F / FIDO2 authenticator is eligible.")
+
+    rq = queue.Queue()
+    cancel = Event()
+    for device in devices:
+        thread = Thread(
+            target=_pwl_webauthn_get_assertion,
+            args=(device, ctx, options, session_id, session, ssl_verification_enabled, cancel, rq),
+        )
+        thread.daemon = True
+        thread.start()
+
+    # Return the first authenticator that produces a usable assertion.
+    return rq.get()
+
+
+def _pwl_webauthn_get_assertion(device, ctx, options, session_id, session, ssl_verification_enabled, cancel, rq):
+    click.echo(
+        "Activate your FIDO U2F / FIDO2 authenticator now: '{}'".format(device),
+        err=True,
+    )
+    client = Fido2Client(device, options["extensions"]["appid"])
+    try:
+        assertion = client.get_assertion(options, event=cancel)
+        authenticator_assertion_response = assertion.get_response(0)
+        assertion_response = assertion.get_assertions()[0]
+
+        public_key_credential = {
+            "id": websafe_encode(assertion_response.credential["id"]),
+            "type": assertion_response.credential["type"],
+            "authenticatorAttachment": "cross-platform",
+            "response": {
+                "authenticatorData": _pwl_b64(assertion_response.auth_data),
+                "clientDataJSON": _pwl_b64(authenticator_assertion_response["clientData"]),
+                "signature": _pwl_b64(assertion_response.signature),
+            },
+            "extensionResults": authenticator_assertion_response.get("extensionResults") or {},
+        }
+
+        click.echo(
+            "Got response from FIDO U2F / FIDO2 authenticator: '{}'".format(device),
+            err=True,
+        )
+        rq.put(_pwl_submit_passkey(ctx, session_id, public_key_credential, session, ssl_verification_enabled))
+    except Exception as e:
+        logging.debug("Got an exception while waiting for {}: {}".format(device, e))
+        if not cancel.is_set():
+            raise
+    finally:
+        # Cancel the other FIDO U2F / FIDO2 prompts.
+        cancel.set()
+        device.close()
+
+
+def _pwl_submit_passkey(ctx, session_id, public_key_credential, session, ssl_verification_enabled):
+    # The passkey factor is synchronous: an OK response means the assertion was
+    # accepted, so finalize immediately to obtain the OIDC redirect back to ADFS.
+    _pwl_post_factor(
+        ctx,
+        "/auth/factors/passkey",
+        {
+            "auth_method_type": "cross_platform",
+            "session_id": session_id,
+            "result": {"public_key_credential": public_key_credential},
+            "saw_good_news": False,
+        },
+        session,
+        ssl_verification_enabled,
+        "submitting Duo security key assertion",
+    )
+    return _pwl_finalize_auth(ctx, session, ssl_verification_enabled)
+
+
+def _pwl_poll_status(ctx, poll_path, txid_param, txid, use_saw_good_news, session, ssl_verification_enabled):
+    if not txid:
+        raise click.ClickException("Duo did not return a transaction id when starting authentication.")
+
+    status_url = _pwl_url(ctx, poll_path)
+    saw_good_news = "false"
+    for _ in range(60):
+        params = {"authkey": ctx["authkey"], txid_param: txid}
+        if use_saw_good_news:
+            params["saw_good_news"] = saw_good_news
+        response = session.get(
+            status_url,
+            verify=ssl_verification_enabled,
+            headers=_pwl_headers(ctx),
+            params=params,
+        )
+        trace_http_request(response)
+        body = _pwl_check_ok(response, "polling Duo authentication status")
+        response_body = body["response"]
+        logging.debug("pwl status result: {}".format(json.dumps(response_body)))
+
+        # push nests the status under response.result as an object, while
+        # phone_call returns response.result as a bare status string; support
+        # both shapes.
+        inner = response_body.get("result")
+        if isinstance(inner, dict):
+            detail = inner
+            result_status = str(inner.get("result") or inner.get("status_code") or "").upper()
+        elif isinstance(inner, str):
+            detail = response_body
+            result_status = inner.upper()
+        else:
+            detail = response_body
+            result_status = str(response_body.get("status_code") or "").upper()
+
+        if result_status in ("SUCCESS", "ALLOW"):
+            result_url = detail.get("result_url") or response_body.get("result_url")
+            if result_url:
+                return _pwl_fetch_result(ctx, result_url, session, ssl_verification_enabled)
+            # The pwl flow does not return a result_url; finalize the auth to
+            # obtain the OIDC redirect url back to ADFS.
+            return _pwl_finalize_auth(ctx, session, ssl_verification_enabled)
+        if result_status in ("FAILURE", "DENY", "FRAUD", "ERROR"):
+            raise click.ClickException("Duo authentication was denied or failed: {}".format(json.dumps(response_body)))
+
+        saw_good_news = "true"
+        time.sleep(1)
+
+    raise click.ClickException("Timed out waiting for Duo authentication approval.")
+
+
+def _pwl_finalize_auth(ctx, session, ssl_verification_enabled):
+    response = session.get(
+        _pwl_url(ctx, "/auth/finalize_auth"),
+        verify=ssl_verification_enabled,
+        headers=_pwl_headers(ctx),
+        params={"authkey": ctx["authkey"]},
+    )
+    trace_http_request(response)
+    body = _pwl_check_ok(response, "finalizing the Duo authentication")
+    redirect_url = body["response"].get("url")
+    logging.debug("pwl finalize_auth url: {}".format(redirect_url))
+    return _pwl_fetch_result(ctx, redirect_url, session, ssl_verification_enabled)
+
+
+def _pwl_fetch_result(ctx, result_url, session, ssl_verification_enabled):
+    if not result_url:
+        raise click.ClickException("Duo did not provide a completion url after successful authentication.")
+
+    url = result_url if result_url.startswith("http") else "https://{}{}".format(ctx["host"], result_url)
+    # Following the result URL runs the OIDC redirect chain back to ADFS, which
+    # returns the page that completes the SAML round-trip.
+    response = session.get(
+        url,
+        verify=ssl_verification_enabled,
+        headers=_headers,
+        allow_redirects=True,
+    )
+    trace_http_request(response)
+    logging.debug("pwl result final url: {}".format(response.url))
+    return response
+
+
+def _pwl_retrieve_roles_page(signed_response, roles_page_url, adfs_context, session, ssl_verification_enabled):
+    # Persist cookies so subsequent logins can reuse the Duo session.
+    session.cookies.save(ignore_discard=True)
+
+    html_response = ET.fromstring(signed_response.text, ET.HTMLParser())
+
+    # Case 1: ADFS already returned the SAML auto-POST page (the roles page).
+    if html_response.find('.//input[@name="SAMLResponse"]') is not None:
+        return roles_assertion_extractor.extract(html_response)
+
+    # Case 2: an intermediate OIDC "code" form must be posted back to ADFS,
+    # mirroring the behaviour of the older Universal Prompt flow.
+    return _retrieve_roles_page(
+        roles_page_url,
+        adfs_context,
+        session,
+        ssl_verification_enabled,
+        signed_response,
+    )
