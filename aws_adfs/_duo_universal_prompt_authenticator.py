@@ -789,7 +789,7 @@ def _pwl_devices_for_factor(payload, factor_type):
 
 def _pwl_select_pkey(payload, factor_type, device):
     devices = _pwl_devices_for_factor(payload, factor_type)
-    logging.info("pwl {} devices: {}".format(factor_type, json.dumps(devices)))
+    logging.debug("pwl {} devices: {}".format(factor_type, json.dumps(devices)))
     if not devices:
         raise click.ClickException(
             "No Duo device supports the '{}' factor. Prompt payload: {}".format(
@@ -834,7 +834,7 @@ def _pwl_get_payload(ctx, session, ssl_verification_enabled):
     )
     trace_http_request(response)
     body = _pwl_check_ok(response, "fetching the Duo authentication payload")
-    logging.info("pwl payload response: {}".format(json.dumps(body.get("response"))))
+    logging.debug("pwl payload response: {}".format(json.dumps(body.get("response"))))
     return body["response"]
 
 
@@ -866,7 +866,7 @@ def _pwl_evaluate_pre_authn(ctx, session, ssl_verification_enabled):
             },
         )
         trace_http_request(response)
-        logging.info("pwl pre_authn/evaluation response: {}".format(response.text))
+        logging.debug("pwl pre_authn/evaluation response: {}".format(response.text))
     except Exception as e:
         logging.info("pwl pre_authn/evaluation failed (continuing): {}".format(e))
 
@@ -961,7 +961,7 @@ def _pwl_authenticate_async(ctx, factor, payload, device, session, ssl_verificat
         or body["response"].get("txid")
         or body["response"].get("push_txid")
     )
-    logging.info("pwl {} txid: {}".format(spec["factor_type"], txid))
+    logging.debug("pwl {} txid: {}".format(spec["factor_type"], txid))
     return _pwl_poll_status(
         ctx,
         spec["poll_path"],
@@ -1012,7 +1012,7 @@ def _pwl_get_passkey_options(ctx, session, ssl_verification_enabled):
     )
     trace_http_request(response)
     body = _pwl_check_ok(response, "initializing the Duo security key challenge")
-    logging.info("pwl passkey init response: {}".format(json.dumps(body.get("response"))))
+    logging.debug("pwl passkey init response: {}".format(json.dumps(body.get("response"))))
     return body["response"]
 
 
@@ -1123,7 +1123,7 @@ def _pwl_poll_status(ctx, poll_path, txid_param, txid, use_saw_good_news, sessio
         trace_http_request(response)
         body = _pwl_check_ok(response, "polling Duo authentication status")
         response_body = body["response"]
-        logging.info("pwl status result: {}".format(json.dumps(response_body)))
+        logging.debug("pwl status result: {}".format(json.dumps(response_body)))
 
         # push nests the status under response.result as an object, while
         # phone_call returns response.result as a bare status string; support
@@ -1165,7 +1165,7 @@ def _pwl_finalize_auth(ctx, session, ssl_verification_enabled):
     trace_http_request(response)
     body = _pwl_check_ok(response, "finalizing the Duo authentication")
     redirect_url = body["response"].get("url")
-    logging.info("pwl finalize_auth url: {}".format(redirect_url))
+    logging.debug("pwl finalize_auth url: {}".format(redirect_url))
     return _pwl_fetch_result(ctx, redirect_url, session, ssl_verification_enabled)
 
 
@@ -1183,7 +1183,7 @@ def _pwl_fetch_result(ctx, result_url, session, ssl_verification_enabled):
         allow_redirects=True,
     )
     trace_http_request(response)
-    logging.info("pwl result final url: {}".format(response.url))
+    logging.debug("pwl result final url: {}".format(response.url))
     return response
 
 
