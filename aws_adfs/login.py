@@ -238,10 +238,10 @@ def login(
                 config.adfs_user, password = _file_user_credentials(config.profile, authfile)
 
             if not config.adfs_user:
-                config.adfs_user = click.prompt(text='Username', type=str, default=config.adfs_user)
+                config.adfs_user = click.prompt(text='Username', type=str, default=config.adfs_user, err=stdout)
 
             if not password:
-                password = click.prompt('Password', type=str, hide_input=True)
+                password = click.prompt('Password', type=str, hide_input=True, err=stdout)
 
             principal_roles, assertion, aws_session_duration = authenticator.authenticate(config, config.adfs_user, password)
 
