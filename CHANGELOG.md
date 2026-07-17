@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.13.0](https://github.com/venth/aws-adfs/compare/v2.12.1...v2.13.0) (2026-07-17)
+
+
+### Continuous Integration
+
+* adopt release-please for automated releases ([#448](https://github.com/venth/aws-adfs/issues/448)) ([384c7de](https://github.com/venth/aws-adfs/commit/384c7dea269861427989d4f72ae7fd6cb8194621))
+
 ## [2.12.1](https://github.com/venth/aws-adfs/tree/2.12.1) (2025-09-08)
 
 [Full Changelog](https://github.com/venth/aws-adfs/compare/v2.12.0...2.12.1)
