@@ -1,17 +1,15 @@
-# This workflow will install Python dependencies and run tests with several versions of Python on MacOS, Ubuntu and Windows
-# When successful, packages are published to test.pypi.org and pypi.org (releases only)
+# This workflow installs Python dependencies and runs tests with several versions of Python on MacOS, Ubuntu and Windows.
+# Releases and PyPI publishing are handled by release.yml (release-please).
 # For more information see: https://help.github.com/actions/language-and-framework-guides/using-python-with-github-actions
 
 name: Build
 
 env:
-  PYTHON_VERSION: "3.13"
   POETRY_VERSION: "1.2.2"
 
 on:
   push:
     branches: [master]
-    tags: ["*"]
   pull_request:
     branches: [master]
 
@@ -53,52 +51,3 @@ jobs:
       - name: Test with pytest
         run: |
           poetry run pytest
-
-  publish:
-    name: Publish source and wheel archives
-    needs: test
-    if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags') # Only publish tagged releases
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Set up Python ${{ env.PYTHON_VERSION }}
-        uses: actions/setup-python@v5
-        with:
-          python-version: ${{ env.PYTHON_VERSION }}
-
-      - name: Install poetry ${{ env.POETRY_VERSION }}
-        run: |
-          pip install poetry==${{ env.POETRY_VERSION }}
-
-      - name: Build source and wheel archives
-        run: |
-          poetry build
-
-      - name: Publish package to TestPyPI
-        env:
-          POETRY_PYPI_TOKEN_TESTPYPI: ${{ secrets.test_pypi_password }}
-        run: |
-          poetry config repositories.testpypi https://test.pypi.org/legacy/
-          poetry publish --skip-existing --repository testpypi
-
-      - name: Check Version
-        id: check-version
-        run: |
-          [[ "$(poetry version --short)" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]] \
-            || echo ::set-output name=prerelease::true
-
-      - name: Create Release
-        uses: ncipollo/release-action@v1
-        with:
-          artifacts: "dist/*"
-          token: ${{ secrets.GITHUB_TOKEN }}
-          draft: false
-          generateReleaseNotes: true
-          prerelease: ${{ steps.check-version.outputs.prerelease == 'true' }}
-
-      - name: Publish to PyPI
-        env:
-          POETRY_PYPI_TOKEN_PYPI: ${{ secrets.pypi_password }}
-        run: poetry publish
-        # if: steps.check-version.outputs.prerelease != 'true' # Only publish final releases to PyPI
