@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.13.1](https://github.com/venth/aws-adfs/compare/v2.13.0...v2.13.1) (2026-07-18)
+
+
+### Documentation
+
+* update README release process for release-please ([#450](https://github.com/venth/aws-adfs/issues/450)) ([6d243e7](https://github.com/venth/aws-adfs/commit/6d243e76af89ef4d71894d2932075530c3c9f27d))
+
 ## [2.13.0](https://github.com/venth/aws-adfs/compare/v2.12.1...v2.13.0) (2026-07-17)
 
 
