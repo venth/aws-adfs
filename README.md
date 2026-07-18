@@ -392,11 +392,8 @@ poetry run pytest
 
 * release:
 
-```
-export CHANGELOG_GITHUB_TOKEN=$(gopass show -o pins/Github/github-changelog-generator)
-./scripts/release.sh patch # or minor, major, prepatch, preminor, premajor, prerelease, or a valid semver string
-```
+Releases are automated with [release-please](https://github.com/googleapis/release-please): every push to `master` maintains a release pull request that bumps the version and updates `CHANGELOG.md` from the [Conventional Commits](https://www.conventionalcommits.org/) since the last release. Merging that pull request tags the release, publishes it on GitHub, and uploads the distributions to PyPI via OIDC trusted publishing.
 
 ## Changelog
 
-See the [CHANGELOG.md](CHANGELOG.md) file, which is generated using [github-changelog-generator](https://github.com/github-changelog-generator/github-changelog-generator).
+See the [CHANGELOG.md](CHANGELOG.md) file, which is generated from [Conventional Commits](https://www.conventionalcommits.org/) by [release-please](https://github.com/googleapis/release-please).
