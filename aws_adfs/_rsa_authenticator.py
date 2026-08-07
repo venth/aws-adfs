@@ -51,17 +51,20 @@ def _context(html_response):
     return element.get('value')
 
 
-def _retrieve_roles_page(roles_page_url, context, session, ssl_verification_enabled,
-                         rsa_securid_code):
+def _retrieve_roles_page(html_response, roles_page_url, context, session, ssl_verification_enabled, rsa_securid_code):
+    auth_query = './/input[@id="authMethod"]'
+    element = html_response.find(auth_query)
+    authMethod = element.get("value")
+
     response = session.post(
         roles_page_url,
         verify=ssl_verification_enabled,
         allow_redirects=True,
         data={
-            'AuthMethod': 'SecurIDAuthentication',
-            'Context': context,
-            'Passcode': rsa_securid_code,
-        }
+            "AuthMethod": authMethod,
+            "Context": context,
+            "Passcode": rsa_securid_code,
+        },
     )
     trace_http_request(response)
 
