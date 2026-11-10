@@ -50,7 +50,7 @@ def choose_role_to_assume(config, principal_roles):
                 click.echo('    [ {} -> {} ]: {}'.format(role_entry['name'].ljust(30, ' ' if i % 2 == 0 else '.'), i, role_arn))
                 i += 1
 
-        selected_index = click.prompt(text='Selection', type=click.IntRange(0, len(role_collection)))
+        selected_index = click.prompt(text='Selection', type=click.IntRange(0, len(role_collection) - 1))
 
         chosen_principal_arn = role_collection[selected_index][0]
         chosen_role_arn = role_collection[selected_index][1]
